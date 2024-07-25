@@ -18,15 +18,27 @@
     "react/jsx-filename-extension": [1, { "extensions": [".js", ".jsx"] }],
     "max-len": ["warn", 120],
     "jsx-quotes": ["warn", "prefer-single"],
-    "quotes": [2, "single", {"avoidEscape": true}],
+    "quotes": [2, "single", { "avoidEscape": true }],
     "no-unused-vars": "warn",
     "func-names": "off",
-    "sort-imports": ["warn", {
+    "sort-imports": [
+      "warn",
+      {
         "ignoreCase": true,
         "ignoreDeclarationSort": false,
         "ignoreMemberSort": false,
         "memberSyntaxSortOrder": ["none", "all", "multiple", "single"],
         "allowSeparatedGroups": false
-    }]
+      }
+    ],
+    "import/no-extraneous-dependencies": [
+      "error",
+      {
+        "devDependencies": false,
+        "optionalDependencies": false,
+        "peerDependencies": false
+      }
+    ],
+    "import/order": "off"
   }
 }
