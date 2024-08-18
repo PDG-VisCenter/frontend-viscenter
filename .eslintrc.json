@@ -39,6 +39,7 @@
         "peerDependencies": false
       }
     ],
-    "import/order": "off"
+    "import/order": "off",
+    "jsx-a11y/control-has-associated-label": "off"
   }
 }

@@ -1,41 +1,100 @@
-import { Button } from 'antd';
-import Image from 'next/image';
-import { SaveOutlined } from '@ant-design/icons';
-import styles from './page.module.css';
+import Header from '../components/Header';
 
-export default function Home() {
+function Home() {
   return (
-    <main className={styles.main}>
-      <div className={styles.description}>
-        <p>
-          Get started by editing&nbsp;
-          <code className={styles.code}>app/page.js</code>
-        </p>
-        <div>
-          <a
-            href='https://vercel.com?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app'
-            target='_blank'
-            rel='noopener noreferrer'
-          >
-            By{' '}
-            <Image
-              src='/vercel.svg'
-              alt='Vercel Logo'
-              className={styles.vercelLogo}
-              width={100}
-              height={24}
-              priority
-            />
-          </a>
-        </div>
-      </div>
-      <Button
-        type='primary'
-        danger
-      >
-        Primary
-      </Button>
-      <SaveOutlined />
-    </main>
+    <>
+      <Header />
+      <p>sdfsdf</p>
+      <p>sdfsdf</p>
+      <p>sdfsdf</p>
+      <p>sdfsdf</p>
+      <p>sdfsdf</p>
+      <p>sdfsdf</p>
+      <p>sdfsdf</p>
+      <p>sdfsdf</p>
+      <p>sdfsdf</p>
+      <p>sdfsdf</p>
+      <p>sdfsdf</p>
+      <p>sdfsdf</p>
+      <p>sdfsdf</p>
+      <p>sdfsdf</p>
+      <p>sdfsdf</p>
+      <p>sdfsdf</p>
+      <p>sdfsdf</p>
+      <p>sdfsdf</p>
+      <p>sdfsdf</p>
+      <p>sdfsdf</p>
+      <p>sdfsdf</p>
+      <p>sdfsdf</p>
+      <p>sdfsdf</p>
+      <p>sdfsdf</p>
+      <p>sdfsdf</p>
+      <p>sdfsdf</p>
+      <p>sdfsdf</p>
+      <p>sdfsdf</p>
+      <p>sdfsdf</p>
+      <p>sdfsdf</p>
+      <p>sdfsdf</p>
+      <p>sdfsdf</p>
+      <p>sdfsdf</p>
+      <p>sdfsdf</p>
+      <p>sdfsdf</p>
+      <p>sdfsdf</p>
+      <p>sdfsdf</p>
+      <p>sdfsdf</p>
+      <p>sdfsdf</p>
+      <p>sdfsdf</p>
+      <p>sdfsdf</p>
+      <p>sdfsdf</p>
+      <p>sdfsdf</p>
+      <p>sdfsdf</p>
+      <p>sdfsdf</p>
+      <p>sdfsdf</p>
+      <p>sdfsdf</p>
+      <p>sdfsdf</p>
+      <p>sdfsdf</p>
+      <p>sdfsdf</p>
+      <p>sdfsdf</p>
+      <p>sdfsdf</p>
+      <p>sdfsdf</p>
+      <p>sdfsdf</p>
+      <p>sdfsdf</p>
+      <p>sdfsdf</p>
+      <p>sdfsdf</p>
+      <p>sdfsdf</p>
+      <p>sdfsdf</p>
+      <p>sdfsdf</p>
+      <p>sdfsdf</p>
+      <p>sdfsdf</p>
+      <p>sdfsdf</p>
+      <p>sdfsdf</p>
+      <p>sdfsdf</p>
+      <p>sdfsdf</p>
+      <p>sdfsdf</p>
+      <p>sdfsdf</p>
+      <p>sdfsdf</p>
+      <p>sdfsdf</p>
+      <p>sdfsdf</p>
+      <p>sdfsdf</p>
+      <p>sdfsdf</p>
+      <p>sdfsdf</p>
+      <p>sdfsdf</p>
+      <p>sdfsdf</p>
+      <p>sdfsdf</p>
+      <p>sdfsdf</p>
+      <p>sdfsdf</p>
+      <p>sdfsdf</p>
+      <p>sdfsdf</p>
+      <p>sdfsdf</p>
+      <p>sdfsdf</p>
+      <p>sdfsdf</p>
+      <p>sdfsdf</p>
+      <p>sdfsdf</p>
+      <p>sdfsdf</p>
+      <p>sdfsdf</p>
+      <p>sdfsdf</p>
+    </>
   );
 }
+
+export default Home;
