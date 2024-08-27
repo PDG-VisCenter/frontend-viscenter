@@ -1,3 +1,4 @@
+import Footer from '../components/Footer';
 import Header from '../components/Header';
 
 function Home() {
@@ -93,6 +94,7 @@ function Home() {
       <p>sdfsdf</p>
       <p>sdfsdf</p>
       <p>sdfsdf</p>
+      <Footer />
     </>
   );
 }
