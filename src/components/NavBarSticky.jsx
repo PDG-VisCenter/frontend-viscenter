@@ -1,7 +1,7 @@
 'use client';
 
 import { AnimatePresence, motion } from 'framer-motion';
-import { SearchOutlined, ShoppingCartOutlined } from '@ant-design/icons';
+import { MenuOutlined, SearchOutlined, ShoppingCartOutlined, LeftOutlined } from '@ant-design/icons';
 import { useEffect, useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -52,7 +52,7 @@ function NavBarSticky(props) {
         onClick={toggleMenuVisibility}
         data-testid='menu-btn'
       >
-        menu
+        <MenuOutlined />
       </button>
 
       <Link
@@ -119,28 +119,28 @@ function NavBarSticky(props) {
             transition={{ type: 'tween' }}
             data-testid='menu-dropdown'
           >
-            <ul className='nav__links'>
+            <ul className='nav-menu__links'>
               <Link
                 href='/lentes'
-                className='nav__link'
+                className='nav-menu__link'
               >
                 Lentes
               </Link>
               <Link
                 href='/lentesdesol'
-                className='nav__link'
+                className='nav-menu__link'
               >
                 Lentes de sol
               </Link>
               <Link
                 href='/accesorios'
-                className='nav__link'
+                className='nav-menu__link'
               >
                 Accesorios
               </Link>
               <Link
                 href='/reservacita'
-                className='nav__link'
+                className='nav-menu__link'
               >
                 Reserva de citas
               </Link>
@@ -151,7 +151,7 @@ function NavBarSticky(props) {
               onClick={hideMenu}
               data-testid='hide-menu-btn'
             >
-              arrow_back_ios_new
+              <LeftOutlined />
             </button>
           </motion.nav>
         )}

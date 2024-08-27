@@ -22,10 +22,6 @@ function Header() {
     setSearchInView(() => !searchInView);
   };
 
-  const hideSearchView = () => {
-    setSearchInView(false);
-  };
-
   return (
     <header className='header'>
       <div
