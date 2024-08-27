@@ -3,9 +3,9 @@
 import { AnimatePresence, motion } from 'framer-motion';
 import { SearchOutlined, ShoppingCartOutlined } from '@ant-design/icons';
 import { useEffect, useState } from 'react';
+import Image from 'next/image';
 import Link from 'next/link';
 import logo from '../assets/img/logo-white.png';
-import Image from 'next/image';
 
 function NavBarSticky(props) {
   const { toggleSearchView } = props;

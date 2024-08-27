@@ -1,14 +1,13 @@
 'use client';
 
 import { SearchOutlined, ShoppingCartOutlined } from '@ant-design/icons';
-import ImageWrapper from './ImageWrapper';
+import Image from 'next/image';
 import Link from 'next/link';
 import logo from '../assets/img/logo-black.png';
-import NavBar from '../app/NavBar';
+import NavBar from './NavBar';
 import NavBarSticky from './NavBarSticky';
 import { useInView } from 'react-intersection-observer';
 import { useState } from 'react';
-import Image from 'next/image';
 
 function Header() {
   //const [cartItems] = useContext(CartContext);
