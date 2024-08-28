@@ -1,27 +1,14 @@
+'use client';
+
 import Footer from '../components/Footer';
 import Header from '../components/Header';
+import Hero from './components/Hero';
 
 function Home() {
   return (
     <>
       <Header />
-      <p>sdfsdf</p>
-      <p>sdfsdf</p>
-      <p>sdfsdf</p>
-      <p>sdfsdf</p>
-      <p>sdfsdf</p>
-      <p>sdfsdf</p>
-      <p>sdfsdf</p>
-      <p>sdfsdf</p>
-      <p>sdfsdf</p>
-      <p>sdfsdf</p>
-      <p>sdfsdf</p>
-      <p>sdfsdf</p>
-      <p>sdfsdf</p>
-      <p>sdfsdf</p>
-      <p>sdfsdf</p>
-      <p>sdfsdf</p>
-      <p>sdfsdf</p>
+      <Hero />
       <p>sdfsdf</p>
       <p>sdfsdf</p>
       <p>sdfsdf</p>
