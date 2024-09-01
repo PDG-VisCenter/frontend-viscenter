@@ -1,8 +1,6 @@
 'use client';
 
 import Flickity from 'react-flickity-component';
-// eslint-disable-next-line no-unused-vars
-import flickityFade from 'flickity-fade';
 import heroData from '../../data/heroData';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -40,7 +38,7 @@ function Hero() {
               <p className='hero-item__details'>{item.details}</p>
             </div>
             <Link
-              href='/products'
+              href='/'
               className='hero-item__link'
             >
               Comprar
