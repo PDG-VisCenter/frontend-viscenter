@@ -1,24 +1,24 @@
 import Image from 'next/image';
 import Link from 'next/link';
-import facialimage from '../../assets/img/home/facial-recognition.jpg';
+import PropTypes from 'prop-types';
 
-const Banner = () => {
+function Banner(props) {
+  const { img, title, description } = props;
+
   return (
     <section className='hero-banner'>
       <div className='hero-banner__image-wrapper'>
         <Image
-          src={facialimage}
-          alt='Child wearing glasses'
+          src={img}
+          alt='banner info'
           className='hero-banner__image'
-          width={742}
+          height={300}
           placeholder='blur'
         />
       </div>
       <div className='hero-banner__content'>
-        <p className='hero-banner__text'>
-          Encuentra tu estilo único. La tecnología de escaneo facial analiza la forma, el tamaño y los rasgos faciales
-          de tu rostro para brindarle una selección personalizada de monturas.
-        </p>
+        <h3 className='hero-banner__title'>{title}</h3>
+        <p className='hero-banner__description'>{description}</p>
         <Link
           href='/shop'
           className='hero-banner__button'
@@ -28,6 +28,12 @@ const Banner = () => {
       </div>
     </section>
   );
+}
+
+Banner.propTypes = {
+  img: PropTypes.node.isRequired,
+  title: PropTypes.string.isRequired,
+  description: PropTypes.string.isRequired,
 };
 
 export default Banner;

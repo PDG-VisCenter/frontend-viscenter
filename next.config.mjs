@@ -3,6 +3,7 @@ const nextConfig = {
   env: {
     API_URL: '',
   },
+  images: {},
 };
 
 export default nextConfig;

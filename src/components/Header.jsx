@@ -1,6 +1,6 @@
 'use client';
 
-import { SearchOutlined, ShoppingCartOutlined } from '@ant-design/icons';
+import { SearchOutlined, ShoppingCartOutlined, UserOutlined } from '@ant-design/icons';
 import Image from 'next/image';
 import Link from 'next/link';
 import logo from '../assets/img/logo-black.png';
@@ -49,13 +49,21 @@ function Header() {
             onClick={toggleSearchView}
             data-testid='search-button'
           >
-            <SearchOutlined />
+            <SearchOutlined className='header__icon' />
+          </button>
+          <button
+            type='button'
+            className='header__btn-icon icon__search material-symbols-outlined'
+            onClick={toggleSearchView}
+            data-testid='search-button'
+          >
+            <UserOutlined className='header__icon' />
           </button>
           <Link
             href='/cart'
             className='header__btn-icon icon__shopping-bag material-symbols-outlined'
           >
-            <ShoppingCartOutlined />
+            <ShoppingCartOutlined className='header__icon' />
           </Link>
         </div>
       </div>

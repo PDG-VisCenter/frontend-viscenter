@@ -111,6 +111,7 @@ $breakpoints: (
   cursor: pointer;
   position: relative;
   text-decoration: none;
+  align-content: center;
 
   @include breakpoint(sm) {
     font-size: 1.65rem;

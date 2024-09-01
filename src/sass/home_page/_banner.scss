@@ -26,8 +26,16 @@
     text-align: center;
   }
 
-  &__text {
-    font-size: 1.5rem;
+  &__title {
+    font-size: 2rem;
+    font-weight: 600;
+    margin-bottom: 20px;
+    color: #333;
+    font-family: var(--font-gotham);
+  }
+
+  &__description {
+    font-size: 1.2rem;
     font-weight: 300;
     margin-bottom: 20px;
     color: #333;

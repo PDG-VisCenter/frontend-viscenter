@@ -1,7 +1,7 @@
 'use client';
 
 import { AnimatePresence, motion } from 'framer-motion';
-import { MenuOutlined, SearchOutlined, ShoppingCartOutlined, LeftOutlined } from '@ant-design/icons';
+import { LeftOutlined, MenuOutlined, SearchOutlined, ShoppingCartOutlined, UserOutlined } from '@ant-design/icons';
 import { useEffect, useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -101,6 +101,14 @@ function NavBarSticky(props) {
           onClick={toggleSearchView}
         >
           <SearchOutlined />
+        </button>
+        <button
+          type='button'
+          className='header__btn-icon icon__search material-symbols-outlined'
+          onClick={toggleSearchView}
+          data-testid='search-button'
+        >
+          <UserOutlined />
         </button>
         <Link
           href='/cart'
