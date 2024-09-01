@@ -3,6 +3,8 @@
 .blog {
   @include center-self(horizontal);
   width: var(--page-width);
+  padding-left: 10%;
+  padding-right: 10%;
   overflow-x: hidden;
 
   &__section-title {
