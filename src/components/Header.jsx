@@ -51,14 +51,12 @@ function Header() {
           >
             <SearchOutlined className='header__icon' />
           </button>
-          <button
-            type='button'
+          <Link
+            href='/profile'
             className='header__btn-icon icon__search material-symbols-outlined'
-            onClick={toggleSearchView}
-            data-testid='search-button'
           >
             <UserOutlined className='header__icon' />
-          </button>
+          </Link>
           <Link
             href='/cart'
             className='header__btn-icon icon__shopping-bag material-symbols-outlined'

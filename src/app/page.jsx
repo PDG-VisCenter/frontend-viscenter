@@ -1,39 +1,19 @@
-'use client';
+import { authOptions } from './api/auth/[...nextauth]/route';
+import ClientHome from './home/page';
+import { getServerSession } from 'next-auth';
+import Login from './login/page';
 
-import Banner from './components/Banner';
-import bannerData from '../data/homeBannerData';
-import BlogContent from './components/BlogContent';
-import blogData from '../data/homePageBlogData';
-// import FeaturedProducts from './components/FeaturedProducts';
-import Footer from '../components/Footer';
-import Header from '../components/Header';
-import Hero from './components/Hero';
-
-function Home() {
-  return (
-    <>
-      <Header />
-      <Hero />
-      {/* <FeaturedProducts /> */}
-      <Banner
-        img={bannerData[0].img}
-        title={bannerData[0].title}
-        description={bannerData[0].description}
-      />
-      {/* <FeaturedProducts /> */}
-      <Banner
-        img={bannerData[1].img}
-        title={bannerData[1].title}
-        description={bannerData[1].description}
-      />
-      {/* <FeaturedProducts /> */}
-      <BlogContent
-        content={blogData}
-        headerTitle='Conoce a los profesionales'
-      />
-      <Footer />
-    </>
-  );
+async function Home() {
+  const session = await getServerSession(authOptions);
+  if (session) {
+    return (
+      <>
+        <div>Your name is {session.user?.name}</div>
+        <ClientHome />
+      </>
+    );
+  }
+  return <Login />;
 }
 
 export default Home;

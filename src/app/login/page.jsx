@@ -3,6 +3,7 @@
 import { Button, Form, Input } from 'antd';
 import { LockOutlined, UserOutlined } from '@ant-design/icons';
 import Link from 'next/link';
+import { signIn } from 'next-auth/react';
 
 function Login() {
   const onFinish = (values) => {
@@ -61,6 +62,7 @@ function Login() {
               type='primary'
               htmlType='submit'
               color='#ffc038'
+              onClick={() => signIn('keycloak')}
             >
               Ingresar
             </Button>
