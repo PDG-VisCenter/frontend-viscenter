@@ -2,6 +2,7 @@ import '../sass/main.scss';
 
 import { AntdRegistry } from '@ant-design/nextjs-registry';
 import { Inter } from 'next/font/google';
+import SessionProviderWrapper from '../utils/sessionProviderWrapper';
 import StoreProvider from './StoreProvider';
 
 const inter = Inter({ subsets: ['latin'] });
@@ -13,12 +14,14 @@ export const metadata = {
 
 export default function RootLayout({ children }) {
   return (
-    <StoreProvider>
-      <html lang='en'>
-        <body>
-          <AntdRegistry className={inter.className}>{children}</AntdRegistry>
-        </body>
-      </html>
-    </StoreProvider>
+    <SessionProviderWrapper>
+      <StoreProvider>
+        <html lang='en'>
+          <body>
+            <AntdRegistry className={inter.className}>{children}</AntdRegistry>
+          </body>
+        </html>
+      </StoreProvider>
+    </SessionProviderWrapper>
   );
 }

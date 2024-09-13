@@ -3,38 +3,15 @@
 import { Button, Form, Input } from 'antd';
 import { LockOutlined, UserOutlined } from '@ant-design/icons';
 
-import axios from 'axios';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 
 function Login() {
-  const router = useRouter();
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
-  const [errorP, setErrorP] = useState('');
 
   const handleSubmit = async () => {
-    const data = new URLSearchParams({
-      grant_type: 'password',
-      client_id: 'paws-claws-client',
-      username: username,
-      password: password,
-      client_secret: 'MgqEo5QeQKFndVAoSVHw3dCPpoapWlBp',
-    });
-
-    try {
-      const response = await axios.post(
-        'http://localhost:8181/realms/paws-and-claws-realm/protocol/openid-connect/token',
-        data
-      );
-      const { access_token } = response.data;
-      localStorage.setItem('token', access_token);
-      router.push('/');
-    } catch (error) {
-      console.error('Error logging in:', error);
-      setErrorP('Usuario o contraseña incorrectos');
-    }
+    console.log('submit');
   };
 
   return (
@@ -52,7 +29,6 @@ function Login() {
           size='large'
           onFinish={handleSubmit}
         >
-          {errorP && <div className=''>{errorP}</div>}
           <Form.Item
             name='username'
             label='Usuario'

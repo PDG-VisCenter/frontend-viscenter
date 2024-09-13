@@ -1,5 +1,6 @@
 'use client';
 
+import AuthStatus from '../components/authStatus';
 import Banner from './components/Banner';
 import bannerData from '../data/homeBannerData';
 import BlogContent from './components/BlogContent';
@@ -12,6 +13,7 @@ import Hero from './components/Hero';
 function Home() {
   return (
     <>
+      <AuthStatus />
       <Header />
       <Hero />
       {/* <FeaturedProducts /> */}
