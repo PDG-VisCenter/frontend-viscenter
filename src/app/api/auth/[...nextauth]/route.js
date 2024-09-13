@@ -5,11 +5,11 @@ import KeycloakProvider from 'next-auth/providers/keycloak';
 import NextAuth from 'next-auth';
 
 async function refreshAccessToken(token) {
-  const resp = await fetch('http://localhost:8181/realms/paws-and-claws-realm/protocol/openid-connect/token', {
+  const resp = await fetch(`${process.env.KEYCLOAK_REFRESH_TOKEN_URL}`, {
     headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
     body: new URLSearchParams({
-      client_id: 'paws-claws-client',
-      client_secret: 'W7huTyGvNq6IIjBJ3pYYV7qMLLkkqmIa',
+      client_id: process.env.KEYCLOAK_CLIENT_ID,
+      client_secret: process.env.KEYCLOAK_CLIENT_SECRET,
       grant_type: 'refresh_token',
       refresh_token: token.refresh_token,
     }),
@@ -31,9 +31,9 @@ async function refreshAccessToken(token) {
 export const authOptions = {
   providers: [
     KeycloakProvider({
-      clientId: 'paws-claws-client',
-      clientSecret: 'W7huTyGvNq6IIjBJ3pYYV7qMLLkkqmIa',
-      issuer: 'http://localhost:8181/realms/paws-and-claws-realm',
+      clientId: `${process.env.KEYCLOAK_CLIENT_ID}`,
+      clientSecret: `${process.env.KEYCLOAK_CLIENT_SECRET}`,
+      issuer: `${process.env.KEYCLOAK_ISSUER}`,
     }),
   ],
 
@@ -67,8 +67,8 @@ export const authOptions = {
     },
     async session({ session, token }) {
       // Send properties to the client
-      session.access_token = encrypt(token.access_token); // see utils/sessionTokenAccessor.js
-      session.id_token = encrypt(token.id_token); // see utils/sessionTokenAccessor.js
+      session.access_token = encrypt(token.access_token);
+      session.id_token = encrypt(token.id_token);
       session.roles = token.decoded.realm_access.roles;
       session.error = token.error;
       return session;

@@ -1,7 +1,7 @@
 import Cryptr from 'cryptr';
 
 export function encrypt(text) {
-  const secretKey = 'fx1y6jA8WtYw25qxAYZKYaW75JUCanAnzPLWTY+1D20';
+  const secretKey = process.env.NEXTAUTH_SECRET;
   const cryptr = new Cryptr(secretKey);
 
   const encryptedString = cryptr.encrypt(text);
@@ -9,7 +9,7 @@ export function encrypt(text) {
 }
 
 export function decrypt(encryptedString) {
-  const secretKey = 'fx1y6jA8WtYw25qxAYZKYaW75JUCanAnzPLWTY+1D20';
+  const secretKey = process.env.NEXTAUTH_SECRET;
   const cryptr = new Cryptr(secretKey);
 
   const text = cryptr.decrypt(encryptedString);
