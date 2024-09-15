@@ -3,15 +3,18 @@
 import { AnimatePresence, motion } from 'framer-motion';
 import { LeftOutlined, MenuOutlined, SearchOutlined, ShoppingCartOutlined, UserOutlined } from '@ant-design/icons';
 import { useEffect, useState } from 'react';
+import { useSession, signIn } from 'next-auth/react';
+import { Button } from 'antd';
 import Image from 'next/image';
 import Link from 'next/link';
 import logo from '../assets/img/logo-white.png';
 
 function NavBarSticky(props) {
+  const { data: session, status } = useSession();
   const { toggleSearchView } = props;
 
   const [menuVisible, setMenuVisibility] = useState(false);
-  //const [cartItems] = useContext(CartContext);
+  // const [cartItems] = useContext(CartContext);
 
   const toggleMenuVisibility = () => {
     setMenuVisibility(() => !menuVisible);
@@ -102,17 +105,33 @@ function NavBarSticky(props) {
         >
           <SearchOutlined />
         </button>
-        <Link
-          href='/profile'
-          className='header__btn-icon icon__search material-symbols-outlined'
-        >
-          <UserOutlined />
-        </Link>
+        {session ? (
+          <Link
+            href='/profile'
+            className='header__btn-icon icon__search material-symbols-outlined'
+            style={{
+              color: 'white',
+            }}
+          >
+            <UserOutlined />
+          </Link>
+        ) : (
+          <Button
+            className='nav__btn-signin'
+            onClick={() => signIn('keycloak')}
+          >
+            Iniciar sesión
+          </Button>
+        )}
         <Link
           href='/cart'
           className='nav__btn-icon icon__shopping-bag material-symbols-outlined'
         >
-          <ShoppingCartOutlined />
+          <ShoppingCartOutlined
+            style={{
+              color: 'white',
+            }}
+          />
         </Link>
       </div>
       <AnimatePresence>

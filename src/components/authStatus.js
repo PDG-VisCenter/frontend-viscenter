@@ -22,7 +22,9 @@ export default function AuthStatus() {
 
   if (status === 'loading') {
     return <div className='my-3'>Loading...</div>;
-  } else if (session) {
+  }
+
+  if (session) {
     return (
       <div className='my-3'>
         Logged in as <span className='text-yellow-100'>{session.user.email}</span>{' '}

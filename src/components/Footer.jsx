@@ -96,18 +96,27 @@ function Footer() {
           <Link
             href='/'
             className='footer-bottom__link'
+            style={{
+              color: 'rgb(71, 71, 71)',
+            }}
           >
             Sobre nosotros
           </Link>
           <Link
             href='/'
             className='footer-bottom__link'
+            style={{
+              color: 'rgb(71, 71, 71)',
+            }}
           >
             Preguntas frecuentes
           </Link>
           <Link
             href='/'
             className='footer-bottom__link'
+            style={{
+              color: 'rgb(71, 71, 71)',
+            }}
           >
             Ubicación
           </Link>

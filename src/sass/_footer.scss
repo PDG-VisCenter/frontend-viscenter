@@ -138,7 +138,7 @@
     font-size: 12px;
     font-family: var(--font-roboto-mono);
     font-weight: bold;
-    color: rgb(71, 71, 71);
+    color: rgb(71, 71, 71) !important;
 
     @include breakpoint(sm) {
       font-size: 9px;
@@ -171,11 +171,7 @@
       margin-bottom: 5px;
       gap: 10px;
       font-size: 12px;
-    }
-
-    &__copyright {
-      font-size: 10px;
-      font-family: var(--font-courier);
+      color: black;
     }
   }
 }
