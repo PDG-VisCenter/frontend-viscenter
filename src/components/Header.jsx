@@ -9,21 +9,14 @@ import logo from '../assets/img/logo-black.png';
 import NavBar from './NavBar';
 import NavBarSticky from './NavBarSticky';
 import { useInView } from 'react-intersection-observer';
-import { useState } from 'react';
 
 function Header() {
   const { data: session, status } = useSession();
   //const [cartItems] = useContext(CartContext);
 
-  const [searchInView, setSearchInView] = useState(false);
-
   const [ref, inView] = useInView({
     threshold: 0,
   });
-
-  const toggleSearchView = () => {
-    setSearchInView(() => !searchInView);
-  };
 
   return (
     <header className='header'>
@@ -46,14 +39,13 @@ function Header() {
           </div>
         </Link>
         <div className='header__icons-wrapper'>
-          <button
-            type='button'
+          <Link
+            href='/search'
             className='header__btn-icon icon__search material-symbols-outlined'
-            onClick={toggleSearchView}
             data-testid='search-button'
           >
             <SearchOutlined className='header__icon' />
-          </button>
+          </Link>
           {session ? (
             <Link
               href='/profile'
@@ -86,7 +78,7 @@ function Header() {
         </div>
       </div>
 
-      {inView ? <NavBar /> : <NavBarSticky toggleSearchView={toggleSearchView} />}
+      {inView ? <NavBar /> : <NavBarSticky />}
     </header>
   );
 }

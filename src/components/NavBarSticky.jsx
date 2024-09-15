@@ -2,16 +2,15 @@
 
 import { AnimatePresence, motion } from 'framer-motion';
 import { LeftOutlined, MenuOutlined, SearchOutlined, ShoppingCartOutlined, UserOutlined } from '@ant-design/icons';
+import { signIn, useSession } from 'next-auth/react';
 import { useEffect, useState } from 'react';
-import { useSession, signIn } from 'next-auth/react';
 import { Button } from 'antd';
 import Image from 'next/image';
 import Link from 'next/link';
 import logo from '../assets/img/logo-white.png';
 
-function NavBarSticky(props) {
+function NavBarSticky() {
   const { data: session, status } = useSession();
-  const { toggleSearchView } = props;
 
   const [menuVisible, setMenuVisibility] = useState(false);
   // const [cartItems] = useContext(CartContext);
@@ -98,13 +97,15 @@ function NavBarSticky(props) {
         </Link>
       </ul>
       <div className='nav__icons-wrapper'>
-        <button
-          type='button'
+        <Link
+          href='/search'
           className='nav__btn-icon icon__search material-symbols-outlined'
-          onClick={toggleSearchView}
+          style={{
+            color: 'white',
+          }}
         >
           <SearchOutlined />
-        </button>
+        </Link>
         {session ? (
           <Link
             href='/profile'

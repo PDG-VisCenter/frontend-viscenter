@@ -42,6 +42,18 @@
     "import/order": "off",
     "jsx-a11y/control-has-associated-label": "off",
     "no-param-reassign": "off",
-    "import/prefer-default-export": "off"
+    "import/prefer-default-export": "off",
+    "import/no-unresolved": [
+      "error",
+      {
+        "ignore": ["@/*"]
+      }
+    ],
+    "import/extensions": [
+      "error",
+      {
+        "ignore": ["@/*"]
+      }
+    ]
   }
 }
