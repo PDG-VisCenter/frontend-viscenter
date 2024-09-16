@@ -1,8 +1,17 @@
 'use client';
 
-import { brands, frameColors, frameMaterial, frameShape, gender } from '@/data/searchFilters';
-import { Checkbox, Collapse, Input } from 'antd';
+import {
+  brands,
+  categories,
+  frameColors,
+  frameMaterial,
+  frameShape,
+  gender,
+  sortByElements,
+} from '@/data/searchFilters';
+import { Button, Checkbox, Collapse, Dropdown, Input, Menu, Pagination } from 'antd';
 import Layout, { Content } from 'antd/es/layout/layout';
+import { DownOutlined } from '@ant-design/icons';
 import Footer from '@/components/Footer';
 import HeaderSimple from '@/components/HeaderSimple';
 import Sider from 'antd/es/layout/Sider';
@@ -17,6 +26,21 @@ const onChange = (checkedValues) => {
 const items = [
   {
     key: '1',
+    label: 'Categorias',
+    children: (
+      <Checkbox.Group
+        options={categories}
+        onChange={onChange}
+        defaultValue={['Lentes', 'LentesSol', 'Accesorios']}
+        style={{
+          display: 'flex',
+          flexDirection: 'column',
+        }}
+      />
+    ),
+  },
+  {
+    key: '2',
     label: 'Color del Marco',
     children: (
       <Checkbox.Group
@@ -30,7 +54,7 @@ const items = [
     ),
   },
   {
-    key: '2',
+    key: '3',
     label: 'Marca',
     children: (
       <Checkbox.Group
@@ -44,7 +68,7 @@ const items = [
     ),
   },
   {
-    key: '3',
+    key: '4',
     label: 'Forma del Marco',
     children: (
       <Checkbox.Group
@@ -58,7 +82,7 @@ const items = [
     ),
   },
   {
-    key: '4',
+    key: '5',
     label: 'Material del Marco',
     children: (
       <Checkbox.Group
@@ -72,7 +96,7 @@ const items = [
     ),
   },
   {
-    key: '5',
+    key: '6',
     label: 'Genero',
     children: (
       <Checkbox.Group
@@ -86,6 +110,18 @@ const items = [
     ),
   },
 ];
+
+const handleMenuClick = (e) => {
+  console.log('click', e);
+};
+
+const menu = (
+  <Menu onClick={handleMenuClick}>
+    {sortByElements.map((item) => (
+      <Menu.Item key={item.key}>{item.label}</Menu.Item>
+    ))}
+  </Menu>
+);
 
 function Search() {
   return (
@@ -103,13 +139,32 @@ function Search() {
           />
         </Sider>
         <Content className='search__content'>
-          <Title>Search</Title>
+          <Title className='search__title'>Search</Title>
           <Input.Search
-            placeholder='Escribe...'
+            placeholder='Busca productos...'
             allowClear
             enterButton='Search'
             size='large'
             onSearch={onSearch}
+          />
+          <br />
+          <br />
+          <Title
+            level={3}
+            className='search__subtitle'
+          >
+            Resultados para ...
+          </Title>
+          <Dropdown overlay={menu}>
+            <Button>
+              Ordenar por: <DownOutlined />
+            </Button>
+          </Dropdown>
+          <Pagination
+            align='center'
+            defaultCurrent={1}
+            defaultPageSize={20}
+            total={50}
           />
         </Content>
       </Layout>

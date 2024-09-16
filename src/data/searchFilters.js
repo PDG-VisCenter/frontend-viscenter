@@ -1,3 +1,18 @@
+export const categories = [
+  {
+    label: 'Lentes',
+    value: 'Lentes',
+  },
+  {
+    label: 'Lentes de sol',
+    value: 'LentesSol',
+  },
+  {
+    label: 'Accesorios',
+    value: 'Accesorios',
+  },
+];
+
 export const frameColors = [
   {
     label: 'Negro',
@@ -102,5 +117,24 @@ export const gender = [
   {
     label: 'Unisex',
     value: 'Unisex',
+  },
+];
+
+export const sortByElements = [
+  {
+    label: 'Alfabetico: A-Z',
+    key: '1',
+  },
+  {
+    label: 'Alfabetico: Z-A',
+    key: '2',
+  },
+  {
+    label: 'Precio: Bajo a Alto',
+    key: '3',
+  },
+  {
+    label: 'Precio: Alto a Bajo',
+    key: '4',
   },
 ];
