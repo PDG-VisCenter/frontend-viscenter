@@ -44,59 +44,67 @@ function HomeSeller() {
 
   return (
     <Layout style={{ minHeight: '100vh' }}>
-      <Sider
-        collapsible
-        collapsed={collapsed}
-        onCollapse={(value) => setCollapsed(value)}
+      <Header
+        style={{
+          paddingLeft: '0px',
+          paddingRight: 16,
+          background: '#ffc038',
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+        }}
       >
-        <div className='demo-logo-vertical' />
-        <Menu
-          defaultSelectedKeys={['1']}
-          mode='inline'
-          items={items}
+        <Button
+          type='text'
+          icon={collapsed ? <MenuUnfoldOutlined /> : <MenuFoldOutlined />}
+          onClick={() => setCollapsed(!collapsed)}
           style={{
-            height: '100%',
+            fontSize: '16px',
+            width: 64,
+            height: 64,
           }}
         />
-      </Sider>
-      <Layout>
-        <Header
+        <Title
           style={{
-            paddingLeft: '0px',
-            paddingRight: 16,
-            background: 'red',
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
+            margin: 0,
+            fontSize: '28px',
+            fontStyle: 'bold',
           }}
         >
-          <Button
-            type='text'
-            icon={collapsed ? <MenuUnfoldOutlined /> : <MenuFoldOutlined />}
-            onClick={() => setCollapsed(!collapsed)}
+          VisCenter
+        </Title>
+        <Link
+          href='/profile'
+          style={{
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            width: 64,
+            height: 64,
+          }}
+        >
+          <Avatar
+            icon={<UserOutlined />}
+            size={36}
+          />
+        </Link>
+      </Header>
+      <Layout>
+        <Sider
+          collapsible
+          collapsed={collapsed}
+          onCollapse={(value) => setCollapsed(value)}
+        >
+          <div className='demo-logo-vertical' />
+          <Menu
+            defaultSelectedKeys={['1']}
+            mode='inline'
+            items={items}
             style={{
-              fontSize: '16px',
-              width: 64,
-              height: 64,
+              height: '100%',
             }}
           />
-          <Title style={{ margin: 0 }}>VisCenter</Title>
-          <Link
-            href='/profile'
-            style={{
-              display: 'flex',
-              justifyContent: 'center',
-              alignItems: 'center',
-              width: 64,
-              height: 64,
-            }}
-          >
-            <Avatar
-              icon={<UserOutlined />}
-              size={36}
-            />
-          </Link>
-        </Header>
+        </Sider>
         <Content style={{ margin: '8px 16px' }}>
           <div
             style={{
