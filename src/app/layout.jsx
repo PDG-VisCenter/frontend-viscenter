@@ -15,13 +15,13 @@ export const metadata = {
 export default function RootLayout({ children }) {
   return (
     <SessionProviderWrapper>
-      <StoreProvider>
-        <html lang='en'>
-          <body>
+      <html lang='en'>
+        <body>
+          <StoreProvider>
             <AntdRegistry className={inter.className}>{children}</AntdRegistry>
-          </body>
-        </html>
-      </StoreProvider>
+          </StoreProvider>
+        </body>
+      </html>
     </SessionProviderWrapper>
   );
 }
