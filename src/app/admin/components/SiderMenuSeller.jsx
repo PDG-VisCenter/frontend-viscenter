@@ -12,6 +12,7 @@ import { collapse, expand } from '@/lib/features/sellerSlice';
 import { useDispatch, useSelector } from 'react-redux';
 import { Menu } from 'antd';
 import Sider from 'antd/es/layout/Sider';
+import { useRouter } from 'next/navigation';
 
 function getItem(label, key, icon, children) {
   return {
@@ -31,9 +32,19 @@ const items = [
   getItem('Citas', '6', <CalendarOutlined />),
 ];
 
-function SiderMenuSeller() {
+const keyToPath = {
+  1: '/admin/home',
+  2: '/admin/addproduct',
+  3: '/admin/products',
+  4: '/admin/orders',
+  5: '/admin/users',
+  6: '/admin/appointments',
+};
+
+function SiderMenuSeller({ selectedItem }) {
   const dispatch = useDispatch();
   const isCollapsed = useSelector((state) => state.seller.value.isCollapsed);
+  const router = useRouter();
 
   const onClickMenu = () => {
     if (isCollapsed) {
@@ -41,6 +52,13 @@ function SiderMenuSeller() {
       return;
     }
     dispatch(collapse());
+  };
+
+  const onClickItemMenu = (e) => {
+    const path = keyToPath[e.key];
+    if (path) {
+      router.push(path);
+    }
   };
 
   return (
@@ -52,7 +70,8 @@ function SiderMenuSeller() {
     >
       <div className='demo-logo-vertical' />
       <Menu
-        defaultSelectedKeys={['1']}
+        defaultSelectedKeys={[selectedItem]}
+        onClick={(e) => onClickItemMenu(e)}
         mode='inline'
         items={items}
         style={{

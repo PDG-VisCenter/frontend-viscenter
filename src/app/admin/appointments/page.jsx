@@ -5,7 +5,7 @@ import { Content } from 'antd/es/layout/layout';
 import HeaderSeller from '../components/HeaderSeller';
 import SiderMenuSeller from '../components/SiderMenuSeller';
 
-function HomeSeller() {
+function Appointments() {
   const {
     token: { colorBgContainer, borderRadiusLG },
   } = theme.useToken();
@@ -14,7 +14,7 @@ function HomeSeller() {
     <Layout style={{ minHeight: '100vh' }}>
       <HeaderSeller />
       <Layout>
-        <SiderMenuSeller selectedItem='1' />
+        <SiderMenuSeller selectedItem='6' />
         <Content style={{ margin: '8px 16px' }}>
           <div
             style={{
@@ -24,7 +24,7 @@ function HomeSeller() {
               borderRadius: borderRadiusLG,
             }}
           >
-            Overview
+            Appointments page
           </div>
         </Content>
       </Layout>
@@ -32,4 +32,4 @@ function HomeSeller() {
   );
 }
 
-export default HomeSeller;
+export default Appointments;
