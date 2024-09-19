@@ -15,10 +15,8 @@ function HeaderSeller() {
   const onClickMenu = () => {
     if (isCollapsed) {
       dispatch(expand());
-      console.log("expand");
       return;
     }
-    console.log("collapse");
     dispatch(collapse());
   };
 
