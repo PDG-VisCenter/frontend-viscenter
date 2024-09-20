@@ -19,7 +19,7 @@ function AddProduct() {
           <div
             style={{
               padding: 24,
-              minHeight: 360,
+              minHeight: '88vh',
               background: colorBgContainer,
               borderRadius: borderRadiusLG,
             }}
