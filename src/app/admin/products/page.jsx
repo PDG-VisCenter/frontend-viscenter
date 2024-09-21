@@ -98,7 +98,7 @@ function Products() {
               Productos
             </Title>
             <Input.Search
-              placeholder='Busca productos...'
+              placeholder='Busca productos por nombre o SKU...'
               allowClear
               enterButton='Search'
               size='large'
