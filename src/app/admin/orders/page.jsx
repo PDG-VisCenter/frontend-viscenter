@@ -2,11 +2,11 @@
 
 import { Input, Layout, Space, Table, theme } from 'antd';
 import { Content } from 'antd/es/layout/layout';
+import { EditOutlined } from '@ant-design/icons';
 import HeaderSeller from '../components/HeaderSeller';
+import Link from 'next/link';
 import SiderMenuSeller from '../components/SiderMenuSeller';
 import Title from 'antd/es/typography/Title';
-import Link from 'next/link';
-import { EditOutlined } from '@ant-design/icons';
 
 const columns = [
   {
