@@ -98,7 +98,7 @@ function NavBarSticky() {
       </ul>
       <div className='nav__icons-wrapper'>
         <Link
-          href='/search'
+          href='/buscar'
           className='nav__btn-icon icon__search material-symbols-outlined'
           style={{
             color: 'white',

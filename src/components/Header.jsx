@@ -40,7 +40,7 @@ function Header() {
         </Link>
         <div className='header__icons-wrapper'>
           <Link
-            href='/search'
+            href='/buscar'
             className='header__btn-icon icon__search material-symbols-outlined'
             data-testid='search-button'
           >

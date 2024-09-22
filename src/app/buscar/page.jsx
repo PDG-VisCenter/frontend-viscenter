@@ -139,7 +139,7 @@ function Search() {
           />
         </Sider>
         <Content className='search__content'>
-          <Title className='search__title'>Search</Title>
+          <Title className='search__title'>Buscar</Title>
           <Input.Search
             placeholder='Busca productos...'
             allowClear
