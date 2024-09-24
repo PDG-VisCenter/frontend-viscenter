@@ -6,7 +6,6 @@ import axios from 'axios';
 import moment from 'moment';
 import { Calendar as AntCalendar, Modal, Form, Input, DatePicker, Select, Button, message } from 'antd';
 
-// Definir los horarios disponibles
 const schedules = [
   { id: 11, time: '20:00:00 - 21:00:00' },
   { id: 10, time: '16:00:00 - 17:00:00' },
@@ -97,7 +96,7 @@ const ExtendedAppointment = () => {
   };
 
   const handleFormSubmit = async (values) => {
-    const updatedData = { ...formData, ...values }; // Actualizar formData con los valores del formulario
+    const updatedData = { ...formData, ...values };
 
     try {
       if (updatedData.appointmentID) {
@@ -145,7 +144,7 @@ const ExtendedAppointment = () => {
         fullscreen
         onSelect={handleDateClick}
         dateCellRender={dateCellRender}
-        onPanelChange={fetchAppointments} // Actualiza las citas al cambiar de mes
+        onPanelChange={fetchAppointments}
       />
 
       <Modal

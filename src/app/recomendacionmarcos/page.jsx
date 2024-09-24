@@ -149,14 +149,14 @@ function FaceLandmarkerComponent() {
       processImage(reader.result);
     };
     reader.readAsDataURL(file);
-    return false; // Prevent default behavior of file input
+    return false;
   };
 
   const handleCaptureImage = () => {
     const imageSrc = webcamRef.current.getScreenshot();
     setUploadedImage(imageSrc);
     processImage(imageSrc);
-    handleStopCamera(); // Desactivar la cámara después de capturar la imagen
+    handleStopCamera();
   };
 
   const processImage = (imageSrc) => {
@@ -168,12 +168,12 @@ function FaceLandmarkerComponent() {
       if (faceMesh) {
         await faceMesh.send({ image: img });
       }
-      uploadImage(imageSrc); // Subir la imagen procesada
+      uploadImage(imageSrc);
     };
   };
 
   const uploadImage = async (imageSrc) => {
-    setLoading(true); // Mostrar "Cargando..." antes de la solicitud
+    setLoading(true);
     try {
       const imageBase64 = imageSrc.split(",")[1];
       const response = await axios({
@@ -195,7 +195,7 @@ function FaceLandmarkerComponent() {
     } catch (error) {
       console.error("Error al subir la imagen:", error.message);
     } finally {
-      setLoading(false); // Ocultar "Cargando..." después de obtener la respuesta
+      setLoading(false);
     }
   };
 

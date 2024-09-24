@@ -3,9 +3,9 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
 import { Button, Form, Input, Select, DatePicker, Alert, Typography, Steps } from 'antd';
-import moment from 'moment';  // Importar moment para manejar las fechas correctamente
+import moment from 'moment';
 import { Link } from 'next/link';
-import Map from '../components/Map'; // Suponiendo que el componente Map se encuentra en components/map
+import Map from '../components/Map';
 
 const { Title, Text } = Typography;
 const { Step } = Steps;
@@ -35,18 +35,17 @@ function ScheduleAppointment() {
   }, []);
 
   const validateDate = (date) => {
-    const today = moment().startOf('day');  // Asegúrate de que el valor de hoy sea el inicio del día
+    const today = moment().startOf('day');
     const inputDate = moment(date).startOf('day');
-    return inputDate.isSameOrBefore(today); // Asegurarse que la fecha ingresada no sea futura
+    return inputDate.isSameOrBefore(today);
   };
 
   const validateTime = (selected) => {
     const now = new Date();
-    const today = new Date().toISOString().split('T')[0]; // Get today's date in YYYY-MM-DD format
+    const today = new Date().toISOString().split('T')[0];
 
-    if (!selected) return false; // If no time selected, invalid
+    if (!selected) return false;
 
-    // Combine today's date with the selected start time and end time
     const startDateTime = new Date(`${today}T${selected.startTime}`);
     return now < startDateTime;
   };
@@ -106,7 +105,7 @@ function ScheduleAppointment() {
 
     if (selected) {
       if (selectedAvailability) {
-        setPreviousAvailability(selectedAvailability); // Save the previous availability
+        setPreviousAvailability(selectedAvailability);
       }
 
       setFormData((prevData) => ({
@@ -115,7 +114,7 @@ function ScheduleAppointment() {
         selectedTime: `${selected.startTime} - ${selected.endTime}`,
       }));
       setSelectedAvailability(selected);
-      setError(''); // Clear any previous errors
+      setError('');
     } else {
       setFormData((prevData) => ({
         ...prevData,
@@ -123,7 +122,7 @@ function ScheduleAppointment() {
         selectedTime: '',
       }));
       setSelectedAvailability(null);
-      setError(''); // Clear any previous errors
+      setError('');
     }
   };
 
@@ -135,7 +134,6 @@ function ScheduleAppointment() {
         })
         .catch((error) => console.error(error));
     }
-    // Navigate to home page (reemplaza esto con el enrutamiento de Next.js si es necesario)
     <Link
       href='/home'
       className='text-blue-500 hover:underline'
@@ -192,7 +190,7 @@ function ScheduleAppointment() {
               <DatePicker
                 format='YYYY-MM-DD'
                 onChange={(date, dateString) => setFormData({ ...formData, birthDate: dateString })}
-                disabledDate={(current) => current && current > moment().endOf('day')} // Desactivar fechas futuras
+                disabledDate={(current) => current && current > moment().endOf('day')}
               />
             </Form.Item>
             <Form.Item
