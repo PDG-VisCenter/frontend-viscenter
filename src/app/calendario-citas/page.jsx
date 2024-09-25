@@ -166,10 +166,8 @@ const ExtendedAppointment = () => {
     const today = moment().format('YYYY-MM-DD');
 
     try {
-      // Eliminar la cita
       await axios.delete(`http://localhost:5281/api/ExtendedAppointment/${formData.appointmentID}`);
 
-      // Si la fecha de la cita es igual a la fecha actual, enviar PATCH para actualizar la disponibilidad
       if (formData.appointmentDate === today) {
         await axios.patch(`http://localhost:5281/api/Availability/${formData.scheduleID}`, {
           isAvailable: true,
