@@ -31,7 +31,7 @@ function NavBar() {
           Accesorios
         </Link>
         <Link
-          href='/reservacita'
+          href='/reserva-cita'
           className='nav__link'
         >
           Reserva de citas

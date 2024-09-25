@@ -14,7 +14,7 @@ function Appointments() {
     <Layout style={{ minHeight: '100vh' }}>
       <HeaderSeller />
       <Layout>
-        <SiderMenuSeller selectedItem='6' />
+        <SiderMenuSeller selectedItem='9' />
         <Content style={{ margin: '8px 16px' }}>
           <div
             style={{
@@ -24,7 +24,7 @@ function Appointments() {
               borderRadius: borderRadiusLG,
             }}
           >
-            Appointments page
+            Appointments Services
           </div>
         </Content>
       </Layout>

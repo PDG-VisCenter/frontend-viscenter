@@ -17,6 +17,7 @@ function EditAppointment() {
   const [appointment, setAppointment] = useState(null);
   const [availabilities, setAvailabilities] = useState([]);
   const [newAvailabilityID, setNewAvailabilityID] = useState('');
+  const [selectedAvailability, setSelectedAvailability] = useState(null);
   const [error, setError] = useState('');
   const [showModal, setShowModal] = useState(false);
   const [cancelReason, setCancelReason] = useState('');
@@ -30,7 +31,10 @@ function EditAppointment() {
           if (response.data.availabilityID) {
             axios
               .get(`http://localhost:5281/api/Availability/${response.data.availabilityID}`)
-              .then((resp) => setNewAvailabilityID(resp.data.availabilityID))
+              .then((resp) => {
+                setNewAvailabilityID(resp.data.availabilityID);
+                setSelectedAvailability(resp.data);
+              })
               .catch((error) => console.error('Error fetching availability:', error));
           }
         })
@@ -57,7 +61,7 @@ function EditAppointment() {
         availabilityID: newAvailabilityID,
         status: 'Updated',
       })
-      .then(() => router.push('/'))
+      .then(() => router.push('/reserva-cita'))
       .catch((error) => console.error('Error updating appointment:', error));
   };
 
@@ -68,9 +72,23 @@ function EditAppointment() {
       setError('Debe ingresar una razón para cancelar la cita.');
       return;
     }
+    
     axios
       .delete(`http://localhost:5281/api/Appointment/${id}`)
-      .then(() => router.push('/'))
+      .then(() => {
+        if (appointment.availabilityID) {
+          axios
+            .patch(`http://localhost:5281/api/Availability/${appointment.availabilityID}`, {
+              isAvailable: true
+            })
+            .then(() => {
+              router.push('/reserva-cita');
+            })
+            .catch((error) => console.error('Error updating availability:', error));
+        } else {
+          router.push('/reserva-cita');
+        }
+      })
       .catch((error) => console.error('Error deleting appointment:', error));
   };
 
@@ -96,10 +114,16 @@ function EditAppointment() {
         bordered={false}
       >
         <Paragraph>Fecha de Cita: {new Date(appointment.appointmentDate).toLocaleDateString('en-CA')}</Paragraph>
+        {selectedAvailability && (
+          <Paragraph>Horario: {selectedAvailability.startTime} - {selectedAvailability.endTime}</Paragraph>
+        )}
         <Select
           placeholder='Seleccione un nuevo horario'
-          onChange={setNewAvailabilityID}
-          value={newAvailabilityID}
+          onChange={(value) => {
+            setNewAvailabilityID(value);
+            const selected = availabilities.find(slot => slot.availabilityID === value);
+            setSelectedAvailability(selected);
+          }}
           style={{ width: '100%' }}
         >
           {availabilities.map((availability) => (

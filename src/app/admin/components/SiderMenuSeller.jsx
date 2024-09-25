@@ -7,6 +7,10 @@ import {
   ProductOutlined,
   ShoppingOutlined,
   TeamOutlined,
+  BarChartOutlined,
+  BookOutlined,
+  SettingOutlined,
+  HistoryOutlined
 } from '@ant-design/icons';
 import { collapse, expand } from '@/lib/features/sellerSlice';
 import { useDispatch, useSelector } from 'react-redux';
@@ -29,7 +33,12 @@ const items = [
   getItem('Productos', '3', <ProductOutlined />),
   getItem('Pedidos', '4', <ShoppingOutlined />),
   getItem('Usuarios', '5', <TeamOutlined />),
-  getItem('Citas', '6', <CalendarOutlined />),
+  getItem('Citas del día', '6', <CalendarOutlined />),
+  getItem('Calendario de citas', '7', <CalendarOutlined />),
+  getItem('Estadisticas de citas', '8', <BarChartOutlined />),
+  getItem('Servicios oftalmológicos', '9', <BookOutlined />),
+  getItem('Configuración de citas', '10', <SettingOutlined />),
+  getItem('Historial de citas', '11', <HistoryOutlined />),
 ];
 
 const keyToPath = {
@@ -38,7 +47,12 @@ const keyToPath = {
   3: '/admin/products',
   4: '/admin/orders',
   5: '/admin/users',
-  6: '/admin/appointments',
+  6: '/admin/citas-dia',
+  7: '/admin/calendario-citas',
+  8: '/admin/citas-estadisticas',
+  9: '/admin/citas-servicios',
+  10: '/admin/citas-configuracion',
+  11: '/admin/citas-historial',
 };
 
 function SiderMenuSeller({ selectedItem }) {

@@ -45,7 +45,7 @@ function ReservaCita() {
               Programa una nueva cita seleccionando el horario y fecha más adecuados para ti.
             </Text>
             <Divider />
-            <Link href="/agendarcita">
+            <Link href="/agendar-cita">
               <Button type="primary" size="large" block icon={<ScheduleOutlined />}>Ir a Agendar</Button>
             </Link>
           </Card>
@@ -72,7 +72,7 @@ function ReservaCita() {
               Revisa y gestiona las citas que has agendado previamente.
             </Text>
             <Divider />
-            <Link href="/citasagendadas">
+            <Link href="/citas-agendadas">
               <Button type="primary" size="large" block icon={<CalendarOutlined />}>Ver Citas</Button>
             </Link>
           </Card>
@@ -99,7 +99,7 @@ function ReservaCita() {
               Consulta el calendario disponible para reservar citas en fechas futuras.
             </Text>
             <Divider />
-            <Link href="/calendariocitas">
+            <Link href="/calendario-citas">
               <Button type="primary" size="large" block icon={<CalendarOutlined />}>Ver Calendario</Button>
             </Link>
           </Card>
@@ -126,7 +126,7 @@ function ReservaCita() {
               Obtén recomendaciones personalizadas para elegir el marco perfecto según tu rostro.
             </Text>
             <Divider />
-            <Link href="/recomendacionmarcos">
+            <Link href="/recomendacion-marcos">
               <Button type="primary" size="large" block icon={<EyeOutlined />}>Ver Recomendaciones</Button>
             </Link>
           </Card>

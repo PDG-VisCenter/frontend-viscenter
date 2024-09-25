@@ -2,9 +2,9 @@
 
 import { useState, useEffect } from 'react';
 import axios from 'axios';
+import { useRouter } from 'next/navigation';
 import { Button, Form, Input, Select, DatePicker, Alert, Typography, Steps } from 'antd';
 import moment from 'moment';
-import { Link } from 'next/link';
 import Map from '../components/Map';
 
 const { Title, Text } = Typography;
@@ -13,6 +13,7 @@ const { Step } = Steps;
 const LOCATION = { lat: -17.38907923125398, lng: -66.15522088392129 };
 
 function ScheduleAppointment() {
+  const router = useRouter();
   const [step, setStep] = useState(1);
   const [formData, setFormData] = useState({
     name: '',
@@ -89,12 +90,7 @@ function ScheduleAppointment() {
               .catch((error) => console.error(error));
           }
 
-          <Link
-            href='/home'
-            className='text-blue-500 hover:underline'
-          >
-            Volver a la página principal
-          </Link>;
+          router.push('/reserva-cita');
         })
         .catch((error) => console.error(error));
     }
@@ -134,12 +130,7 @@ function ScheduleAppointment() {
         })
         .catch((error) => console.error(error));
     }
-    <Link
-      href='/home'
-      className='text-blue-500 hover:underline'
-    >
-      Volver a la página principal
-    </Link>;
+    router.push('/reserva-cita');
   };
 
   const availableTimes = availabilities.filter((availability) => availability.isAvailable);

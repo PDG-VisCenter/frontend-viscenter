@@ -2,7 +2,7 @@
 
 import React, { useRef, useEffect, useState } from "react";
 import { Modal, Button, Upload, Spin, Typography, Row, Col, Card } from "antd";
-import { UploadOutlined, CameraOutlined, FileImageOutlined, CloseCircleOutlined } from "@ant-design/icons";
+import { UploadOutlined, CameraOutlined, FileImageOutlined, RedoOutlined } from "@ant-design/icons";
 import { FaceMesh } from "@mediapipe/face_mesh";
 import { FaceLandmarker, DrawingUtils } from "@mediapipe/tasks-vision";
 import * as cam from "@mediapipe/camera_utils";
@@ -21,6 +21,7 @@ function FaceLandmarkerComponent() {
   const [faceShape, setFaceShape] = useState("");
   const [loading, setLoading] = useState(false);
   const [isModalVisible, setIsModalVisible] = useState(true);
+  const [buttonsDisabled, setButtonsDisabled] = useState(false);
 
   useEffect(() => {
     const faceMeshInstance = new FaceMesh({
@@ -39,9 +40,9 @@ function FaceLandmarkerComponent() {
     if (cameraActive && webcamRef.current && webcamRef.current.video) {
       const newCamera = new cam.Camera(webcamRef.current.video, {
         onFrame: async () => {
-            if (webcamRef.current && webcamRef.current.video) {
-                await faceMesh.send({ image: webcamRef.current.video });
-              }
+          if (webcamRef.current && webcamRef.current.video) {
+            await faceMesh.send({ image: webcamRef.current.video });
+          }
         },
         width: 640,
         height: 480,
@@ -67,68 +68,23 @@ function FaceLandmarkerComponent() {
       canvasRef.current.width = videoWidth;
       canvasRef.current.height = videoHeight;
     } else {
-        console.log("stoped");
+      console.log("stoped");
     }
 
     const canvasElement = canvasRef.current;
     const canvasCtx = canvasElement.getContext("2d");
     canvasCtx.save();
     canvasCtx.clearRect(0, 0, canvasElement.width, canvasElement.height);
-    canvasCtx.drawImage(
-      results.image,
-      0,
-      0,
-      canvasElement.width,
-      canvasElement.height
-    );
+    canvasCtx.drawImage(results.image, 0, 0, canvasElement.width, canvasElement.height);
+
     if (results.multiFaceLandmarks) {
       const drawingUtils = new DrawingUtils(canvasCtx);
       results.multiFaceLandmarks.forEach((landmarks) => {
-        drawingUtils.drawConnectors(
-          landmarks,
-          FaceLandmarker.FACE_LANDMARKS_TESSELATION,
-          { color: "#FFFFFF", lineWidth: 1 }
-        );
-        drawingUtils.drawConnectors(
-          landmarks,
-          FaceLandmarker.FACE_LANDMARKS_RIGHT_EYE,
-          { color: "#FF0000" }
-        );
-        drawingUtils.drawConnectors(
-          landmarks,
-          FaceLandmarker.FACE_LANDMARKS_RIGHT_EYEBROW,
-          { color: "#FF0000" }
-        );
-        drawingUtils.drawConnectors(
-          landmarks,
-          FaceLandmarker.FACE_LANDMARKS_LEFT_EYE,
-          { color: "#FF0000" }
-        );
-        drawingUtils.drawConnectors(
-          landmarks,
-          FaceLandmarker.FACE_LANDMARKS_LEFT_EYEBROW,
-          { color: "#FF0000" }
-        );
-        drawingUtils.drawConnectors(
-          landmarks,
-          FaceLandmarker.FACE_LANDMARKS_FACE_OVAL,
-          { color: "#FFFFFF" }
-        );
-        drawingUtils.drawConnectors(
-          landmarks,
-          FaceLandmarker.FACE_LANDMARKS_LIPS,
-          { color: "#FFFFFF" }
-        );
-        drawingUtils.drawConnectors(
-          landmarks,
-          FaceLandmarker.FACE_LANDMARKS_RIGHT_IRIS,
-          { color: "#FF0000" }
-        );
-        drawingUtils.drawConnectors(
-          landmarks,
-          FaceLandmarker.FACE_LANDMARKS_LEFT_IRIS,
-          { color: "#FF0000" }
-        );
+        drawingUtils.drawConnectors(landmarks, FaceLandmarker.FACE_LANDMARKS_TESSELATION, { color: "#FFFFFF", lineWidth: 1 });
+        drawingUtils.drawConnectors(landmarks, FaceLandmarker.FACE_LANDMARKS_RIGHT_EYE, { color: "#FF0000" });
+        drawingUtils.drawConnectors(landmarks, FaceLandmarker.FACE_LANDMARKS_LEFT_EYE, { color: "#FF0000" });
+        drawingUtils.drawConnectors(landmarks, FaceLandmarker.FACE_LANDMARKS_FACE_OVAL, { color: "#FFFFFF" });
+        drawingUtils.drawConnectors(landmarks, FaceLandmarker.FACE_LANDMARKS_LIPS, { color: "#FFFFFF" });
       });
     }
     canvasCtx.restore();
@@ -136,6 +92,7 @@ function FaceLandmarkerComponent() {
 
   const handleStartCamera = () => {
     setCameraActive(true);
+    setButtonsDisabled(true);
   };
 
   const handleStopCamera = () => {
@@ -149,6 +106,7 @@ function FaceLandmarkerComponent() {
       processImage(reader.result);
     };
     reader.readAsDataURL(file);
+    setButtonsDisabled(true);
     return false;
   };
 
@@ -179,24 +137,22 @@ function FaceLandmarkerComponent() {
       const response = await axios({
         method: "POST",
         url: "https://classify.roboflow.com/face-shape-d4mv0/1",
-        params: {
-          api_key: "JSTj20botXDts9LyY3uf",
-        },
+        params: { api_key: "DMcwoln0peywtlKgiHHT" },
         data: imageBase64,
-        headers: {
-          "Content-Type": "application/x-www-form-urlencoded",
-        },
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
       });
 
-      console.log(response.data);
       const faceShapeResult = response.data.predictions[0].class;
       setFaceShape(faceShapeResult);
-
     } catch (error) {
       console.error("Error al subir la imagen:", error.message);
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleReset = () => {
+    window.location.reload();
   };
 
   const handleOk = () => {
@@ -211,9 +167,7 @@ function FaceLandmarkerComponent() {
         onOk={handleOk}
         onCancel={handleOk}
         footer={[
-          <Button key="ok" type="primary" onClick={handleOk}>
-            OK
-          </Button>
+          <Button key="ok" type="primary" onClick={handleOk}>OK</Button>
         ]}
       >
         <Title level={4}>Herramienta de Recomendación de Marcos de Lentes</Title>
@@ -268,50 +222,58 @@ function FaceLandmarkerComponent() {
           <Col span={24} md={12}>
             <Card>
               <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                {!cameraActive ? (
-                  <Button
-                    type="primary"
-                    icon={<CameraOutlined />}
-                    onClick={handleStartCamera}
-                    style={{ marginBottom: '16px' }}
-                  >
-                    Iniciar Cámara
-                  </Button>
-                ) : (
-                  <>
-                    <Button
-                      type="danger"
-                      icon={<CloseCircleOutlined />}
-                      onClick={handleStopCamera}
-                      style={{ marginBottom: '16px' }}
-                    >
-                      Detener Cámara
-                    </Button>
-                    <Button
-                      type="default"
-                      icon={<CameraOutlined />}
-                      onClick={handleCaptureImage}
-                      style={{ marginBottom: '16px' }}
-                    >
-                      Capturar Imagen
-                    </Button>
-                  </>
-                )}
+                <Button
+                  type="primary"
+                  icon={<CameraOutlined />}
+                  onClick={handleStartCamera}
+                  style={{ marginBottom: '16px' }}
+                  disabled={buttonsDisabled || cameraActive}
+                >
+                  Iniciar Cámara
+                </Button>
+
                 <Upload
                   customRequest={(options) => handleUpload(options.file)}
                   showUploadList={false}
                   accept="image/*"
-                  style={{ marginBottom: '16px' }}
+                  disabled={buttonsDisabled}
                 >
-                  <Button icon={<UploadOutlined />}>Subir Imagen</Button>
+                  <Button icon={<UploadOutlined />} disabled={cameraActive || buttonsDisabled}>
+                    Subir Imagen
+                  </Button>
                 </Upload>
-                {loading && <Spin />}
-                {faceShape && (
-                  <Title level={4} style={{ marginTop: '16px' }}>
-                    Tipo de Rostro: {faceShape}
-                  </Title>
+
+                {cameraActive && (
+                  <Button
+                    type="primary"
+                    icon={<FileImageOutlined />}
+                    onClick={handleCaptureImage}
+                    style={{ marginTop: '16px' }}
+                    
+                  >
+                    Capturar Imagen
+                  </Button>
+                )}
+
+                {(uploadedImage || cameraActive) && (
+                  <Button
+                    icon={<RedoOutlined />}
+                    onClick={handleReset}
+                    style={{ marginTop: '16px' }}
+                  >
+                    Volver a Intentar
+                  </Button>
                 )}
               </div>
+              {loading ? (
+                <Spin style={{ marginTop: '16px' }} />
+              ) : (
+                faceShape && (
+                  <Paragraph style={{ marginTop: '16px', fontSize: '18px' }}>
+                    Tipo de rostro detectado: <strong>{faceShape}</strong>
+                  </Paragraph>
+                )
+              )}
             </Card>
           </Col>
         </Row>
