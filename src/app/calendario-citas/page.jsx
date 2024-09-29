@@ -36,6 +36,7 @@ const ExtendedAppointment = () => {
   const [selectedDate, setSelectedDate] = useState(null);
   const [showForm, setShowForm] = useState(false);
   const [showCancelModal, setShowCancelModal] = useState(false);
+  const [showDayAppointmentModal, setShowDayAppointmentModal] = useState(false);
   const [cancelReason, setCancelReason] = useState('');
   const [formData, setFormData] = useState({
     appointmentID: 0,
@@ -48,6 +49,7 @@ const ExtendedAppointment = () => {
     name: '',
     birthDate: '',
   });
+  const [currentAppointment, setCurrentAppointment] = useState(null);
 
   const router = useRouter();
   const [form] = Form.useForm();
@@ -89,7 +91,8 @@ const ExtendedAppointment = () => {
       const existingAppointment = appointments.find((app) => app.appointmentDate === formattedDate);
 
       if (existingAppointment) {
-        handleEventClick(existingAppointment);
+        setCurrentAppointment(existingAppointment);
+        setShowDayAppointmentModal(true);
       } else {
         router.push('/agendar-cita');
       }
@@ -200,92 +203,106 @@ const ExtendedAppointment = () => {
     ) : null;
   };
 
-  return (
-    <div style={{ padding: '24px' }}>
-      <h1 style={{ fontSize: '24px', marginBottom: '24px', color: '#1890ff' }}>Agendar y Gestionar Citas</h1>
-      <AntCalendar
-        fullscreen
-        onSelect={handleDateClick}
-        cellRender={dateCellRender}
-        onPanelChange={fetchAppointments}
-      />
+  const handleConvertToDailyAppointment = async () => {
+    const newAppointmentData = {
+      appointmentID: 0,
+      userID: currentAppointment.userID,
+      availabilityID: currentAppointment.scheduleID,
+      appointmentDate: currentAppointment.appointmentDate,
+      status: currentAppointment.status,
+      description: currentAppointment.description,
+    };
 
+    try {
+      await axios.post('http://localhost:5281/api/appointment', newAppointmentData);
+
+      await axios.delete(`http://localhost:5281/api/ExtendedAppointment/${currentAppointment.appointmentID}`);
+
+      message.success('Cita convertida a Cita del Día correctamente');
+      setShowDayAppointmentModal(false);
+      router.push('/citas-agendadas');
+    } catch (error) {
+      message.error('Error al convertir la cita');
+    }
+  };
+
+  return (
+    <>
+    <h1 style={{ fontSize: '24px', marginBottom: '24px', color: '#1890ff' }}>Agendar y Gestionar Citas</h1>
+      <AntCalendar cellRender={dateCellRender} onSelect={handleDateClick} />
       <Modal
-        title={formData.appointmentID ? 'Editar Cita' : 'Agendar Cita'}
+        title="Cita del Día"
+        open={showDayAppointmentModal}
+        onCancel={() => setShowDayAppointmentModal(false)}
+        footer={[
+          <Button key="cancel" onClick={() => setShowDayAppointmentModal(false)}>
+            Cancelar
+          </Button>,
+          <Button key="confirm" type="primary" onClick={handleConvertToDailyAppointment}>
+            Convertir a Cita del Día
+          </Button>,
+        ]}
+      >
+        {currentAppointment && (
+          <div>
+            <p><strong>Nombre:</strong> {currentAppointment.name}</p>
+            <p><strong>Fecha de Nacimiento:</strong> {currentAppointment.birthDate}</p>
+            <p><strong>Servicio:</strong> {currentAppointment.serviceType}</p>
+            <p><strong>Descripción:</strong> {currentAppointment.description}</p>
+            <p><strong>Horario:</strong> {schedules.find((s) => s.id === currentAppointment.scheduleID)?.time}</p>
+          </div>
+        )}
+      </Modal>
+      <Modal
+        title="¿Estás seguro de que deseas cancelar esta cita?"
+        open={showCancelModal}
+        onCancel={() => setShowCancelModal(false)}
+        footer={[
+          <Button key="back" onClick={() => setShowCancelModal(false)}>
+            No
+          </Button>,
+          <Button key="submit" type="primary" onClick={confirmDelete}>
+            Sí
+          </Button>,
+        ]}
+      >
+        <Form layout="vertical">
+          <Form.Item label="Motivo de la cancelación">
+            <Input.TextArea
+              value={cancelReason}
+              onChange={(e) => setCancelReason(e.target.value)}
+              rows={4}
+              required
+            />
+          </Form.Item>
+        </Form>
+      </Modal>
+      <Modal
+        title="Formulario de Cita"
         open={showForm}
         onCancel={() => setShowForm(false)}
         footer={null}
       >
-        <Form
-          form={form}
-          layout='vertical'
-          onFinish={handleFormSubmit}
-          initialValues={formData}
-        >
-          <Form.Item
-            name='name'
-            label='Nombre'
-            rules={[{ required: true, message: 'Por favor ingrese su nombre' }]}
-          >
+        <Form form={form} onFinish={handleFormSubmit} layout="vertical">
+          <Form.Item label="Nombre" name="name" rules={[{ required: true, message: 'Por favor ingresa tu nombre' }]}>
             <Input />
           </Form.Item>
-
-          <Form.Item
-            name='birthDate'
-            label='Fecha de Nacimiento'
-            rules={[{ required: true, message: 'Por favor ingrese su fecha de nacimiento' }]}
-          >
-            <DatePicker format='YYYY-MM-DD' />
+          <Form.Item label="Fecha de Nacimiento" name="birthDate" rules={[{ required: true, message: 'Por favor selecciona tu fecha de nacimiento' }]}>
+            <DatePicker />
           </Form.Item>
-
-          <Form.Item
-            name='description'
-            label='Descripción'
-          >
-            <Input.TextArea />
+          <Form.Item label="Servicio" name="serviceType" rules={[{ required: true, message: 'Por favor selecciona un servicio' }]}>
+            <Select options={serviceTypes} />
           </Form.Item>
-
-          <Form.Item
-            name='serviceType'
-            label='Tipo de Servicio'
-            rules={[{ required: true, message: 'Por favor seleccione un tipo de servicio' }]}
-          >
-            <Select>
-              {serviceTypes.map((service) => (
-                <Select.Option
-                  key={service.value}
-                  value={service.value}
-                >
-                  {service.label}
-                </Select.Option>
-              ))}
-            </Select>
+          <Form.Item label="Descripción" name="description">
+            <Input.TextArea rows={4} />
           </Form.Item>
-
-          <Form.Item
-            name='scheduleID'
-            label='Horario'
-          >
-            <Select>
-              {schedules.map((schedule) => (
-                <Select.Option
-                  key={schedule.id}
-                  value={schedule.id}
-                >
-                  {schedule.time}
-                </Select.Option>
-              ))}
-            </Select>
+          <Form.Item label="Horario" name="scheduleID" rules={[{ required: true, message: 'Por favor selecciona un horario' }]}>
+            <Select options={schedules.map((schedule) => ({ value: schedule.id, label: schedule.time }))} />
           </Form.Item>
-
-          <Form.Item>
-            <Button
-              type='primary'
-              htmlType='submit'
-            >
-              {formData.appointmentID ? 'Actualizar' : 'Agendar'}
-            </Button>
-            {formData.appointmentID > 0 && (
+          <Button type="primary" htmlType="submit">
+            {formData.appointmentID ? 'Actualizar' : 'Agendar'}
+          </Button>
+          {formData.appointmentID > 0 && (
               <Button
                 type='danger'
                 style={{ marginLeft: '8px' }}
@@ -294,23 +311,9 @@ const ExtendedAppointment = () => {
                 Eliminar
               </Button>
             )}
-          </Form.Item>
         </Form>
       </Modal>
-
-      <Modal
-        title='Confirmar Cancelación'
-        open={showCancelModal}
-        onOk={confirmDelete}
-        onCancel={() => setShowCancelModal(false)}
-      >
-        <p>Por favor ingrese el motivo de la cancelación:</p>
-        <Input.TextArea
-          value={cancelReason}
-          onChange={(e) => setCancelReason(e.target.value)}
-        />
-      </Modal>
-    </div>
+    </>
   );
 };
 

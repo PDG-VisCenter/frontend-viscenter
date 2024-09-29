@@ -19,12 +19,14 @@ function HomeClient() {
         img={bannerData[0].img}
         title={bannerData[0].title}
         description={bannerData[0].description}
+        link={bannerData[0].link}
       />
       {/* <FeaturedProducts /> */}
       <Banner
         img={bannerData[1].img}
         title={bannerData[1].title}
         description={bannerData[1].description}
+        link={bannerData[0].link}
       />
       {/* <FeaturedProducts /> */}
       <BlogContent

@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useRouter, useParams } from 'next/navigation';
-import { Button, Card, Typography, Select, Modal, Input, Spin } from 'antd';
+import { Button, Card, Typography, Select, Modal, Input, Spin, message } from 'antd';
 import Map from '../../../components/Map';
 
 const { Title, Paragraph } = Typography;
@@ -69,7 +69,7 @@ function EditAppointment() {
 
   const confirmCancel = () => {
     if (!cancelReason) {
-      setError('Debe ingresar una razón para cancelar la cita.');
+      message.warning('Debe ingresar una razón para cancelar la cita.');
       return;
     }
     

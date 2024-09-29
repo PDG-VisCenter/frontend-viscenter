@@ -5,7 +5,7 @@ import Link from 'next/link';
 import PropTypes from 'prop-types';
 
 function Banner(props) {
-  const { img, title, description } = props;
+  const { img, title, description, link } = props;
 
   return (
     <section className='hero-banner'>
@@ -22,7 +22,7 @@ function Banner(props) {
         <h3 className='hero-banner__title'>{title}</h3>
         <p className='hero-banner__description'>{description}</p>
         <Link
-          href='/shop'
+          href={link}
           className='hero-banner__button'
         >
           Empezar
@@ -36,6 +36,7 @@ Banner.propTypes = {
   img: PropTypes.node.isRequired,
   title: PropTypes.string.isRequired,
   description: PropTypes.string.isRequired,
+  link: PropTypes.string.isRequired,
 };
 
 export default Banner;
