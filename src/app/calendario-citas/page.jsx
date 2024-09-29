@@ -6,34 +6,11 @@ import axios from 'axios';
 import moment from 'moment';
 import { Calendar as AntCalendar, Modal, Form, Input, DatePicker, Select, Button, message } from 'antd';
 
-const schedules = [
-  { id: 11, time: '20:00:00 - 21:00:00' },
-  { id: 10, time: '16:00:00 - 17:00:00' },
-  { id: 9, time: '15:00:00 - 16:00:00' },
-  { id: 8, time: '14:00:00 - 15:00:00' },
-  { id: 7, time: '13:00:00 - 14:00:00' },
-  { id: 6, time: '12:00:00 - 13:00:00' },
-  { id: 5, time: '11:00:00 - 12:00:00' },
-  { id: 4, time: '10:00:00 - 11:00:00' },
-  { id: 3, time: '09:00:00 - 10:00:00' },
-  { id: 2, time: '08:00:00 - 09:00:00' },
-  { id: 1, time: '07:00:00 - 08:00:00' },
-];
-
-const serviceTypes = [
-  { value: 'eyeExam', label: 'Examen de la Vista' },
-  { value: 'fundusExam', label: 'Examen de Fondo de Ojo' },
-  { value: 'refraction', label: 'Refracción' },
-  { value: 'pressureControl', label: 'Control de Presión Ocular' },
-  { value: 'contactLens', label: 'Consulta para Lentes de Contacto' },
-  { value: 'refractiveSurgery', label: 'Consulta para Cirugía Refractiva' },
-  { value: 'cataractAssessment', label: 'Evaluación de Cataratas' },
-  { value: 'postOpFollowUp', label: 'Consulta de Seguimiento Postoperatorio' },
-];
-
 const ExtendedAppointment = () => {
   const [appointments, setAppointments] = useState([]);
   const [selectedDate, setSelectedDate] = useState(null);
+  const [schedules, setSchedules] = useState([]);
+  const [serviceTypes, setServiceTypes] = useState([]);
   const [showForm, setShowForm] = useState(false);
   const [showCancelModal, setShowCancelModal] = useState(false);
   const [showDayAppointmentModal, setShowDayAppointmentModal] = useState(false);
@@ -44,10 +21,11 @@ const ExtendedAppointment = () => {
     appointmentDate: '',
     status: 'Scheduled',
     description: '',
-    scheduleID: schedules[0].id,
+    scheduleID: schedules.id,
     serviceType: '',
-    name: '',
-    birthDate: '',
+    patientName: '',
+    patientBirthday: '',
+    symptoms: '',
   });
   const [currentAppointment, setCurrentAppointment] = useState(null);
 
@@ -56,6 +34,16 @@ const ExtendedAppointment = () => {
 
   useEffect(() => {
     fetchAppointments();
+    fetchServiceTypes();
+    axios.get('http://localhost:5281/api/ExtendedAppointment/schedules')
+      .then(response => {
+        const schedulesData = response.data.map(schedule => ({
+          id: schedule.scheduleID,
+          time: `${schedule.startTime} - ${schedule.endTime}`,
+        }));
+        setSchedules(schedulesData);
+      })
+      .catch(error => console.error('Error fetching schedules:', error));
   }, []);
 
   const fetchAppointments = async () => {
@@ -69,6 +57,19 @@ const ExtendedAppointment = () => {
       setAppointments(formattedAppointments);
     } catch (error) {
       message.error('Error al obtener las citas');
+    }
+  };
+
+  const fetchServiceTypes = async () => {
+    try {
+      const response = await axios.get('http://localhost:5281/api/AppointmentService');
+      const formattedServices = response.data.map(service => ({
+        value: service.serviceID.toString(),
+        label: service.serviceType,
+      }));
+      setServiceTypes(formattedServices);
+    } catch (error) {
+      message.error('Error al obtener los tipos de servicio');
     }
   };
 
@@ -113,8 +114,9 @@ const ExtendedAppointment = () => {
         description: '',
         scheduleID: schedules[0].id,
         serviceType: '',
-        name: '',
-        birthDate: '',
+        patientName: '',
+        patientBirthday: '',
+        symptoms: '',
       });
       setShowForm(true);
       form.resetFields();
@@ -131,12 +133,16 @@ const ExtendedAppointment = () => {
       description: event.description,
       scheduleID: event.scheduleID,
       serviceType: event.serviceType,
-      name: event.name,
-      birthDate: event.birthDate,
+      patientName: event.patientName,
+      patientBirthday: event.patientBirthday,
+      symptoms: event.symptoms,
     });
     setShowForm(true);
-    form.setFieldsValue(event);
-  };
+    form.setFieldsValue({
+      ...event,
+      patientBirthday: moment(event.patientBirthday),
+    });
+};
 
   const handleFormSubmit = async (values) => {
     const updatedData = { ...formData, ...values };
@@ -211,6 +217,10 @@ const ExtendedAppointment = () => {
       appointmentDate: currentAppointment.appointmentDate,
       status: currentAppointment.status,
       description: currentAppointment.description,
+      patientName: currentAppointment.patientName,
+      patientBirthday: currentAppointment.patientBirthday,
+      symptoms: currentAppointment.symptoms,
+      serviceType: currentAppointment.serviceType,
     };
 
     try {
@@ -218,11 +228,16 @@ const ExtendedAppointment = () => {
 
       await axios.delete(`http://localhost:5281/api/ExtendedAppointment/${currentAppointment.appointmentID}`);
 
+      await axios.patch(`http://localhost:5281/api/Availability/${currentAppointment.scheduleID}`, {
+        isAvailable: false,
+      });
+
       message.success('Cita convertida a Cita del Día correctamente');
       setShowDayAppointmentModal(false);
       router.push('/citas-agendadas');
     } catch (error) {
-      message.error('Error al convertir la cita');
+      message.error('Error al convertir la cita, excedió el plazo límite');
+      await axios.delete(`http://localhost:5281/api/ExtendedAppointment/${currentAppointment.appointmentID}`);
     }
   };
 
@@ -245,10 +260,10 @@ const ExtendedAppointment = () => {
       >
         {currentAppointment && (
           <div>
-            <p><strong>Nombre:</strong> {currentAppointment.name}</p>
-            <p><strong>Fecha de Nacimiento:</strong> {currentAppointment.birthDate}</p>
+            <p><strong>Nombre:</strong> {currentAppointment.patientName}</p>
+            <p><strong>Fecha de Nacimiento:</strong> {currentAppointment.patientBirthday}</p>
             <p><strong>Servicio:</strong> {currentAppointment.serviceType}</p>
-            <p><strong>Descripción:</strong> {currentAppointment.description}</p>
+            <p><strong>Síntomas:</strong> {currentAppointment.symptoms}</p>
             <p><strong>Horario:</strong> {schedules.find((s) => s.id === currentAppointment.scheduleID)?.time}</p>
           </div>
         )}
@@ -284,16 +299,16 @@ const ExtendedAppointment = () => {
         footer={null}
       >
         <Form form={form} onFinish={handleFormSubmit} layout="vertical">
-          <Form.Item label="Nombre" name="name" rules={[{ required: true, message: 'Por favor ingresa tu nombre' }]}>
+          <Form.Item label="Nombre" name="patientName" rules={[{ required: true, message: 'Por favor ingresa tu nombre' }]}>
             <Input />
           </Form.Item>
-          <Form.Item label="Fecha de Nacimiento" name="birthDate" rules={[{ required: true, message: 'Por favor selecciona tu fecha de nacimiento' }]}>
+          <Form.Item label="Fecha de Nacimiento" name="patientBirthday" rules={[{ required: true, message: 'Por favor selecciona tu fecha de nacimiento' }]}>
             <DatePicker />
           </Form.Item>
           <Form.Item label="Servicio" name="serviceType" rules={[{ required: true, message: 'Por favor selecciona un servicio' }]}>
             <Select options={serviceTypes} />
           </Form.Item>
-          <Form.Item label="Descripción" name="description">
+          <Form.Item label="Síntomas" name="symptoms">
             <Input.TextArea rows={4} />
           </Form.Item>
           <Form.Item label="Horario" name="scheduleID" rules={[{ required: true, message: 'Por favor selecciona un horario' }]}>

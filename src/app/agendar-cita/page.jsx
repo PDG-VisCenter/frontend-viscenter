@@ -16,14 +16,18 @@ function ScheduleAppointment() {
   const router = useRouter();
   const [step, setStep] = useState(1);
   const [formData, setFormData] = useState({
-    name: '',
-    birthDate: '',
+    patientName: '',
+    patientBirthday: '',
     symptoms: '',
     serviceType: '',
     availabilityID: '',
     selectedTime: '',
+    appointmentDate: '',
+    status: 'Scheduled',
+    description: '',
   });
   const [availabilities, setAvailabilities] = useState([]);
+  const [services, setServices] = useState([]);
   const [selectedAvailability, setSelectedAvailability] = useState(null);
   const [previousAvailability, setPreviousAvailability] = useState(null);
   const [error, setError] = useState('');
@@ -32,6 +36,11 @@ function ScheduleAppointment() {
     axios
       .get('http://localhost:5281/api/Availability')
       .then((response) => setAvailabilities(response.data))
+      .catch((error) => console.error(error));
+      
+    axios
+      .get('http://localhost:5281/api/AppointmentService')
+      .then((response) => setServices(response.data))
       .catch((error) => console.error(error));
   }, []);
 
@@ -69,9 +78,15 @@ function ScheduleAppointment() {
       axios
         .post('http://localhost:5281/api/Appointment', {
           ...formData,
+          userID: 1,
+          availabilityID: formData.availabilityID,
           appointmentDate: todayDate,
-          status: 'Scheduled',
-          description: formData.symptoms,
+          status: formData.status,
+          description: formData.description,
+          patientName: formData.patientName,
+          patientBirthday: formData.patientBirthday,
+          symptoms: formData.symptoms,
+          serviceType: formData.serviceType,
         })
         .then(() => {
           if (formData.availabilityID) {
@@ -90,7 +105,7 @@ function ScheduleAppointment() {
               .catch((error) => console.error(error));
           }
 
-          router.push('/reserva-cita');
+          router.push('/pagina-citas');
         })
         .catch((error) => console.error(error));
     }
@@ -130,7 +145,7 @@ function ScheduleAppointment() {
         })
         .catch((error) => console.error(error));
     }
-    router.push('/reserva-cita');
+    router.push('/pagina-citas');
   };
 
   const availableTimes = availabilities.filter((availability) => availability.isAvailable);
@@ -171,7 +186,7 @@ function ScheduleAppointment() {
               name='name'
               rules={[{ required: true, message: 'Por favor, ingresa tu nombre' }]}
             >
-              <Input onChange={(e) => setFormData({ ...formData, name: e.target.value })} />
+              <Input onChange={(e) => setFormData({ ...formData, patientName: e.target.value })} />
             </Form.Item>
             <Form.Item
               label='Fecha de Nacimiento'
@@ -180,7 +195,7 @@ function ScheduleAppointment() {
             >
               <DatePicker
                 format='YYYY-MM-DD'
-                onChange={(date, dateString) => setFormData({ ...formData, birthDate: dateString })}
+                onChange={(date, dateString) => setFormData({ ...formData, patientBirthday: dateString })}
                 disabledDate={(current) => current && current > moment().endOf('day')}
               />
             </Form.Item>
@@ -197,14 +212,11 @@ function ScheduleAppointment() {
               rules={[{ required: true, message: 'Por favor, selecciona un tipo de servicio' }]}
             >
               <Select onChange={(value) => setFormData({ ...formData, serviceType: value })}>
-                <Select.Option value='eyeExam'>Examen de la Vista</Select.Option>
-                <Select.Option value='fundusExam'>Examen de Fondo de Ojo</Select.Option>
-                <Select.Option value='refraction'>Refracción</Select.Option>
-                <Select.Option value='pressureControl'>Control de Presión Ocular</Select.Option>
-                <Select.Option value='contactLens'>Consulta para Lentes de Contacto</Select.Option>
-                <Select.Option value='refractiveSurgery'>Consulta para Cirugía Refractiva</Select.Option>
-                <Select.Option value='cataractAssessment'>Evaluación de Cataratas</Select.Option>
-                <Select.Option value='postOpFollowUp'>Consulta de Seguimiento Postoperatorio</Select.Option>
+                {services.map((service) => (
+                  <Select.Option key={service.serviceID} value={service.serviceType}>
+                    {service.serviceType}
+                  </Select.Option>
+                ))}
               </Select>
             </Form.Item>
             <Form.Item
@@ -266,19 +278,14 @@ function ScheduleAppointment() {
             </Button>
             <Button
               onClick={handleCancel}
-              className='ml-4'
+              className='ml-2'
             >
               Cancelar
             </Button>
           </div>
         )}
       </div>
-      <div className='map-container'>
-        <Map
-          center={LOCATION}
-          zoom={16}
-        />
-      </div>
+      <Map center={LOCATION} zoom={16} />
     </div>
   );
 }

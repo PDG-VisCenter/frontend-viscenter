@@ -44,6 +44,10 @@ function ScheduledAppointments() {
     router.push('/calendario-citas');
   };
 
+  const handleConsultAppointmentDay = () => {
+    router.push('/agendar-cita');
+  };
+
   const filteredAppointments = appointments.filter(appointment => {
     const appointmentDate = new Date(appointment.appointmentDate).toLocaleDateString('en-CA');
     return appointmentDate === currentDate;
@@ -73,7 +77,7 @@ function ScheduledAppointments() {
                         <Button type="primary" onClick={() => handleEdit(appointment.appointmentID)}>Editar</Button>,
                       ]}
                     >
-                      <Paragraph>Descripción: {appointment.description}</Paragraph>
+                      <Paragraph>Descripción: {appointment.serviceType}</Paragraph>
                     </Card>
                   </List.Item>
                 );
@@ -84,6 +88,9 @@ function ScheduledAppointments() {
               <p>No hay citas agendadas desde citas del Día.</p>
               <p>
                 Consulta el <Button type="link" onClick={handleConsultCalendar}>calendario de citas</Button> para ver las citas hechas desde el calendario.
+              </p>
+              <p>
+                O crea una cita del día en <Button type="link" onClick={handleConsultAppointmentDay}>agendar citas</Button> para agendar una nueva cita.
               </p>
             </>
           )

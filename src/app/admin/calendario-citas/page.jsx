@@ -12,6 +12,7 @@ const { Title } = Typography;
 
 function Appointments() {
   const [appointments, setAppointments] = useState([]);
+  const [schedules, setSchedules] = useState([]);
   const [selectedDate, setSelectedDate] = useState(null);
   const [showModal, setShowModal] = useState(false);
   const [cancelReason, setCancelReason] = useState('');
@@ -22,20 +23,6 @@ function Appointments() {
     token: { colorBgContainer, borderRadiusLG },
   } = theme.useToken();
 
-  const schedules = [
-    { id: 11, time: '20:00:00 - 21:00:00' },
-    { id: 10, time: '16:00:00 - 17:00:00' },
-    { id: 9, time: '15:00:00 - 16:00:00' },
-    { id: 8, time: '14:00:00 - 15:00:00' },
-    { id: 7, time: '13:00:00 - 14:00:00' },
-    { id: 6, time: '12:00:00 - 13:00:00' },
-    { id: 5, time: '11:00:00 - 12:00:00' },
-    { id: 4, time: '10:00:00 - 11:00:00' },
-    { id: 3, time: '09:00:00 - 10:00:00' },
-    { id: 2, time: '08:00:00 - 09:00:00' },
-    { id: 1, time: '07:00:00 - 08:00:00' },
-  ];
-
   useEffect(() => {
     axios.get('http://localhost:5281/api/ExtendedAppointment')
       .then(response => {
@@ -43,6 +30,16 @@ function Appointments() {
         setAppointments(appointmentsData);
       })
       .catch(error => console.error('Error fetching appointments:', error));
+
+    axios.get('http://localhost:5281/api/ExtendedAppointment/schedules')
+      .then(response => {
+        const schedulesData = response.data.map(schedule => ({
+          id: schedule.scheduleID,
+          time: `${schedule.startTime} - ${schedule.endTime}`,
+        }));
+        setSchedules(schedulesData);
+      })
+      .catch(error => console.error('Error fetching schedules:', error));
   }, []);
 
   const handleDateChange = (date) => {

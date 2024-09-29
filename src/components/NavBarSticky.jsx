@@ -90,7 +90,7 @@ function NavBarSticky() {
           Accesorios
         </Link>
         <Link
-          href='/reserva-cita'
+          href='/pagina-citas'
           className='nav__link'
         >
           Reserva de citas
@@ -163,7 +163,7 @@ function NavBarSticky() {
                 Accesorios
               </Link>
               <Link
-                href='/reserva-cita'
+                href='/pagina-citas'
                 className='nav-menu__link'
               >
                 Reserva de citas

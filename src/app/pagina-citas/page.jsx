@@ -8,7 +8,6 @@ import Image from 'next/image';
 import schedule from '../../assets/img/citas/cat-leaping.jpg';
 import appointments from '../../assets/img/citas/cat-leaping.jpg';
 import calendar from '../../assets/img/citas/cat-leaping.jpg';
-import glasses from '../../assets/img/citas/cat-leaping.jpg';
 
 const { Title, Text } = Typography;
 
@@ -24,7 +23,6 @@ function ReservaCita() {
       </Text>
       
       <Row gutter={[24, 24]} justify="center">
-        {/* Tarjeta Agendar Cita */}
         <Col span={24} md={12} lg={8}>
           <Card
             hoverable
@@ -51,7 +49,6 @@ function ReservaCita() {
           </Card>
         </Col>
 
-        {/* Tarjeta Citas Agendadas */}
         <Col span={24} md={12} lg={8}>
           <Card
             hoverable
@@ -78,7 +75,6 @@ function ReservaCita() {
           </Card>
         </Col>
 
-        {/* Tarjeta Calendario de Citas */}
         <Col span={24} md={12} lg={8}>
           <Card
             hoverable
@@ -101,33 +97,6 @@ function ReservaCita() {
             <Divider />
             <Link href="/calendario-citas">
               <Button type="primary" size="large" block icon={<CalendarOutlined />}>Ver Calendario</Button>
-            </Link>
-          </Card>
-        </Col>
-
-        {/* Tarjeta Recomendaciones de Marcos */}
-        <Col span={24} md={12} lg={8}>
-          <Card
-            hoverable
-            style={{ textAlign: 'center', borderRadius: '12px', padding: '20px' }}
-            cover={
-              <Image
-                alt="Recomendaciones de Marcos"
-                src={glasses}
-                width={400}
-                height={200}
-                style={{ objectFit: 'cover' }}
-              />
-            }
-          >
-            <EyeOutlined style={{ fontSize: '36px', color: '#1890ff' }} />
-            <Title level={3} style={{ marginTop: '15px' }}>Recomendaciones de Marcos</Title>
-            <Text style={{ fontSize: '16px' }}>
-              Obtén recomendaciones personalizadas para elegir el marco perfecto según tu rostro.
-            </Text>
-            <Divider />
-            <Link href="/recomendacion-marcos">
-              <Button type="primary" size="large" block icon={<EyeOutlined />}>Ver Recomendaciones</Button>
             </Link>
           </Card>
         </Col>
