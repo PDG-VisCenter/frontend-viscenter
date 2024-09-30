@@ -1,0 +1,36 @@
+name: Frontend CI/CD
+
+on:
+  pull_request:
+    types:
+      - opened
+      - edited
+      - synchronize
+      - reopened
+  workflow_call:
+
+jobs:
+  test:
+    name: Test application
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: "☁️ checkout repository"
+        uses: actions/checkout@v2
+
+      - name: "🔧 setup node"
+        uses: actions/setup-node@v3
+        with:
+          node-version: 20.x
+
+      - name: "🔧 install npm@latest"
+        run: npm i -g npm@latest
+
+      - name: "📦 install dependencies"
+        run: npm install
+
+      - name: "🔍 run tests"
+        run: npm run test
+
+      - name: "🔍 lint code"
+        run: npm run lint
