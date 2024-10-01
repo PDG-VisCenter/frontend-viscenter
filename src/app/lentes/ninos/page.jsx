@@ -1,13 +1,6 @@
 'use client';
 
-import {
-  brands,
-  frameColors,
-  frameMaterial,
-  frameShape,
-  gender,
-  sortByElements,
-} from '@/data/searchFilters';
+import { brands, frameColors, frameMaterial, frameShape, gender, sortByElements } from '@/data/searchFilters';
 import { Button, Checkbox, Collapse, Dropdown, Input, Menu, Pagination } from 'antd';
 import Layout, { Content } from 'antd/es/layout/layout';
 import { DownOutlined } from '@ant-design/icons';

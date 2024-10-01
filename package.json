@@ -2,13 +2,12 @@
   "name": "frontend-viscenter",
   "version": "0.1.0",
   "private": true,
-  "type": "module",
   "scripts": {
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
     "lint": "eslint .",
-    "lint:fix": "eslint --fix",
+    "lint:fix": "eslint --fix --ext .js,.jsx .",
     "format": "prettier --write './**/*.{js,jsx,ts,tsx,css,md,json}' --config ./.prettierrc",
     "prepare": "husky",
     "test": "jest"
