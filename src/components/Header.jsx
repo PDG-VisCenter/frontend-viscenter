@@ -1,7 +1,7 @@
 'use client';
 
 import { SearchOutlined, ShoppingCartOutlined, UserOutlined } from '@ant-design/icons';
-import { useSession, signIn } from 'next-auth/react';
+import { signIn, useSession } from 'next-auth/react';
 import { Button } from 'antd';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -12,7 +12,7 @@ import { useInView } from 'react-intersection-observer';
 
 function Header() {
   const { data: session, status } = useSession();
-  //const [cartItems] = useContext(CartContext);
+  // const [cartItems] = useContext(CartContext);
 
   const [ref, inView] = useInView({
     threshold: 0,

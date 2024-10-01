@@ -1,7 +1,5 @@
 function SunglassesKids() {
-  return (
-    <div>SunglassesKids</div>
-  )
+  return <div>SunglassesKids</div>;
 }
 
 export default SunglassesKids;

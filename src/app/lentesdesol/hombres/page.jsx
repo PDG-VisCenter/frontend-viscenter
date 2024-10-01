@@ -1,7 +1,5 @@
 function SunglassesMen() {
-  return (
-    <div>SunglassesMen</div>
-  )
+  return <div>SunglassesMen</div>;
 }
 
 export default SunglassesMen;
