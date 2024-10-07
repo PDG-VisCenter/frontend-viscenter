@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useRouter, useParams } from 'next/navigation';
-import { Button, Form, Input, Select, DatePicker, Alert, Typography, Modal, message } from 'antd';
+import { Button, Form, Input, Select, DatePicker, Alert, Typography, Modal, message, ConfigProvider } from 'antd';
 import moment from 'moment';
 import Map from '../../../components/Map';
 
@@ -169,7 +169,18 @@ function EditAppointment() {
   };
 
   return (
-    <div className='min-h-screen p-6 flex items-center justify-center'>
+    <ConfigProvider
+      theme={{
+        token: {
+          colorPrimary: '#fe0034',
+          colorBgSolidHover: '#c8306c',
+          colorText: '#000',
+          colorTextSecondary: '#555',
+          borderRadius: 4,
+        },
+      }}
+    >
+    <div style={{backgroundColor: '#f0f2f5', padding:'20px'}} className='min-h-screen p-6 flex items-center justify-center'>
       <div className='bg-white p-8 rounded-lg shadow-lg w-full max-w-md'>
         {error && (
           <Alert
@@ -282,6 +293,7 @@ function EditAppointment() {
             <Button
               type='primary'
               htmlType='submit'
+              style={{margin: '10px'}}
             >
               Actualizar Cita
             </Button>
@@ -317,6 +329,7 @@ function EditAppointment() {
         </div>
       </div>
     </div>
+    </ConfigProvider>
   );
 }
 

@@ -98,8 +98,8 @@ function Appointments() {
       },
     },
     {
-      title: 'Descripción',
-      dataIndex: 'description',
+      title: 'Sintomas',
+      dataIndex: 'symptoms',
     },
     {
       title: 'Acciones',

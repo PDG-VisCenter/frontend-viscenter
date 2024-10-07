@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useRouter } from 'next/navigation';
-import { Button, Form, Input, Select, DatePicker, Alert, Typography, Steps } from 'antd';
+import { Button, Form, Input, Select, DatePicker, Alert, Typography, Steps, ConfigProvider } from 'antd';
 import moment from 'moment';
 import Map from '../components/Map';
 
@@ -159,7 +159,18 @@ function ScheduleAppointment() {
   };
 
   return (
-    <div className='p-6 bg-gray-100 min-h-screen flex items-center justify-center'>
+    <ConfigProvider
+      theme={{
+        token: {
+          colorPrimary: '#fe0034',
+          colorBgSolidHover: '#c8306c',
+          colorText: '#000',
+          colorTextSecondary: '#555',
+          borderRadius: 4,
+        },
+      }}
+    >
+    <div style={{backgroundColor: '#f0f2f5', padding:'20px'}}>
       <div className='bg-white p-8 rounded-lg shadow-lg w-full max-w-md'>
         {error && (
           <Alert
@@ -273,12 +284,13 @@ function ScheduleAppointment() {
             <Button
               type='primary'
               onClick={handleSubmit}
+              style={{margin: '10px'}}
             >
               Confirmar
             </Button>
             <Button
+              type='primary'
               onClick={handleCancel}
-              className='ml-2'
             >
               Cancelar
             </Button>
@@ -287,6 +299,7 @@ function ScheduleAppointment() {
       </div>
       <Map center={LOCATION} zoom={16} />
     </div>
+    </ConfigProvider>
   );
 }
 

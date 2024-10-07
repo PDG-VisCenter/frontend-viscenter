@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import axios from 'axios';
 import moment from 'moment';
-import { Calendar as AntCalendar, Modal, Form, Input, DatePicker, Select, Button, message } from 'antd';
+import { Calendar as AntCalendar, Modal, Form, Input, DatePicker, Select, Button, message, ConfigProvider } from 'antd';
 
 const ExtendedAppointment = () => {
   const [appointments, setAppointments] = useState([]);
@@ -64,7 +64,7 @@ const ExtendedAppointment = () => {
     try {
       const response = await axios.get('http://localhost:5281/api/AppointmentService');
       const formattedServices = response.data.map(service => ({
-        value: service.serviceID.toString(),
+        value: service.serviceType,
         label: service.serviceType,
       }));
       setServiceTypes(formattedServices);
@@ -181,8 +181,6 @@ const ExtendedAppointment = () => {
         await axios.patch(`http://localhost:5281/api/Availability/${formData.scheduleID}`, {
           isAvailable: true,
         });
-      } else {
-        console.log("drogas");
       }
 
       fetchAppointments();
@@ -242,8 +240,19 @@ const ExtendedAppointment = () => {
   };
 
   return (
-    <>
-    <h1 style={{ fontSize: '24px', marginBottom: '24px', color: '#1890ff' }}>Agendar y Gestionar Citas</h1>
+    <ConfigProvider
+      theme={{
+        token: {
+          colorPrimary: '#fe0034',
+          colorBgSolidHover: '#c8306c',
+          colorText: '#000',
+          colorTextSecondary: '#555',
+          borderRadius: 4,
+        },
+      }}
+    >
+    <div style={{backgroundColor: '#f0f2f5', padding:'5px'}}>
+    <h1 style={{ fontSize: '24px', marginBottom: '24px', color: '#fe0034' }}>Agendar y Gestionar Citas</h1>
       <AntCalendar cellRender={dateCellRender} onSelect={handleDateClick} />
       <Modal
         title="Cita del Día"
@@ -328,7 +337,8 @@ const ExtendedAppointment = () => {
             )}
         </Form>
       </Modal>
-    </>
+    </div>
+    </ConfigProvider>
   );
 };
 

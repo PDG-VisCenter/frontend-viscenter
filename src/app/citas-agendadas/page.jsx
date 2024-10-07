@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useRouter } from 'next/navigation';
-import { List, Card, Button, Typography, Spin } from 'antd';
+import { List, Card, Button, Typography, Spin, ConfigProvider } from 'antd';
 
 const { Title, Paragraph } = Typography;
 
@@ -54,7 +54,18 @@ function ScheduledAppointments() {
   });
 
   return (
-    <div className="min-h-screen bg-gray-100 p-6">
+    <ConfigProvider
+      theme={{
+        token: {
+          colorPrimary: '#fe0034',
+          colorBgSolidHover: '#c8306c',
+          colorText: '#000',
+          colorTextSecondary: '#555',
+          borderRadius: 4,
+        },
+      }}
+    >
+    <div style={{backgroundColor: '#f0f2f5', padding:'20px'}} className="min-h-screen bg-gray-100 p-6">
       <Card title={<Title level={2} className="text-red-600">Citas Agendadas</Title>} bordered={false}>
         {loading ? (
           <Spin tip="Cargando citas...">
@@ -97,6 +108,7 @@ function ScheduledAppointments() {
         )}
       </Card>
     </div>
+    </ConfigProvider>
   );
 }
 

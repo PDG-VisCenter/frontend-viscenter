@@ -3,6 +3,7 @@ import Banner from '../components/Banner';
 import bannerData from '../../data/homeBannerData';
 import BlogContent from '../components/BlogContent';
 import blogData from '../../data/homePageBlogData';
+import serviceData from '@/data/homePageServicesData';
 // import FeaturedProducts from '../components/FeaturedProducts';
 import Footer from '../../components/Footer';
 import Header from '../../components/Header';
@@ -28,6 +29,12 @@ function HomeClient() {
         description={bannerData[1].description}
         link={bannerData[0].link}
       />
+
+      <BlogContent
+        content={serviceData}
+        headerTitle='Servicios Oftalmológicos'
+      />
+
       {/* <FeaturedProducts /> */}
       <BlogContent
         content={blogData}

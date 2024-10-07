@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useRef, useEffect, useState } from "react";
-import { Modal, Button, Upload, Spin, Typography, Row, Col, Card } from "antd";
+import { Modal, Button, Upload, Spin, Typography, Row, Col, Card, ConfigProvider } from "antd";
 import { UploadOutlined, CameraOutlined, FileImageOutlined, RedoOutlined } from "@ant-design/icons";
 import { FaceMesh } from "@mediapipe/face_mesh";
 import { FaceLandmarker, DrawingUtils } from "@mediapipe/tasks-vision";
@@ -160,7 +160,18 @@ function FaceLandmarkerComponent() {
   };
 
   return (
-    <>
+    <ConfigProvider
+      theme={{
+        token: {
+          colorPrimary: '#fe0034',
+          colorBgSolidHover: '#c8306c',
+          colorText: '#000',
+          colorTextSecondary: '#555',
+          borderRadius: 4,
+        },
+      }}
+    >
+    <div style={{backgroundColor: '#f0f2f5', padding:'20px'}}>
       <Modal
         title="Bienvenido"
         open={isModalVisible}
@@ -177,7 +188,7 @@ function FaceLandmarkerComponent() {
       </Modal>
 
       <div className="site-layout-content" style={{ padding: '24px', minHeight: 'calc(100vh - 64px)' }}>
-        <Title level={2} style={{ textAlign: 'center', color: '#FF4D4F' }}>Recomendación de Marcos de Lentes</Title>
+        <Title level={2} style={{ textAlign: 'center', color: '#fe0034' }}>Recomendación de Marcos de Lentes</Title>
         <Row gutter={16}>
           <Col span={24} md={12}>
             <Card>
@@ -278,7 +289,8 @@ function FaceLandmarkerComponent() {
           </Col>
         </Row>
       </div>
-    </>
+    </div>
+    </ConfigProvider>
   );
 }
 
