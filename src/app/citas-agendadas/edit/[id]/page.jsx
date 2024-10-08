@@ -10,8 +10,6 @@ import Map from '../../../components/Map';
 const { Title, Paragraph, Text } = Typography;
 const { Option } = Select;
 
-const LOCATION = { lat: -17.38907923125398, lng: -66.15522088392129 };
-
 function EditAppointment() {
   const router = useRouter();
   const { id } = useParams();
@@ -28,6 +26,7 @@ function EditAppointment() {
     status: 'Scheduled',
     description: '',
   });
+  const [LOCATION, setLOCATION] = useState({ lat: 0, lng: 0 });
   const [availabilities, setAvailabilities] = useState([]);
   const [services, setServices] = useState([]);
   const [selectedAvailability, setSelectedAvailability] = useState(null);
@@ -72,6 +71,14 @@ function EditAppointment() {
           setServices(response.data);
         })
         .catch((error) => console.error('Error fetching services:', error));
+
+        axios
+        .get('http://localhost:5281/api/LocationCenter')
+        .then((response) => {
+          const location = response.data[0];
+          setLOCATION({ lat: location.latitude, lng: location.longitude });
+        })
+        .catch((error) => console.error(error));
     }
   }, [id]);
 
@@ -322,10 +329,12 @@ function EditAppointment() {
 
         <div className='mt-6'>
           <Title level={4}>Ubicación del Centro de Atención</Title>
+          {LOCATION.lat !== 0 && LOCATION.lng !== 0 && (
           <Map
             center={LOCATION}
             zoom={16}
           />
+        )}
         </div>
       </div>
     </div>

@@ -7,6 +7,7 @@ import HeaderSeller from '../components/HeaderSeller';
 import SiderMenuSeller from '../components/SiderMenuSeller';
 import axios from 'axios';
 import moment from 'moment';
+import UpdateMap from '@/app/components/UpdateMap';
 
 const { Option } = Select;
 
@@ -27,7 +28,11 @@ function Appointments() {
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [editingService, setEditingService] = useState(null);
 
+  const [location, setLocation] = useState({ lat: 0, lng: 0 });
+  const [markerPosition, setMarkerPosition] = useState(location);
+
   useEffect(() => {
+    fetchLocation();
     fetchAvailabilities();
     fetchAppointments();
     fetchServices();
@@ -45,7 +50,7 @@ function Appointments() {
   const fetchAppointments = async () => {
     try {
       const { data } = await axios.get('http://localhost:5281/api/Appointment');
-  
+
       if (data && data.length > 0) {
         setAppointments(data);
       } else {
@@ -58,7 +63,7 @@ function Appointments() {
         console.error('Error fetching appointments:', error);
       }
     }
-  };  
+  };
 
   const fetchServices = async () => {
     try {
@@ -71,6 +76,35 @@ function Appointments() {
 
   const hasAppointments = (availabilityID) => {
     return appointments.some((appt) => appt.availabilityID === availabilityID);
+  };
+
+  const fetchLocation = async () => {
+    try {
+      const { data } = await axios.get('http://localhost:5281/api/LocationCenter');
+      const location = data[0];
+      setLocation({ lat: location.latitude, lng: location.longitude });
+      setMarkerPosition({ lat: location.latitude, lng: location.longitude });
+    } catch (error) {
+      message.error('Error fetching location.');
+    }
+  };
+
+  const handleUpdateLocation = async () => {
+    try {
+      await axios.put('http://localhost:5281/api/LocationCenter', {
+        locationID: 1,
+        latitude: markerPosition.lat,
+        longitude: markerPosition.lng,
+      });
+      message.success('Localización actualizada con éxito.');
+    } catch (error) {
+      message.error('Error al actualizar la localización.');
+    }
+  };
+
+  const onMapClick = (e) => {
+    const { lat, lng } = e.latlng;
+    setMarkerPosition({ lat, lng });
   };
 
   const handleUpdateAvailability = async () => {
@@ -141,7 +175,6 @@ function Appointments() {
     }
   };
 
-  // Edit service
   const handleEditService = (service) => {
     setEditingService(service);
     setIsModalVisible(true);
@@ -177,7 +210,7 @@ function Appointments() {
     <Layout style={{ minHeight: '100vh' }}>
       <HeaderSeller />
       <Layout>
-        <SiderMenuSeller selectedItem="9" />
+        <SiderMenuSeller selectedItem='9' />
         <Content style={{ margin: '8px 16px' }}>
           <div
             style={{
@@ -187,14 +220,19 @@ function Appointments() {
               borderRadius: borderRadiusLG,
             }}
           >
-            <h2 style={{ marginBottom:8, fontWeight: 'bold', fontSize: '24px' }}>Configurar los horarios del centro</h2>
+            <h2 style={{ marginBottom: 8, fontWeight: 'bold', fontSize: '24px' }}>
+              Configurar los horarios del centro
+            </h2>
             <Select
               style={{ width: '100%' }}
-              placeholder="Seleccione un horario para actualizar"
+              placeholder='Seleccione un horario para actualizar'
               onChange={(id) => setSelectedAvailability(availabilities.find((a) => a.availabilityID === id))}
             >
               {availabilities.map((slot) => (
-                <Option key={slot.availabilityID} value={slot.availabilityID}>
+                <Option
+                  key={slot.availabilityID}
+                  value={slot.availabilityID}
+                >
                   {`${slot.startTime} - ${slot.endTime}`}
                 </Option>
               ))}
@@ -202,17 +240,22 @@ function Appointments() {
 
             <TimePicker.RangePicker
               style={{ width: '100%', marginTop: 16 }}
-              format="HH:mm"
+              format='HH:mm'
               onChange={(times) => {
                 setStartTime(times[0]);
                 setEndTime(times[1]);
               }}
             />
-            <Button type="primary" block style={{ marginTop: 16 }} onClick={handleUpdateAvailability}>
+            <Button
+              type='primary'
+              block
+              style={{ marginTop: 16 }}
+              onClick={handleUpdateAvailability}
+            >
               Actualizar Disponibilidad
             </Button>
 
-            <h2 style={{ marginTop:16, fontWeight: 'bold', fontSize: '24px' }}>Disponibilidad del Día de Hoy</h2>
+            <h2 style={{ marginTop: 16, fontWeight: 'bold', fontSize: '24px' }}>Disponibilidad del Día de Hoy</h2>
             <List
               dataSource={availabilities}
               renderItem={(availability) => (
@@ -221,20 +264,26 @@ function Appointments() {
                   <Switch
                     checked={availability.isAvailable}
                     onChange={() => handleToggleAvailability(availability)}
-                    disabled={moment(availability.startTime, 'HH:mm:ss').isBefore(moment()) || hasAppointments(availability.availabilityID)}
+                    disabled={
+                      moment(availability.startTime, 'HH:mm:ss').isBefore(moment()) ||
+                      hasAppointments(availability.availabilityID)
+                    }
                   />
                 </List.Item>
               )}
             />
 
-            <h2 style={{ marginTop:16, fontWeight: 'bold', fontSize: '24px' }}>Servicios del Centro</h2>
+            <h2 style={{ marginTop: 16, fontWeight: 'bold', fontSize: '24px' }}>Servicios del Centro</h2>
             <List
               dataSource={services}
               renderItem={(service) => (
                 <List.Item
                   actions={[
                     <Button onClick={() => handleEditService(service)}>Editar</Button>,
-                    <Button danger onClick={() => handleDeleteService(service.serviceID)}>
+                    <Button
+                      danger
+                      onClick={() => handleDeleteService(service.serviceID)}
+                    >
                       Eliminar
                     </Button>,
                   ]}
@@ -245,17 +294,22 @@ function Appointments() {
             />
 
             <Input
-              placeholder="Nuevo tipo de servicio"
+              placeholder='Nuevo tipo de servicio'
               value={newServiceType}
               onChange={(e) => setNewServiceType(e.target.value)}
               style={{ marginTop: 16 }}
             />
-            <Button type="primary" block style={{ marginTop: 8 }} onClick={handleAddService}>
+            <Button
+              type='primary'
+              block
+              style={{ marginTop: 8 }}
+              onClick={handleAddService}
+            >
               Añadir Servicio
             </Button>
 
             <Modal
-              title="Editar Servicio"
+              title='Editar Servicio'
               open={isModalVisible}
               onOk={handleUpdateService}
               onCancel={() => setIsModalVisible(false)}
@@ -265,6 +319,29 @@ function Appointments() {
                 onChange={(e) => setEditingService({ ...editingService, serviceType: e.target.value })}
               />
             </Modal>
+
+            <h2 style={{ marginTop: 16, fontWeight: 'bold', fontSize: '24px' }}>Actualizar Ubicación del Centro</h2>
+            <h2 style={{ marginTop: 8, marginBottom: 8, fontSize: '16px' }}>Localiza una nueva ubicación en el mapa y selecciónala con doble click</h2>
+
+            {location.lat !== 0 && location.lng !== 0 && (
+              <UpdateMap
+                center={markerPosition}
+                zoom={16}
+                markerPosition={markerPosition}
+                setMarkerPosition={setMarkerPosition}
+              />
+            )}
+            <p style={{ marginTop: 8 }}>
+              Latitud: {markerPosition.lat.toFixed(6)}, Longitud: {markerPosition.lng.toFixed(6)}
+            </p>
+            <Button
+              type='primary'
+              block
+              style={{ marginTop: 16 }}
+              onClick={handleUpdateLocation}
+            >
+              Actualizar Localización
+            </Button>
           </div>
         </Content>
       </Layout>

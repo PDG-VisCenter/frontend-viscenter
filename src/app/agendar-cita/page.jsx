@@ -10,8 +10,6 @@ import Map from '../components/Map';
 const { Title, Text } = Typography;
 const { Step } = Steps;
 
-const LOCATION = { lat: -17.38907923125398, lng: -66.15522088392129 };
-
 function ScheduleAppointment() {
   const router = useRouter();
   const [step, setStep] = useState(1);
@@ -26,6 +24,7 @@ function ScheduleAppointment() {
     status: 'Scheduled',
     description: '',
   });
+  const [LOCATION, setLOCATION] = useState({ lat: 0, lng: 0 });
   const [availabilities, setAvailabilities] = useState([]);
   const [services, setServices] = useState([]);
   const [selectedAvailability, setSelectedAvailability] = useState(null);
@@ -37,10 +36,18 @@ function ScheduleAppointment() {
       .get('http://localhost:5281/api/Availability')
       .then((response) => setAvailabilities(response.data))
       .catch((error) => console.error(error));
-      
+
     axios
       .get('http://localhost:5281/api/AppointmentService')
       .then((response) => setServices(response.data))
+      .catch((error) => console.error(error));
+
+    axios
+      .get('http://localhost:5281/api/LocationCenter')
+      .then((response) => {
+        const location = response.data[0];
+        setLOCATION({ lat: location.latitude, lng: location.longitude });
+      })
       .catch((error) => console.error(error));
   }, []);
 
@@ -170,135 +177,143 @@ function ScheduleAppointment() {
         },
       }}
     >
-    <div style={{backgroundColor: '#f0f2f5', padding:'20px'}}>
-      <div className='bg-white p-8 rounded-lg shadow-lg w-full max-w-md'>
-        {error && (
-          <Alert
-            message={error}
-            type='error'
-            showIcon
-            className='mb-4'
-          />
-        )}
-        <Steps
-          current={step - 1}
-          className='mb-6'
-        >
-          <Step title='Información del Paciente' />
-          <Step title='Confirmación' />
-        </Steps>
-        {step === 1 ? (
-          <Form
-            onFinish={handleSubmit}
-            layout='vertical'
+      <div style={{ backgroundColor: '#f0f2f5', padding: '20px' }}>
+        <div className='bg-white p-8 rounded-lg shadow-lg w-full max-w-md'>
+          {error && (
+            <Alert
+              message={error}
+              type='error'
+              showIcon
+              className='mb-4'
+            />
+          )}
+          <Steps
+            current={step - 1}
+            className='mb-6'
           >
-            <Form.Item
-              label='Nombre'
-              name='name'
-              rules={[{ required: true, message: 'Por favor, ingresa tu nombre' }]}
+            <Step title='Información del Paciente' />
+            <Step title='Confirmación' />
+          </Steps>
+          {step === 1 ? (
+            <Form
+              onFinish={handleSubmit}
+              layout='vertical'
             >
-              <Input onChange={(e) => setFormData({ ...formData, patientName: e.target.value })} />
-            </Form.Item>
-            <Form.Item
-              label='Fecha de Nacimiento'
-              name='birthDate'
-              rules={[{ required: true, message: 'Por favor, selecciona tu fecha de nacimiento' }]}
-            >
-              <DatePicker
-                format='YYYY-MM-DD'
-                onChange={(date, dateString) => setFormData({ ...formData, patientBirthday: dateString })}
-                disabledDate={(current) => current && current > moment().endOf('day')}
-              />
-            </Form.Item>
-            <Form.Item
-              label='Síntomas'
-              name='symptoms'
-              rules={[{ required: true, message: 'Por favor, describe tus síntomas' }]}
-            >
-              <Input.TextArea onChange={(e) => setFormData({ ...formData, symptoms: e.target.value })} />
-            </Form.Item>
-            <Form.Item
-              label='Tipo de Servicio'
-              name='serviceType'
-              rules={[{ required: true, message: 'Por favor, selecciona un tipo de servicio' }]}
-            >
-              <Select onChange={(value) => setFormData({ ...formData, serviceType: value })}>
-                {services.map((service) => (
-                  <Select.Option key={service.serviceID} value={service.serviceType}>
-                    {service.serviceType}
-                  </Select.Option>
-                ))}
-              </Select>
-            </Form.Item>
-            <Form.Item
-              label='Horario Disponible'
-              name='availabilityID'
-              rules={[{ required: true, message: 'Por favor, selecciona un horario disponible' }]}
-            >
-              <Select onChange={handleAvailabilityChange}>
-                <Select.Option value=''>Selecciona un horario</Select.Option>
-                {availableTimes.map((availability) => (
-                  <Select.Option
-                    key={availability.availabilityID}
-                    value={availability.availabilityID}
-                    disabled={isTimeInThePast(availability.startTime)}
-                  >
-                    {`${availability.startTime} - ${availability.endTime}`}
-                  </Select.Option>
-                ))}
-              </Select>
-            </Form.Item>
-            <Form.Item>
+              <Form.Item
+                label='Nombre'
+                name='name'
+                rules={[{ required: true, message: 'Por favor, ingresa tu nombre' }]}
+              >
+                <Input onChange={(e) => setFormData({ ...formData, patientName: e.target.value })} />
+              </Form.Item>
+              <Form.Item
+                label='Fecha de Nacimiento'
+                name='birthDate'
+                rules={[{ required: true, message: 'Por favor, selecciona tu fecha de nacimiento' }]}
+              >
+                <DatePicker
+                  format='YYYY-MM-DD'
+                  onChange={(date, dateString) => setFormData({ ...formData, patientBirthday: dateString })}
+                  disabledDate={(current) => current && current > moment().endOf('day')}
+                />
+              </Form.Item>
+              <Form.Item
+                label='Síntomas'
+                name='symptoms'
+                rules={[{ required: true, message: 'Por favor, describe tus síntomas' }]}
+              >
+                <Input.TextArea onChange={(e) => setFormData({ ...formData, symptoms: e.target.value })} />
+              </Form.Item>
+              <Form.Item
+                label='Tipo de Servicio'
+                name='serviceType'
+                rules={[{ required: true, message: 'Por favor, selecciona un tipo de servicio' }]}
+              >
+                <Select onChange={(value) => setFormData({ ...formData, serviceType: value })}>
+                  {services.map((service) => (
+                    <Select.Option
+                      key={service.serviceID}
+                      value={service.serviceType}
+                    >
+                      {service.serviceType}
+                    </Select.Option>
+                  ))}
+                </Select>
+              </Form.Item>
+              <Form.Item
+                label='Horario Disponible'
+                name='availabilityID'
+                rules={[{ required: true, message: 'Por favor, selecciona un horario disponible' }]}
+              >
+                <Select onChange={handleAvailabilityChange}>
+                  <Select.Option value=''>Selecciona un horario</Select.Option>
+                  {availableTimes.map((availability) => (
+                    <Select.Option
+                      key={availability.availabilityID}
+                      value={availability.availabilityID}
+                      disabled={isTimeInThePast(availability.startTime)}
+                    >
+                      {`${availability.startTime} - ${availability.endTime}`}
+                    </Select.Option>
+                  ))}
+                </Select>
+              </Form.Item>
+              <Form.Item>
+                <Button
+                  type='primary'
+                  htmlType='submit'
+                >
+                  Siguiente
+                </Button>
+              </Form.Item>
+            </Form>
+          ) : (
+            <div>
+              <Title
+                level={2}
+                className='text-red-600'
+              >
+                Confirmación
+              </Title>
+              <Text>
+                <strong>Razón de la Visita:</strong> {formData.symptoms}
+              </Text>
+              <br />
+              <Text>
+                <strong>Fecha de Nacimiento:</strong> {formData.birthDate}
+              </Text>
+              <br />
+              <Text>
+                <strong>Tipo de Servicio:</strong> {formData.serviceType}
+              </Text>
+              <br />
+              <Text>
+                <strong>Horario Seleccionado:</strong> {formData.selectedTime}
+              </Text>
+              <br />
               <Button
                 type='primary'
-                htmlType='submit'
+                onClick={handleSubmit}
+                style={{ margin: '10px' }}
               >
-                Siguiente
+                Confirmar
               </Button>
-            </Form.Item>
-          </Form>
-        ) : (
-          <div>
-            <Title
-              level={2}
-              className='text-red-600'
-            >
-              Confirmación
-            </Title>
-            <Text>
-              <strong>Razón de la Visita:</strong> {formData.symptoms}
-            </Text>
-            <br />
-            <Text>
-              <strong>Fecha de Nacimiento:</strong> {formData.birthDate}
-            </Text>
-            <br />
-            <Text>
-              <strong>Tipo de Servicio:</strong> {formData.serviceType}
-            </Text>
-            <br />
-            <Text>
-              <strong>Horario Seleccionado:</strong> {formData.selectedTime}
-            </Text>
-            <br />
-            <Button
-              type='primary'
-              onClick={handleSubmit}
-              style={{margin: '10px'}}
-            >
-              Confirmar
-            </Button>
-            <Button
-              type='primary'
-              onClick={handleCancel}
-            >
-              Cancelar
-            </Button>
-          </div>
+              <Button
+                type='primary'
+                onClick={handleCancel}
+              >
+                Cancelar
+              </Button>
+            </div>
+          )}
+        </div>
+        {LOCATION.lat !== 0 && LOCATION.lng !== 0 && (
+          <Map
+            center={LOCATION}
+            zoom={16}
+          />
         )}
       </div>
-      <Map center={LOCATION} zoom={16} />
-    </div>
     </ConfigProvider>
   );
 }

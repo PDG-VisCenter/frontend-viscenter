@@ -1,13 +1,15 @@
 'use client';
 
-import React, { useRef, useEffect, useState } from "react";
-import { Modal, Button, Upload, Spin, Typography, Row, Col, Card, ConfigProvider } from "antd";
-import { UploadOutlined, CameraOutlined, FileImageOutlined, RedoOutlined } from "@ant-design/icons";
-import { FaceMesh } from "@mediapipe/face_mesh";
-import { FaceLandmarker, DrawingUtils } from "@mediapipe/tasks-vision";
-import * as cam from "@mediapipe/camera_utils";
-import Webcam from "react-webcam";
-import axios from "axios";
+import React, { useRef, useEffect, useState } from 'react';
+import { Modal, Button, Upload, Spin, Typography, Row, Col, Card, ConfigProvider, Pagination, Rate } from 'antd';
+import { UploadOutlined, CameraOutlined, FileImageOutlined, RedoOutlined } from '@ant-design/icons';
+import { FaceMesh } from '@mediapipe/face_mesh';
+import { FaceLandmarker, DrawingUtils } from '@mediapipe/tasks-vision';
+import * as cam from '@mediapipe/camera_utils';
+import Webcam from 'react-webcam';
+import axios from 'axios';
+import Image from 'next/image';
+import marcos from '../../assets/img/citas/marcosLentes.jpg';
 
 const { Title, Paragraph } = Typography;
 
@@ -18,10 +20,46 @@ function FaceLandmarkerComponent() {
   const [uploadedImage, setUploadedImage] = useState(null);
   const [camera, setCamera] = useState(null);
   const [faceMesh, setFaceMesh] = useState(null);
-  const [faceShape, setFaceShape] = useState("");
+  const [faceShape, setFaceShape] = useState('');
   const [loading, setLoading] = useState(false);
   const [isModalVisible, setIsModalVisible] = useState(true);
   const [buttonsDisabled, setButtonsDisabled] = useState(false);
+  const [products, setProducts] = useState([]);
+  const [pagination, setPagination] = useState({ page: 1, size: 5, total: 0 });
+
+  const faceShapeInfo = {
+    Oval: {
+      translation: 'Ovalado',
+      description:
+        'El rostro ovalado tiene proporciones equilibradas, con la frente ligeramente más ancha que la mandíbula.',
+      recommendedFrame: 'rectangular',
+    },
+    Round: {
+      translation: 'Redondo',
+      description: 'El rostro redondo tiene mejillas llenas y una línea de mandíbula suave.',
+      recommendedFrame: 'cuadrado',
+    },
+    Square: {
+      translation: 'Cuadrado',
+      description: 'El rostro cuadrado tiene una mandíbula prominente y frente ancha.',
+      recommendedFrame: 'redondeados',
+    },
+    Heart: {
+      translation: 'Corazón',
+      description: 'El rostro en forma de corazón tiene una frente ancha y una mandíbula estrecha.',
+      recommendedFrame: 'ovalados',
+    },
+    Oblong: {
+      translation: 'Alargado',
+      description: 'El rostro alargado es más largo que ancho, con una barbilla prominente.',
+      recommendedFrame: 'anchos',
+    },
+    Unlabeled: {
+      translation: 'No etiquetado',
+      description: 'No se ha podido determinar un tipo de rostro claro.',
+      recommendedFrame: 'Marcos universales',
+    },
+  };
 
   useEffect(() => {
     const faceMeshInstance = new FaceMesh({
@@ -60,6 +98,24 @@ function FaceLandmarkerComponent() {
     };
   }, [cameraActive]);
 
+  const fetchRecommendedFrames = async (searchTerm) => {
+    try {
+      const response = await axios.get(`http://localhost:5203/api/Product/search-shape`, {
+        params: {
+          searchTerm,
+          page: pagination.page,
+          size: pagination.size,
+        },
+      });
+
+      const { data, totalCount, totalPages } = response.data;
+      setProducts(data);
+      setPagination((prev) => ({ ...prev, total: totalCount, totalPages }));
+    } catch (error) {
+      console.error('Error al obtener productos recomendados:', error.message);
+    }
+  };
+
   function onResults(results) {
     if (webcamRef.current != null) {
       const videoWidth = webcamRef.current.video.videoWidth;
@@ -68,11 +124,11 @@ function FaceLandmarkerComponent() {
       canvasRef.current.width = videoWidth;
       canvasRef.current.height = videoHeight;
     } else {
-      console.log("stoped");
+      console.log('stoped');
     }
 
     const canvasElement = canvasRef.current;
-    const canvasCtx = canvasElement.getContext("2d");
+    const canvasCtx = canvasElement.getContext('2d');
     canvasCtx.save();
     canvasCtx.clearRect(0, 0, canvasElement.width, canvasElement.height);
     canvasCtx.drawImage(results.image, 0, 0, canvasElement.width, canvasElement.height);
@@ -80,11 +136,14 @@ function FaceLandmarkerComponent() {
     if (results.multiFaceLandmarks) {
       const drawingUtils = new DrawingUtils(canvasCtx);
       results.multiFaceLandmarks.forEach((landmarks) => {
-        drawingUtils.drawConnectors(landmarks, FaceLandmarker.FACE_LANDMARKS_TESSELATION, { color: "#FFFFFF", lineWidth: 1 });
-        drawingUtils.drawConnectors(landmarks, FaceLandmarker.FACE_LANDMARKS_RIGHT_EYE, { color: "#FF0000" });
-        drawingUtils.drawConnectors(landmarks, FaceLandmarker.FACE_LANDMARKS_LEFT_EYE, { color: "#FF0000" });
-        drawingUtils.drawConnectors(landmarks, FaceLandmarker.FACE_LANDMARKS_FACE_OVAL, { color: "#FFFFFF" });
-        drawingUtils.drawConnectors(landmarks, FaceLandmarker.FACE_LANDMARKS_LIPS, { color: "#FFFFFF" });
+        drawingUtils.drawConnectors(landmarks, FaceLandmarker.FACE_LANDMARKS_TESSELATION, {
+          color: '#FFFFFF',
+          lineWidth: 1,
+        });
+        drawingUtils.drawConnectors(landmarks, FaceLandmarker.FACE_LANDMARKS_RIGHT_EYE, { color: '#FF0000' });
+        drawingUtils.drawConnectors(landmarks, FaceLandmarker.FACE_LANDMARKS_LEFT_EYE, { color: '#FF0000' });
+        drawingUtils.drawConnectors(landmarks, FaceLandmarker.FACE_LANDMARKS_FACE_OVAL, { color: '#FFFFFF' });
+        drawingUtils.drawConnectors(landmarks, FaceLandmarker.FACE_LANDMARKS_LIPS, { color: '#FFFFFF' });
       });
     }
     canvasCtx.restore();
@@ -118,7 +177,7 @@ function FaceLandmarkerComponent() {
   };
 
   const processImage = (imageSrc) => {
-    const img = new Image();
+    const img = document.createElement('img');
     img.src = imageSrc;
     img.onload = async () => {
       canvasRef.current.width = img.width;
@@ -133,19 +192,27 @@ function FaceLandmarkerComponent() {
   const uploadImage = async (imageSrc) => {
     setLoading(true);
     try {
-      const imageBase64 = imageSrc.split(",")[1];
+      const imageBase64 = imageSrc.split(',')[1];
       const response = await axios({
-        method: "POST",
-        url: "https://classify.roboflow.com/face-shape-d4mv0/1",
-        params: { api_key: "DMcwoln0peywtlKgiHHT" },
+        method: 'POST',
+        url: 'https://classify.roboflow.com/face-shape-d4mv0/1',
+        params: { api_key: 'DMcwoln0peywtlKgiHHT' },
         data: imageBase64,
-        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
       });
 
-      const faceShapeResult = response.data.predictions[0].class;
-      setFaceShape(faceShapeResult);
+      const { class: detectedFaceShape, confidence } = response.data.predictions[0];
+      const faceShapeData = faceShapeInfo[detectedFaceShape] || faceShapeInfo['Unlabeled'];
+      setFaceShape({
+        shape: faceShapeData.translation,
+        description: faceShapeData.description,
+        recommendedFrame: faceShapeData.recommendedFrame,
+        confidence: (confidence * 100).toFixed(2) + '%',
+      });
+
+      fetchRecommendedFrames(faceShapeData.recommendedFrame);
     } catch (error) {
-      console.error("Error al subir la imagen:", error.message);
+      console.error('Error al subir la imagen:', error.message);
     } finally {
       setLoading(false);
     }
@@ -171,41 +238,71 @@ function FaceLandmarkerComponent() {
         },
       }}
     >
-    <div style={{backgroundColor: '#f0f2f5', padding:'20px'}}>
-      <Modal
-        title="Bienvenido"
-        open={isModalVisible}
-        onOk={handleOk}
-        onCancel={handleOk}
-        footer={[
-          <Button key="ok" type="primary" onClick={handleOk}>OK</Button>
-        ]}
-      >
-        <Title level={4}>Herramienta de Recomendación de Marcos de Lentes</Title>
-        <Paragraph>
-          Utilice esta herramienta para escanear su rostro y recibir recomendaciones sobre los marcos de lentes que mejor se adaptan a su tipo de rostro.
-        </Paragraph>
-      </Modal>
+      <div style={{ backgroundColor: '#f0f2f5', padding: '20px' }}>
+        <Modal
+          title='Bienvenido'
+          open={isModalVisible}
+          onOk={handleOk}
+          onCancel={handleOk}
+          footer={[
+            <Button
+              key='ok'
+              type='primary'
+              onClick={handleOk}
+            >
+              OK
+            </Button>,
+          ]}
+        >
+          <Title level={4}>Herramienta de Recomendación de Marcos de Lentes</Title>
+          <Paragraph>
+            Utilice esta herramienta para escanear su rostro y recibir recomendaciones sobre los marcos de lentes que
+            mejor se adaptan a su tipo de rostro. Las recomendaciones son meramente estéticas.
+          </Paragraph>
+        </Modal>
 
-      <div className="site-layout-content" style={{ padding: '24px', minHeight: 'calc(100vh - 64px)' }}>
-        <Title level={2} style={{ textAlign: 'center', color: '#fe0034' }}>Recomendación de Marcos de Lentes</Title>
-        <Row gutter={16}>
-          <Col span={24} md={12}>
-            <Card>
-              {cameraActive && (
-                <div style={{ position: 'relative', width: '100%' }}>
-                  <Webcam
-                    ref={webcamRef}
-                    screenshotFormat="image/jpeg"
-                    style={{
-                      position: 'absolute',
-                      top: 0,
-                      left: 0,
-                      width: '100%',
-                      height: '100%',
-                      borderRadius: '8px',
-                    }}
-                  />
+        <div
+          className='site-layout-content'
+          style={{ padding: '24px', minHeight: 'calc(100vh - 64px)' }}
+        >
+          <Title
+            level={2}
+            style={{ textAlign: 'center', color: '#fe0034' }}
+          >
+            Recomendación de Marcos de Lentes
+          </Title>
+          <Row gutter={16}>
+            <Col
+              span={24}
+              md={12}
+            >
+              <Card>
+                {cameraActive && (
+                  <div style={{ position: 'relative', width: '100%' }}>
+                    <Webcam
+                      ref={webcamRef}
+                      screenshotFormat='image/jpeg'
+                      style={{
+                        position: 'absolute',
+                        top: 0,
+                        left: 0,
+                        width: '100%',
+                        height: '100%',
+                        borderRadius: '8px',
+                      }}
+                    />
+                    <canvas
+                      ref={canvasRef}
+                      style={{
+                        width: '100%',
+                        height: '100%',
+                        borderRadius: '8px',
+                        border: '2px solid red',
+                      }}
+                    />
+                  </div>
+                )}
+                {uploadedImage && (
                   <canvas
                     ref={canvasRef}
                     style={{
@@ -215,81 +312,129 @@ function FaceLandmarkerComponent() {
                       border: '2px solid red',
                     }}
                   />
+                )}
+              </Card>
+            </Col>
+            <Col
+              span={24}
+              md={12}
+            >
+              <Card>
+                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                  <Button
+                    type='primary'
+                    icon={<CameraOutlined />}
+                    onClick={handleStartCamera}
+                    style={{ marginBottom: '16px' }}
+                    disabled={buttonsDisabled || cameraActive}
+                  >
+                    Iniciar Cámara
+                  </Button>
+
+                  <Upload
+                    customRequest={(options) => handleUpload(options.file)}
+                    showUploadList={false}
+                    accept='image/*'
+                    disabled={buttonsDisabled}
+                  >
+                    <Button
+                      icon={<UploadOutlined />}
+                      disabled={cameraActive || buttonsDisabled}
+                    >
+                      Subir Imagen
+                    </Button>
+                  </Upload>
+
+                  {cameraActive && (
+                    <Button
+                      type='primary'
+                      icon={<FileImageOutlined />}
+                      onClick={handleCaptureImage}
+                      style={{ marginTop: '16px' }}
+                    >
+                      Capturar Imagen
+                    </Button>
+                  )}
+
+                  {(uploadedImage || cameraActive) && (
+                    <Button
+                      icon={<RedoOutlined />}
+                      onClick={handleReset}
+                      style={{ marginTop: '16px' }}
+                    >
+                      Volver a Intentar
+                    </Button>
+                  )}
                 </div>
-              )}
-              {uploadedImage && (
-                <canvas
-                  ref={canvasRef}
-                  style={{
-                    width: '100%',
-                    height: '100%',
-                    borderRadius: '8px',
-                    border: '2px solid red',
-                  }}
-                />
-              )}
-            </Card>
-          </Col>
-          <Col span={24} md={12}>
-            <Card>
-              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                <Button
-                  type="primary"
-                  icon={<CameraOutlined />}
-                  onClick={handleStartCamera}
-                  style={{ marginBottom: '16px' }}
-                  disabled={buttonsDisabled || cameraActive}
-                >
-                  Iniciar Cámara
-                </Button>
+                {loading ? (
+                  <Spin style={{ marginTop: '16px' }} />
+                ) : (
+                  faceShape && (
+                    <>
+                      <Paragraph style={{ marginTop: '16px', fontSize: '18px' }}>
+                        Tipo de rostro detectado: <strong>{faceShape.shape}</strong>
+                      </Paragraph>
+                      <Paragraph style={{ fontSize: '16px' }}>Descripción: {faceShape.description}</Paragraph>
+                      <Paragraph style={{ fontSize: '16px' }}>
+                        Marco recomendado: <strong>{faceShape.recommendedFrame}</strong>
+                      </Paragraph>
+                      <Paragraph style={{ fontSize: '16px' }}>
+                        Fiabilidad: <strong>{faceShape.confidence}</strong>
+                      </Paragraph>
 
-                <Upload
-                  customRequest={(options) => handleUpload(options.file)}
-                  showUploadList={false}
-                  accept="image/*"
-                  disabled={buttonsDisabled}
-                >
-                  <Button icon={<UploadOutlined />} disabled={cameraActive || buttonsDisabled}>
-                    Subir Imagen
-                  </Button>
-                </Upload>
+                      <Row
+                        gutter={16}
+                        style={{ marginTop: '16px' }}
+                      >
+                        {products.map((product) => (
+                          <Col
+                            span={8}
+                            key={product.productID}
+                          >
+                            <Card
+                              hoverable
+                              cover={
+                                <Image
+                                  alt={product.name}
+                                  src={product.images.length > 0 ? product.images[0] : marcos}
+                                  height={200}
+                                  style={{ objectFit: 'cover' }}
+                                />
+                              }
+                            >
+                              <Card.Meta
+                                title={product.name}
+                                description={
+                                  <>
+                                    <p>SKU: {product.code}</p>
+                                    <p>Precio: ${product.price}</p>
+                                    <Rate
+                                      value={product.averageRating}
+                                      disabled
+                                    />
+                                  </>
+                                }
+                              />
+                            </Card>
+                          </Col>
+                        ))}
+                      </Row>
 
-                {cameraActive && (
-                  <Button
-                    type="primary"
-                    icon={<FileImageOutlined />}
-                    onClick={handleCaptureImage}
-                    style={{ marginTop: '16px' }}
-                    
-                  >
-                    Capturar Imagen
-                  </Button>
+                      <Pagination
+                        current={pagination.page}
+                        total={pagination.total}
+                        pageSize={pagination.size}
+                        onChange={(page) => setPagination((prev) => ({ ...prev, page }))}
+                        style={{ marginTop: '16px', textAlign: 'center' }}
+                      />
+                    </>
+                  )
                 )}
-
-                {(uploadedImage || cameraActive) && (
-                  <Button
-                    icon={<RedoOutlined />}
-                    onClick={handleReset}
-                    style={{ marginTop: '16px' }}
-                  >
-                    Volver a Intentar
-                  </Button>
-                )}
-              </div>
-              {loading ? (
-                <Spin style={{ marginTop: '16px' }} />
-              ) : (
-                faceShape && (
-                  <Paragraph style={{ marginTop: '16px', fontSize: '18px' }}>
-                    Tipo de rostro detectado: <strong>{faceShape}</strong>
-                  </Paragraph>
-                )
-              )}
-            </Card>
-          </Col>
-        </Row>
+              </Card>
+            </Col>
+          </Row>
+        </div>
       </div>
-    </div>
     </ConfigProvider>
   );
 }
