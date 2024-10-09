@@ -25,8 +25,13 @@ function Appointments() {
   const [services, setServices] = useState([]);
   const [newServiceType, setNewServiceType] = useState('');
 
+  const [doctors, setDoctors] = useState([]);
+  const [newDoctor, setNewDoctor] = useState('');
+
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [editingService, setEditingService] = useState(null);
+
+  const [editingDoctor, setEditingDoctor] = useState(null);
 
   const [location, setLocation] = useState({ lat: 0, lng: 0 });
   const [markerPosition, setMarkerPosition] = useState(location);
@@ -36,6 +41,7 @@ function Appointments() {
     fetchAvailabilities();
     fetchAppointments();
     fetchServices();
+    fetchDoctors();
   }, []);
 
   const fetchAvailabilities = async () => {
@@ -43,7 +49,7 @@ function Appointments() {
       const { data } = await axios.get('http://localhost:5281/api/Availability');
       setAvailabilities(data);
     } catch (error) {
-      message.error('Error fetching availabilities.');
+      message.error('Error obteniendo disponibilidades.');
     }
   };
 
@@ -54,7 +60,7 @@ function Appointments() {
       if (data && data.length > 0) {
         setAppointments(data);
       } else {
-        message.info('No appointments found.');
+        message.info('No se encontraron citas del día.');
       }
     } catch (error) {
       if (error.response && error.response.status === 404) {
@@ -70,7 +76,16 @@ function Appointments() {
       const { data } = await axios.get('http://localhost:5281/api/AppointmentService');
       setServices(data);
     } catch (error) {
-      message.error('Error fetching services.');
+      message.error('Error obteniendo los servicios.');
+    }
+  };
+
+  const fetchDoctors = async () => {
+    try {
+      const { data } = await axios.get('http://localhost:5281/api/Doctor');
+      setDoctors(data);
+    } catch (error) {
+      message.error('Error obteniendo los doctores.');
     }
   };
 
@@ -85,7 +100,7 @@ function Appointments() {
       setLocation({ lat: location.latitude, lng: location.longitude });
       setMarkerPosition({ lat: location.latitude, lng: location.longitude });
     } catch (error) {
-      message.error('Error fetching location.');
+      message.error('Error obteniendo la localización del centro.');
     }
   };
 
@@ -109,13 +124,13 @@ function Appointments() {
 
   const handleUpdateAvailability = async () => {
     if (!selectedAvailability || !startTime || !endTime) {
-      message.warning('Please select an availability and times.');
+      message.warning('Por favor selecciona una disponibilidad y horarios.');
       return;
     }
 
     const now = moment();
     if (moment(selectedAvailability.startTime, 'HH:mm:ss').isBefore(now)) {
-      message.error('Cannot update past availability.');
+      message.error('No es posible actualizar un horario pasado.');
       return;
     }
 
@@ -127,22 +142,22 @@ function Appointments() {
         isAvailable: selectedAvailability.isAvailable,
         date: new Date().toISOString(),
       });
-      message.success('Availability updated successfully.');
+      message.success('Disponibilidad actualizada exitosamente.');
       fetchAvailabilities();
     } catch (error) {
-      message.error('Error updating availability.');
+      message.error('Error actualizando disponibilidad.');
     }
   };
 
   const handleToggleAvailability = async (availability) => {
     const now = moment();
     if (moment(availability.startTime, 'HH:mm:ss').isBefore(now)) {
-      message.warning('Cannot update availability for past times.');
+      message.warning('No es posible actualizar horarios para horarios pasados.');
       return;
     }
 
     if (!availability.isAvailable && hasAppointments(availability.availabilityID)) {
-      message.error('Cannot mark this time as available. There is an appointment associated with this time slot.');
+      message.error('No es posible actualizar este horario a disponible, existe una cita asociada a este horario.');
       return;
     }
 
@@ -150,16 +165,16 @@ function Appointments() {
       await axios.patch(`http://localhost:5281/api/Availability/${availability.availabilityID}`, {
         isAvailable: !availability.isAvailable,
       });
-      message.success('Availability status updated successfully.');
+      message.success('Estado de la disponibilidad actualizado exitosamente.');
       fetchAvailabilities();
     } catch (error) {
-      message.error('Error updating availability status.');
+      message.error('Error actualizando el estado de la disponibilidad.');
     }
   };
 
   const handleAddService = async () => {
     if (!newServiceType) {
-      message.warning('Please enter a service type.');
+      message.warning('Por favor ingresa un tipo de servicio.');
       return;
     }
 
@@ -167,16 +182,39 @@ function Appointments() {
       await axios.post('http://localhost:5281/api/AppointmentService', {
         serviceType: newServiceType,
       });
-      message.success('Service added successfully.');
+      message.success('Servicio agregado exitosamente.');
       setNewServiceType('');
       fetchServices();
     } catch (error) {
-      message.error('Error adding service.');
+      message.error('Error añadiendo el servicio.');
+    }
+  };
+
+  const handleAddDoctor = async () => {
+    if (!newDoctor) {
+      message.warning('Por favor selecciona a un doctor o doctora.');
+      return;
+    }
+
+    try {
+      await axios.post('http://localhost:5281/api/Doctor', {
+        doctorName: newDoctor,
+      });
+      message.success('Doctor Doctora agregado Correctamente.');
+      setNewDoctor('');
+      fetchDoctors();
+    } catch (error) {
+      message.error('Error añadiendo al Doctor Doctora.');
     }
   };
 
   const handleEditService = (service) => {
     setEditingService(service);
+    setIsModalVisible(true);
+  };
+
+  const handleEditDoctor = (doctor) => {
+    setEditingDoctor(doctor);
     setIsModalVisible(true);
   };
 
@@ -188,21 +226,47 @@ function Appointments() {
         serviceID: editingService.serviceID,
         serviceType: editingService.serviceType,
       });
-      message.success('Service updated successfully.');
+      message.success('Servicio actualizado exitosamente.');
       setIsModalVisible(false);
       fetchServices();
     } catch (error) {
-      message.error('Error updating service.');
+      message.error('Error actualizando el servicio.');
+    }
+  };
+
+  const handleUpdateDoctor = async () => {
+    if (!editingDoctor) return;
+
+    try {
+      await axios.put('http://localhost:5281/api/Doctor', {
+        doctorID: editingDoctor.doctorID,
+        doctorName: editingDoctor.doctorName,
+      });
+      message.success('Doctor Doctora actualizados correctamente.');
+      setIsModalVisible(false);
+      fetchDoctors();
+    } catch (error) {
+      message.error('Error actualizando al doctor doctora.');
     }
   };
 
   const handleDeleteService = async (serviceID) => {
     try {
       await axios.delete(`http://localhost:5281/api/AppointmentService/${serviceID}`);
-      message.success('Service deleted successfully.');
+      message.success('Servicio eliminado correctamente.');
       fetchServices();
     } catch (error) {
-      message.error('Error deleting service.');
+      message.error('Error eliminando el servicio.');
+    }
+  };
+
+  const handleDeleteDoctor = async (doctorID) => {
+    try {
+      await axios.delete(`http://localhost:5281/api/Doctor/${doctorID}`);
+      message.success('Doctor Doctora eliminados correctamente.');
+      fetchDoctors();
+    } catch (error) {
+      message.error('Error eliminando al doctor doctora.');
     }
   };
 
@@ -223,6 +287,8 @@ function Appointments() {
             <h2 style={{ marginBottom: 8, fontWeight: 'bold', fontSize: '24px' }}>
               Configurar los horarios del centro
             </h2>
+            <h2 style={{ marginTop: 8, marginBottom: 8, fontSize: '16px' }}>Debes estar dentro del rango de horarios para poder actualizarlos, 
+              al actualizar un horario todos sus adyacentes se actualizaran también.</h2>
             <Select
               style={{ width: '100%' }}
               placeholder='Seleccione un horario para actualizar'
@@ -319,6 +385,54 @@ function Appointments() {
                 onChange={(e) => setEditingService({ ...editingService, serviceType: e.target.value })}
               />
             </Modal>
+
+            <h2 style={{ marginTop: 16, fontWeight: 'bold', fontSize: '24px' }}>Doctores Doctoras del Centro</h2>
+            <List
+              dataSource={doctors}
+              renderItem={(doctor) => (
+                <List.Item
+                  actions={[
+                    <Button onClick={() => handleEditDoctor(doctor)}>Editar</Button>,
+                    <Button
+                      danger
+                      onClick={() => handleDeleteDoctor(doctor.doctorID)}
+                    >
+                      Eliminar
+                    </Button>,
+                  ]}
+                >
+                  {doctor.doctorName}
+                </List.Item>
+              )}
+            />
+
+            <Input
+              placeholder='Nuevo Doctor Doctora'
+              value={newDoctor}
+              onChange={(e) => setNewDoctor(e.target.value)}
+              style={{ marginTop: 16 }}
+            />
+            <Button
+              type='primary'
+              block
+              style={{ marginTop: 8 }}
+              onClick={handleAddDoctor}
+            >
+              Añadir Doctor Doctora
+            </Button>
+
+            <Modal
+              title='Editar Doctor Doctora'
+              open={isModalVisible}
+              onOk={handleUpdateDoctor}
+              onCancel={() => setIsModalVisible(false)}
+            >
+              <Input
+                value={editingDoctor?.doctorName}
+                onChange={(e) => setEditingDoctor({ ...editingDoctor, doctorName: e.target.value })}
+              />
+            </Modal>
+
 
             <h2 style={{ marginTop: 16, fontWeight: 'bold', fontSize: '24px' }}>Actualizar Ubicación del Centro</h2>
             <h2 style={{ marginTop: 8, marginBottom: 8, fontSize: '16px' }}>Localiza una nueva ubicación en el mapa y selecciónala con doble click</h2>

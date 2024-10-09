@@ -85,6 +85,12 @@ function Appointments() {
 
   const columns = [
     {
+      title: 'Nombre del Paciente',
+      dataIndex: 'patientName',
+      key: 'patientName',
+      width: 200,
+    },
+    {
       title: 'Fecha',
       dataIndex: 'appointmentDate',
       render: (date) => dayjs(date).format('YYYY-MM-DD'),
@@ -100,6 +106,14 @@ function Appointments() {
     {
       title: 'Sintomas',
       dataIndex: 'symptoms',
+    },
+    {
+      title: 'Servicio',
+      dataIndex: 'serviceType',
+    },
+    {
+      title: 'Doctor Doctora',
+      dataIndex: 'doctorName',
     },
     {
       title: 'Acciones',

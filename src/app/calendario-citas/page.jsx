@@ -11,6 +11,7 @@ const ExtendedAppointment = () => {
   const [selectedDate, setSelectedDate] = useState(null);
   const [schedules, setSchedules] = useState([]);
   const [serviceTypes, setServiceTypes] = useState([]);
+  const [doctors, setDoctors] = useState([]);
   const [showForm, setShowForm] = useState(false);
   const [showCancelModal, setShowCancelModal] = useState(false);
   const [showDayAppointmentModal, setShowDayAppointmentModal] = useState(false);
@@ -26,6 +27,7 @@ const ExtendedAppointment = () => {
     patientName: '',
     patientBirthday: '',
     symptoms: '',
+    doctorName: '',
   });
   const [currentAppointment, setCurrentAppointment] = useState(null);
 
@@ -35,6 +37,7 @@ const ExtendedAppointment = () => {
   useEffect(() => {
     fetchAppointments();
     fetchServiceTypes();
+    fetchDoctors();
     axios.get('http://localhost:5281/api/ExtendedAppointment/schedules')
       .then(response => {
         const schedulesData = response.data.map(schedule => ({
@@ -70,6 +73,19 @@ const ExtendedAppointment = () => {
       setServiceTypes(formattedServices);
     } catch (error) {
       message.error('Error al obtener los tipos de servicio');
+    }
+  };
+
+  const fetchDoctors = async () => {
+    try {
+      const response = await axios.get('http://localhost:5281/api/Doctor');
+      const formattedDoctors = response.data.map(doctor => ({
+        value: doctor.doctorName,
+        label: doctor.doctorName,
+      }));
+      setDoctors(formattedDoctors);
+    } catch (error) {
+      message.error('Error al obtener los doctores');
     }
   };
 
@@ -117,6 +133,7 @@ const ExtendedAppointment = () => {
         patientName: '',
         patientBirthday: '',
         symptoms: '',
+        doctorName: '',
       });
       setShowForm(true);
       form.resetFields();
@@ -136,6 +153,7 @@ const ExtendedAppointment = () => {
       patientName: event.patientName,
       patientBirthday: event.patientBirthday,
       symptoms: event.symptoms,
+      doctorName: event.doctorName,
     });
     setShowForm(true);
     form.setFieldsValue({
@@ -219,6 +237,7 @@ const ExtendedAppointment = () => {
       patientBirthday: currentAppointment.patientBirthday,
       symptoms: currentAppointment.symptoms,
       serviceType: currentAppointment.serviceType,
+      doctorName: currentAppointment.doctorName,
     };
 
     try {
@@ -272,6 +291,7 @@ const ExtendedAppointment = () => {
             <p><strong>Nombre:</strong> {currentAppointment.patientName}</p>
             <p><strong>Fecha de Nacimiento:</strong> {currentAppointment.patientBirthday}</p>
             <p><strong>Servicio:</strong> {currentAppointment.serviceType}</p>
+            <p><strong>Doctor Doctora:</strong> {currentAppointment.doctorName}</p>
             <p><strong>Síntomas:</strong> {currentAppointment.symptoms}</p>
             <p><strong>Horario:</strong> {schedules.find((s) => s.id === currentAppointment.scheduleID)?.time}</p>
           </div>
@@ -316,6 +336,9 @@ const ExtendedAppointment = () => {
           </Form.Item>
           <Form.Item label="Servicio" name="serviceType" rules={[{ required: true, message: 'Por favor selecciona un servicio' }]}>
             <Select options={serviceTypes} />
+          </Form.Item>
+          <Form.Item label="Doctor Doctora" name="doctorName" rules={[{ required: true, message: 'Por favor selecciona un Doctor o Doctora' }]}>
+            <Select options={doctors} />
           </Form.Item>
           <Form.Item label="Síntomas" name="symptoms">
             <Input.TextArea rows={4} />

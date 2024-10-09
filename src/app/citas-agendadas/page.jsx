@@ -88,7 +88,7 @@ function ScheduledAppointments() {
                         <Button type="primary" onClick={() => handleEdit(appointment.appointmentID)}>Editar</Button>,
                       ]}
                     >
-                      <Paragraph>Descripción: {appointment.serviceType}</Paragraph>
+                      <Paragraph>Tipo de servicio: {appointment.serviceType}</Paragraph>
                     </Card>
                   </List.Item>
                 );

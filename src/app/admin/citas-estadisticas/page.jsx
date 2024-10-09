@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { Layout, theme, DatePicker, Button, Row, Col, Typography } from 'antd';
 import { Content } from 'antd/es/layout/layout';
 import axios from 'axios';
-import { Bar, Histogram, Pie, Column } from '@ant-design/charts';
+import { Bar, Line, Pie, Column } from '@ant-design/charts';
 import HeaderSeller from '../components/HeaderSeller';
 import SiderMenuSeller from '../components/SiderMenuSeller';
 import { saveAs } from 'file-saver';
@@ -70,12 +70,24 @@ function Appointments() {
   const cancelledAppointments = filteredData.filter((item) => item.status === 'Canceled').length;
   const scheduledAppointments = filteredData.filter((item) => item.status === 'Scheduled').length;
 
-  const ageDistribution = filteredData.map((item) => {
-    const birthYear = new Date(item.patientBirthday).getFullYear();
-    const currentYear = new Date().getFullYear();
-    const age = currentYear - birthYear;
-    return { age, birthYear };
-  });
+  const ageDistribution = filteredData
+    .map((item) => {
+      const birthYear = item.patientBirthday ? new Date(item.patientBirthday).getFullYear() : null;
+      const currentYear = new Date().getFullYear();
+      const age = birthYear ? currentYear - birthYear : null;
+      return age;
+    })
+    .filter((age) => age !== null);
+
+  const ageCount = ageDistribution.reduce((acc, age) => {
+    acc[age] = (acc[age] || 0) + 1;
+    return acc;
+  }, {});
+
+  const lineData = Object.entries(ageCount).map(([age, count]) => ({
+    age: parseInt(age, 10),
+    count,
+  }));
 
   return (
     <Layout style={{ minHeight: '100vh' }}>
@@ -152,19 +164,27 @@ function Appointments() {
                 <Paragraph style={{ fontSize: '18px', fontWeight: 'bold' }}>
                   Distribución de edades de pacientes.
                 </Paragraph>
-                <Histogram
-                  data={ageDistribution}
-                  binField='age'
-                  binWidth={1}
-                  color='#f759ab'
+                <Line
+                  data={lineData}
+                  xField='age'
+                  yField='count'
+                  point={{
+                    size: 10,
+                    shape: 'circle',
+                  }}
+                  label={{
+                    style: { fill: '#000' },
+                  }}
                   xAxis={{
                     title: { text: 'Edad' },
                   }}
                   yAxis={{
-                    title: { text: 'Frecuencia' },
+                    title: { text: 'Número de Pacientes' },
                   }}
-                  legend={{ position: 'top-left' }}
-                  interactions={[{ type: 'element-highlight' }, { type: 'element-active' }]}
+                  tooltip={{
+                    shared: true,
+                    showMarkers: false,
+                  }}
                 />
               </Col>
             </Row>

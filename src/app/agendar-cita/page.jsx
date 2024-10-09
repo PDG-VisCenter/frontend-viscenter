@@ -23,10 +23,12 @@ function ScheduleAppointment() {
     appointmentDate: '',
     status: 'Scheduled',
     description: '',
+    doctorName: '',
   });
   const [LOCATION, setLOCATION] = useState({ lat: 0, lng: 0 });
   const [availabilities, setAvailabilities] = useState([]);
   const [services, setServices] = useState([]);
+  const [doctors, setDoctors] = useState([]);
   const [selectedAvailability, setSelectedAvailability] = useState(null);
   const [previousAvailability, setPreviousAvailability] = useState(null);
   const [error, setError] = useState('');
@@ -40,6 +42,11 @@ function ScheduleAppointment() {
     axios
       .get('http://localhost:5281/api/AppointmentService')
       .then((response) => setServices(response.data))
+      .catch((error) => console.error(error));
+
+    axios
+      .get('http://localhost:5281/api/Doctor')
+      .then((response) => setDoctors(response.data))
       .catch((error) => console.error(error));
 
     axios
@@ -94,6 +101,7 @@ function ScheduleAppointment() {
           patientBirthday: formData.patientBirthday,
           symptoms: formData.symptoms,
           serviceType: formData.serviceType,
+          doctorName: formData.doctorName,
         })
         .then(() => {
           if (formData.availabilityID) {
@@ -240,6 +248,24 @@ function ScheduleAppointment() {
                   ))}
                 </Select>
               </Form.Item>
+
+              <Form.Item
+                label='Doctor Doctora'
+                name='doctorName'
+                rules={[{ required: true, message: 'Selecciona al Doctor Doctora.' }]}
+              >
+                <Select onChange={(value) => setFormData({ ...formData, doctorName: value })}>
+                  {doctors.map((doctor) => (
+                    <Select.Option
+                      key={doctor.doctorID}
+                      value={doctor.doctorName}
+                    >
+                      {doctor.doctorName}
+                    </Select.Option>
+                  ))}
+                </Select>
+              </Form.Item>
+
               <Form.Item
                 label='Horario Disponible'
                 name='availabilityID'

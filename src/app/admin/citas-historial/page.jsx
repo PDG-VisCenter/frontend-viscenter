@@ -72,6 +72,12 @@ function Appointments() {
       width: 250,
     },
     {
+      title: 'Doctor Doctora',
+      dataIndex: 'doctorName',
+      key: 'doctorName',
+      width: 250,
+    },
+    {
       title: 'Fecha de la Cita',
       dataIndex: 'appointmentDate',
       key: 'appointmentDate',

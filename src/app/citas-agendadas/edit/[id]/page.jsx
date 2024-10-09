@@ -25,10 +25,12 @@ function EditAppointment() {
     appointmentDate: '',
     status: 'Scheduled',
     description: '',
+    doctorName: '',
   });
   const [LOCATION, setLOCATION] = useState({ lat: 0, lng: 0 });
   const [availabilities, setAvailabilities] = useState([]);
   const [services, setServices] = useState([]);
+  const [doctors, setDoctors] = useState([]);
   const [selectedAvailability, setSelectedAvailability] = useState(null);
   const [previousAvailability, setPreviousAvailability] = useState(null);
   const [error, setError] = useState('');
@@ -53,6 +55,7 @@ function EditAppointment() {
             appointmentDate: appointmentData.appointmentDate,
             status: appointmentData.status,
             description: appointmentData.description,
+            doctorName: appointmentData.doctorName,
           });
           setPreviousAvailability(appointmentData.availabilityID);
         })
@@ -72,7 +75,14 @@ function EditAppointment() {
         })
         .catch((error) => console.error('Error fetching services:', error));
 
-        axios
+      axios
+        .get('http://localhost:5281/api/Doctor')
+        .then((response) => {
+          setDoctors(response.data);
+        })
+        .catch((error) => console.error('Error fetching doctors:', error));
+
+      axios
         .get('http://localhost:5281/api/LocationCenter')
         .then((response) => {
           const location = response.data[0];
@@ -121,6 +131,7 @@ function EditAppointment() {
         serviceType: formData.serviceType,
         description: formData.description,
         appointmentID: formData.appointmentID,
+        doctorName: formData.doctorName,
       })
       .then(() => {
         if (previousAvailability && previousAvailability !== formData.availabilityID) {
@@ -187,157 +198,180 @@ function EditAppointment() {
         },
       }}
     >
-    <div style={{backgroundColor: '#f0f2f5', padding:'20px'}} className='min-h-screen p-6 flex items-center justify-center'>
-      <div className='bg-white p-8 rounded-lg shadow-lg w-full max-w-md'>
-        {error && (
-          <Alert
-            message={error}
-            type='error'
-            showIcon
-            className='mb-4'
-          />
-        )}
-        <Title
-          level={2}
-          className='text-red-600'
-        >
-          Editar Cita
-        </Title>
-        <Form
-          layout='vertical'
-          onFinish={handleUpdate}
-        >
-          <Form.Item
-            label='Nombre'
-            required
-          >
-            <Input
-              value={formData.patientName}
-              onChange={(e) => setFormData({ ...formData, patientName: e.target.value })}
+      <div
+        style={{ backgroundColor: '#f0f2f5', padding: '20px' }}
+        className='min-h-screen p-6 flex items-center justify-center'
+      >
+        <div className='bg-white p-8 rounded-lg shadow-lg w-full max-w-md'>
+          {error && (
+            <Alert
+              message={error}
+              type='error'
+              showIcon
+              className='mb-4'
             />
-          </Form.Item>
-          <Form.Item
-            label='Fecha de Nacimiento'
-            required
+          )}
+          <Title
+            level={2}
+            className='text-red-600'
           >
-            <DatePicker
-              format='YYYY-MM-DD'
-              value={moment(formData.patientBirthday)}
-              onChange={(date, dateString) => setFormData({ ...formData, patientBirthday: dateString })}
-              disabledDate={(current) => current && current > moment().endOf('day')}
-            />
-          </Form.Item>
-          <Form.Item
-            label='Síntomas'
-            required
+            Editar Cita
+          </Title>
+          <Form
+            layout='vertical'
+            onFinish={handleUpdate}
+          >
+            <Form.Item
+              label='Nombre'
+              required
+            >
+              <Input
+                value={formData.patientName}
+                onChange={(e) => setFormData({ ...formData, patientName: e.target.value })}
+              />
+            </Form.Item>
+            <Form.Item
+              label='Fecha de Nacimiento'
+              required
+            >
+              <DatePicker
+                format='YYYY-MM-DD'
+                value={moment(formData.patientBirthday)}
+                onChange={(date, dateString) => setFormData({ ...formData, patientBirthday: dateString })}
+                disabledDate={(current) => current && current > moment().endOf('day')}
+              />
+            </Form.Item>
+            <Form.Item
+              label='Síntomas'
+              required
+            >
+              <Input.TextArea
+                value={formData.symptoms}
+                onChange={(e) => setFormData({ ...formData, symptoms: e.target.value })}
+              />
+            </Form.Item>
+            <Form.Item
+              label='Tipo de Servicio'
+              required
+            >
+              <Select
+                value={formData.serviceType}
+                onChange={(value) => setFormData({ ...formData, serviceType: value })}
+              >
+                {services.map((service) => (
+                  <Option
+                    key={service.serviceID}
+                    value={service.serviceType}
+                  >
+                    {service.serviceType}
+                  </Option>
+                ))}
+              </Select>
+            </Form.Item>
+
+            <Form.Item
+              label='Doctor Doctora'
+              required
+            >
+              <Select
+                value={formData.doctorName}
+                onChange={(value) => setFormData({ ...formData, doctorName: value })}
+              >
+                {doctors.map((doctor) => (
+                  <Option
+                    key={doctor.doctorID}
+                    value={doctor.doctorName}
+                  >
+                    {doctor.doctorName}
+                  </Option>
+                ))}
+              </Select>
+            </Form.Item>
+
+            <Form.Item
+              label='Horario Disponible'
+              name='availabilityID'
+              initialValue={availabilities.length > 0 ? availabilities[0].availabilityID : ''}
+              rules={[{ required: true, message: 'Por favor, selecciona un horario disponible' }]}
+            >
+              <Select
+                defaultValue={availabilities.length > 0 ? availabilities[0].availabilityID : ''}
+                onChange={(value) => {
+                  const selected = availabilities.find((avail) => avail.availabilityID === parseInt(value, 10));
+                  if (selected) {
+                    setSelectedAvailability(selected);
+                    setFormData((prevData) => ({
+                      ...prevData,
+                      availabilityID: value,
+                      selectedTime: `${selected.startTime} - ${selected.endTime}`,
+                    }));
+                    setError('');
+                  } else {
+                    setSelectedAvailability(null);
+                    setFormData((prevData) => ({
+                      ...prevData,
+                      availabilityID: '',
+                      selectedTime: '',
+                    }));
+                    setError('');
+                  }
+                }}
+              >
+                <Option value=''>Selecciona un horario</Option>
+                {availabilities.map((availability) => (
+                  <Option
+                    key={availability.availabilityID}
+                    value={availability.availabilityID}
+                    disabled={isTimeInThePast(availability.startTime)}
+                  >
+                    {`${availability.startTime} - ${availability.endTime}`}
+                  </Option>
+                ))}
+              </Select>
+            </Form.Item>
+
+            <Form.Item>
+              <Button
+                type='primary'
+                htmlType='submit'
+                style={{ margin: '10px' }}
+              >
+                Actualizar Cita
+              </Button>
+              <Button
+                danger
+                className='ml-2'
+                onClick={handleCancel}
+              >
+                Cancelar Cita
+              </Button>
+            </Form.Item>
+          </Form>
+
+          <Modal
+            title='Confirmar Cancelación'
+            open={showModal}
+            onOk={confirmCancel}
+            onCancel={() => setShowModal(false)}
           >
             <Input.TextArea
-              value={formData.symptoms}
-              onChange={(e) => setFormData({ ...formData, symptoms: e.target.value })}
+              value={cancelReason}
+              onChange={(e) => setCancelReason(e.target.value)}
+              placeholder='Razón de la cancelación'
             />
-          </Form.Item>
-          <Form.Item
-            label='Tipo de Servicio'
-            required
-          >
-            <Select
-              value={formData.serviceType}
-              onChange={(value) => setFormData({ ...formData, serviceType: value })}
-            >
-              {services.map((service) => (
-                <Option
-                  key={service.serviceID}
-                  value={service.serviceType}
-                >
-                  {service.serviceType}
-                </Option>
-              ))}
-            </Select>
-          </Form.Item>
-          <Form.Item
-            label='Horario Disponible'
-            name='availabilityID'
-            initialValue={availabilities.length > 0 ? availabilities[0].availabilityID : ''}
-            rules={[{ required: true, message: 'Por favor, selecciona un horario disponible' }]}
-          >
-            <Select
-              defaultValue={availabilities.length > 0 ? availabilities[0].availabilityID : ''}
-              onChange={(value) => {
-                const selected = availabilities.find((avail) => avail.availabilityID === parseInt(value, 10));
-                if (selected) {
-                  setSelectedAvailability(selected);
-                  setFormData((prevData) => ({
-                    ...prevData,
-                    availabilityID: value,
-                    selectedTime: `${selected.startTime} - ${selected.endTime}`,
-                  }));
-                  setError('');
-                } else {
-                  setSelectedAvailability(null);
-                  setFormData((prevData) => ({
-                    ...prevData,
-                    availabilityID: '',
-                    selectedTime: '',
-                  }));
-                  setError('');
-                }
-              }}
-            >
-              <Option value=''>Selecciona un horario</Option>
-              {availabilities.map((availability) => (
-                <Option
-                  key={availability.availabilityID}
-                  value={availability.availabilityID}
-                  disabled={isTimeInThePast(availability.startTime)}
-                >
-                  {`${availability.startTime} - ${availability.endTime}`}
-                </Option>
-              ))}
-            </Select>
-          </Form.Item>
+          </Modal>
 
-          <Form.Item>
-            <Button
-              type='primary'
-              htmlType='submit'
-              style={{margin: '10px'}}
-            >
-              Actualizar Cita
-            </Button>
-            <Button
-              danger
-              className='ml-2'
-              onClick={handleCancel}
-            >
-              Cancelar Cita
-            </Button>
-          </Form.Item>
-        </Form>
-
-        <Modal
-          title='Confirmar Cancelación'
-          open={showModal}
-          onOk={confirmCancel}
-          onCancel={() => setShowModal(false)}
-        >
-          <Input.TextArea
-            value={cancelReason}
-            onChange={(e) => setCancelReason(e.target.value)}
-            placeholder='Razón de la cancelación'
-          />
-        </Modal>
-
-        <div className='mt-6'>
-          <Title level={4}>Ubicación del Centro de Atención</Title>
-          {LOCATION.lat !== 0 && LOCATION.lng !== 0 && (
-          <Map
-            center={LOCATION}
-            zoom={16}
-          />
-        )}
+          <div className='mt-6'>
+            <Title level={4}>Ubicación del Centro de Atención</Title>
+            {LOCATION.lat !== 0 && LOCATION.lng !== 0 && (
+              <Map
+                center={LOCATION}
+                zoom={16}
+              />
+            )}
+          </div>
         </div>
       </div>
-    </div>
     </ConfigProvider>
   );
 }
