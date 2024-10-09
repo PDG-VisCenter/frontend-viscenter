@@ -10,13 +10,13 @@ import {
   sortByElements,
 } from '@/data/searchFilters';
 import { Button, Checkbox, Col, Collapse, Dropdown, Input, Layout, Menu, Pagination, Row } from 'antd';
+import { Content } from 'antd/es/layout/layout';
 import { DownOutlined } from '@ant-design/icons';
 import Footer from '@/components/Footer';
 import HeaderSimple from '@/components/HeaderSimple';
 import ProductCard from '../components/ProductCard';
+import Sider from 'antd/es/layout/Sider';
 import Title from 'antd/es/typography/Title';
-
-const { Content, Sider } = Layout;
 
 const onSearch = (value, _e, info) => console.log(info?.source, value);
 
