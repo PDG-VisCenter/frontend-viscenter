@@ -9,11 +9,12 @@ import {
   gender,
   sortByElements,
 } from '@/data/searchFilters';
-import { Button, Checkbox, Collapse, Dropdown, Input, Menu, Pagination } from 'antd';
-import Layout, { Content } from 'antd/es/layout/layout';
+import { Button, Checkbox, Col, Collapse, Dropdown, Input, Layout, Menu, Pagination, Row } from 'antd';
+import { Content } from 'antd/es/layout/layout';
 import { DownOutlined } from '@ant-design/icons';
 import Footer from '@/components/Footer';
 import HeaderSimple from '@/components/HeaderSimple';
+import ProductCard from '../components/ProductCard';
 import Sider from 'antd/es/layout/Sider';
 import Title from 'antd/es/typography/Title';
 
@@ -123,14 +124,27 @@ const menu = (
   </Menu>
 );
 
+const siderStyle = {
+  overflow: 'auto',
+  height: '100%',
+  maxHeight: 'calc(100vh - 90px)',
+  position: 'fixed',
+  insetInlineStart: 0,
+  top: 90,
+  bottom: 0,
+  scrollbarWidth: 'thin',
+  scrollbarColor: 'unset',
+  background: 'white',
+};
+
 function Search() {
   return (
-    <Layout className='search'>
+    <div>
       <HeaderSimple />
       <Layout>
         <Sider
-          width='17%'
-          className='search__sider'
+          width={200}
+          style={siderStyle}
         >
           <Collapse
             items={items}
@@ -138,38 +152,74 @@ function Search() {
             onChange={onChange}
           />
         </Sider>
-        <Content className='search__content'>
-          <Title className='search__title'>Buscar</Title>
-          <Input.Search
-            placeholder='Busca productos...'
-            allowClear
-            enterButton='Search'
-            size='large'
-            onSearch={onSearch}
-          />
-          <br />
-          <br />
-          <Title
-            level={3}
-            className='search__subtitle'
+        <Layout
+          style={{
+            height: '100%',
+            marginInlineStart: '200px',
+          }}
+        >
+          <Content
+            style={{
+              background: 'white',
+              overflow: 'initial',
+              padding: '20px',
+            }}
           >
-            Resultados para ...
-          </Title>
-          <Dropdown overlay={menu}>
-            <Button>
-              Ordenar por: <DownOutlined />
-            </Button>
-          </Dropdown>
-          <Pagination
-            align='center'
-            defaultCurrent={1}
-            defaultPageSize={20}
-            total={50}
-          />
-        </Content>
+            <div className='search__filter'>
+              <Input.Search
+                placeholder='Busca productos...'
+                allowClear
+                enterButton='Search'
+                size='large'
+                onSearch={onSearch}
+                style={{
+                  paddingRight: '50px',
+                }}
+              />
+              <Dropdown overlay={menu}>
+                <Button>
+                  Ordenar por: <DownOutlined />
+                </Button>
+              </Dropdown>
+            </div>
+            <br />
+            <br />
+            <Title
+              level={4}
+              className='search__subtitle'
+            >
+              Resultados para ...
+            </Title>
+            <Row gutter={[16, 16]}>
+              {[...Array(12)].map((_, index) => (
+                <Col
+                  key={index}
+                  xs={24}
+                  sm={24}
+                  md={12}
+                  lg={12}
+                  xl={8}
+                  xxl={8}
+                >
+                  <ProductCard />
+                </Col>
+              ))}
+            </Row>
+            <br />
+            <br />
+            <Pagination
+              align='center'
+              defaultCurrent={1}
+              defaultPageSize={20}
+              total={50}
+            />
+            <br />
+            <br />
+          </Content>
+          <Footer />
+        </Layout>
       </Layout>
-      <Footer />
-    </Layout>
+    </div>
   );
 }
 

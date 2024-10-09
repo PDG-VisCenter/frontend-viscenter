@@ -19,8 +19,9 @@ function CardCategory(props) {
           <Image
             alt={content.imgAlt}
             src={content.img}
-            width={450}
-            height={300}
+            layout='responsive'
+            width={400}
+            height={350}
           />
         }
       >

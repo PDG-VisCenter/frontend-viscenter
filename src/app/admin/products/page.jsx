@@ -19,6 +19,7 @@ const columns = [
       <Image
         src={imgprueba}
         alt='productimg'
+        layout='responsive'
         width={80}
         height={60}
       />

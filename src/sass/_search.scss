@@ -3,19 +3,29 @@
 .search {
   &__sider {
     overflow: auto;
-    height: 88vh;
+    height: 100%;
+    top: 88px;
+    bottom: 0;
+    position: fixed;
+    inset-inline-start: 0;
     scrollbar-width: thin;
     scrollbar-color: unset;
     background-color: white !important;
   }
 
   &__content {
-    padding: 20px;
+    top: 90px;
     min-height: 80vh;
+    overflow: initial;
   }
 
   &__title {
     text-align: center;
+  }
+
+  &__filter {
+    display: flex;
+    justify-content: space-between;
   }
 
   &__no-results {

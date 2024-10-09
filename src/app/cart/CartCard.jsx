@@ -17,21 +17,30 @@ function CartCard() {
       }}
     >
       <Row align='middle'>
-        <Col>
+        <Col span={3}>
           <Image
             alt='example'
             src={pruebaimg}
-            width={150}
-            height={150}
+            width={100}
+            height={100}
           />
         </Col>
-        <Col style={{ paddingLeft: 32 }}>
-          <Title level={3}>Nombre producto</Title>
+        <Col
+          span={13}
+          style={{ paddingLeft: 32 }}
+        >
+          <Title level={5}>Nombre producto</Title>
           <p>Color</p>
           <p>SKU</p>
           <p>Subtotal: 56$</p>
         </Col>
-        <Col offset={15}>
+        <Col
+          span={8}
+          style={{
+            display: 'flex',
+            justifyContent: 'right',
+          }}
+        >
           <Button
             type='primary'
             icon={<DeleteOutlined />}
