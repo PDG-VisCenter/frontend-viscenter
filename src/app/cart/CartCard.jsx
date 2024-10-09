@@ -21,6 +21,7 @@ function CartCard() {
           <Image
             alt='example'
             src={pruebaimg}
+            layout='responsive'
             width={150}
             height={150}
           />

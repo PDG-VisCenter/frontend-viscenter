@@ -83,6 +83,9 @@
   }
 
   &__price {
+    font-family: var(--font-gotham-bold);
+    text-align: center;
+    letter-spacing: 1px;
     font-size: 0.9em;
   }
 
