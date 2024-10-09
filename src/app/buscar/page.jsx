@@ -137,7 +137,7 @@ const siderStyle = {
   background: 'white',
 };
 
-function App() {
+function Search() {
   return (
     <div>
       <HeaderSimple />
@@ -223,4 +223,4 @@ function App() {
   );
 }
 
-export default App;
+export default Search;
