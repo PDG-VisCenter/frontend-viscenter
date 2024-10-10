@@ -242,11 +242,11 @@ function Appointments() {
         doctorID: editingDoctor.doctorID,
         doctorName: editingDoctor.doctorName,
       });
-      message.success('Doctor Doctora actualizados correctamente.');
+      message.success('Se actualizó correctamente.');
       setIsModalVisible(false);
       fetchDoctors();
     } catch (error) {
-      message.error('Error actualizando al doctor doctora.');
+      message.error('Error actualizando.');
     }
   };
 
@@ -263,10 +263,10 @@ function Appointments() {
   const handleDeleteDoctor = async (doctorID) => {
     try {
       await axios.delete(`http://localhost:5281/api/Doctor/${doctorID}`);
-      message.success('Doctor Doctora eliminados correctamente.');
+      message.success('Eliminado correctamente.');
       fetchDoctors();
     } catch (error) {
-      message.error('Error eliminando al doctor doctora.');
+      message.error('Error eliminando.');
     }
   };
 
@@ -287,8 +287,10 @@ function Appointments() {
             <h2 style={{ marginBottom: 8, fontWeight: 'bold', fontSize: '24px' }}>
               Configurar los horarios del centro
             </h2>
-            <h2 style={{ marginTop: 8, marginBottom: 8, fontSize: '16px' }}>Debes estar dentro del rango de horarios para poder actualizarlos, 
-              al actualizar un horario todos sus adyacentes se actualizaran también.</h2>
+            <h2 style={{ marginTop: 8, marginBottom: 8, fontSize: '16px' }}>
+              Debes estar dentro del rango de horarios para poder actualizarlos, al actualizar un horario todos sus
+              adyacentes se actualizaran también.
+            </h2>
             <Select
               style={{ width: '100%' }}
               placeholder='Seleccione un horario para actualizar'
@@ -374,18 +376,6 @@ function Appointments() {
               Añadir Servicio
             </Button>
 
-            <Modal
-              title='Editar Servicio'
-              open={isModalVisible}
-              onOk={handleUpdateService}
-              onCancel={() => setIsModalVisible(false)}
-            >
-              <Input
-                value={editingService?.serviceType}
-                onChange={(e) => setEditingService({ ...editingService, serviceType: e.target.value })}
-              />
-            </Modal>
-
             <h2 style={{ marginTop: 16, fontWeight: 'bold', fontSize: '24px' }}>Doctores Doctoras del Centro</h2>
             <List
               dataSource={doctors}
@@ -422,20 +412,28 @@ function Appointments() {
             </Button>
 
             <Modal
-              title='Editar Doctor Doctora'
+              title={editingService ? 'Editar Servicio' : 'Editar Doctor'}
               open={isModalVisible}
-              onOk={handleUpdateDoctor}
+              onOk={editingService ? handleUpdateService : handleUpdateDoctor}
               onCancel={() => setIsModalVisible(false)}
             >
-              <Input
-                value={editingDoctor?.doctorName}
-                onChange={(e) => setEditingDoctor({ ...editingDoctor, doctorName: e.target.value })}
-              />
+              {editingService ? (
+                <Input
+                  value={editingService?.serviceType}
+                  onChange={(e) => setEditingService({ ...editingService, serviceType: e.target.value })}
+                />
+              ) : (
+                <Input
+                  value={editingDoctor?.doctorName}
+                  onChange={(e) => setEditingDoctor({ ...editingDoctor, doctorName: e.target.value })}
+                />
+              )}
             </Modal>
 
-
             <h2 style={{ marginTop: 16, fontWeight: 'bold', fontSize: '24px' }}>Actualizar Ubicación del Centro</h2>
-            <h2 style={{ marginTop: 8, marginBottom: 8, fontSize: '16px' }}>Localiza una nueva ubicación en el mapa y selecciónala con doble click</h2>
+            <h2 style={{ marginTop: 8, marginBottom: 8, fontSize: '16px' }}>
+              Localiza una nueva ubicación en el mapa y selecciónala con doble click
+            </h2>
 
             {location.lat !== 0 && location.lng !== 0 && (
               <UpdateMap
