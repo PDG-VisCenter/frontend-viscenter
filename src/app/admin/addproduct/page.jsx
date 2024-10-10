@@ -1,12 +1,21 @@
 'use client';
 
-import { Button, Col, Flex, Form, Input, InputNumber, Layout, Row, Select, theme, Upload } from 'antd';
+import { Button, Col, Flex, Form, Image, Input, InputNumber, Layout, Row, Select, theme, Upload } from 'antd';
 import { Content } from 'antd/es/layout/layout';
 import HeaderSeller from '../components/HeaderSeller';
 import { PlusOutlined } from '@ant-design/icons';
 import SiderMenuSeller from '../components/SiderMenuSeller';
 import TextArea from 'antd/es/input/TextArea';
 import Title from 'antd/es/typography/Title';
+import { useState } from 'react';
+
+const getBase64 = (file) =>
+  new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = () => resolve(reader.result);
+    reader.onerror = (error) => reject(error);
+  });
 
 const normFile = (e) => {
   if (Array.isArray(e)) {
@@ -16,9 +25,22 @@ const normFile = (e) => {
 };
 
 function AddProduct() {
+  const [previewOpen, setPreviewOpen] = useState(false);
+  const [previewImage, setPreviewImage] = useState('');
+  const [fileList, setFileList] = useState([]);
+
   const {
     token: { colorBgContainer, borderRadiusLG },
   } = theme.useToken();
+
+  const handlePreview = async (file) => {
+    if (!file.url && !file.preview) {
+      file.preview = await getBase64(file.originFileObj);
+    }
+    setPreviewImage(file.url || file.preview);
+    setPreviewOpen(true);
+  };
+  const handleChange = ({ fileList: newFileList }) => setFileList(newFileList);
 
   return (
     <Layout style={{ minHeight: '100vh' }}>
@@ -248,8 +270,10 @@ function AddProduct() {
                 getValueFromEvent={normFile}
               >
                 <Upload
-                  action='/upload.do'
                   listType='picture-card'
+                  fileList={fileList}
+                  onPreview={handlePreview}
+                  onChange={handleChange}
                 >
                   <button
                     style={{ border: 0, background: 'none' }}
@@ -259,6 +283,20 @@ function AddProduct() {
                     <div style={{ marginTop: 8 }}>Subir</div>
                   </button>
                 </Upload>
+                {previewImage && (
+                  <Image
+                    alt=''
+                    wrapperStyle={{
+                      display: 'none',
+                    }}
+                    preview={{
+                      visible: previewOpen,
+                      onVisibleChange: (visible) => setPreviewOpen(visible),
+                      afterOpenChange: (visible) => !visible && setPreviewImage(''),
+                    }}
+                    src={previewImage}
+                  />
+                )}
               </Form.Item>
               <Flex
                 justify='space-between'

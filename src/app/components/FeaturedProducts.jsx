@@ -1,4 +1,4 @@
-import { allProductsData } from '../../data/productData';
+import { allProductsData } from '@/data/productData';
 import Flickity from 'react-flickity-component';
 import getCategory from '../../utils/getCategory';
 import Image from 'next/image';

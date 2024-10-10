@@ -1,9 +1,12 @@
 import { Card } from 'antd';
 import Image from 'next/image';
 import Link from 'next/link';
+import PropTypes from 'prop-types';
 import pruebaimg from '../../assets/img/category/accessories.jpg';
 
-function ProductCard() {
+function ProductCard(props) {
+  const { name, price } = props;
+
   return (
     <Link href='/producto'>
       <Card
@@ -24,11 +27,16 @@ function ProductCard() {
           />
         }
       >
-        <h5 className='pd-card__title'>Lentes name</h5>
-        <div className='pd-card__price'>Lentes price</div>
+        <h5 className='pd-card__title'>{name}</h5>
+        <div className='pd-card__price'>Bs. {price}</div>
       </Card>
     </Link>
   );
 }
+
+ProductCard.propTypes = {
+  name: PropTypes.string.isRequired,
+  price: PropTypes.number.isRequired,
+};
 
 export default ProductCard;
