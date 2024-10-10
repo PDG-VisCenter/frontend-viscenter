@@ -5,10 +5,10 @@ import PropTypes from 'prop-types';
 import pruebaimg from '../../assets/img/category/accessories.jpg';
 
 function ProductCard(props) {
-  const { name, price } = props;
+  const { id, name, price } = props;
 
   return (
-    <Link href='/producto'>
+    <Link href={`/products/${id}`}>
       <Card
         hoverable
         style={{
@@ -35,6 +35,7 @@ function ProductCard(props) {
 }
 
 ProductCard.propTypes = {
+  id: PropTypes.number.isRequired,
   name: PropTypes.string.isRequired,
   price: PropTypes.number.isRequired,
 };

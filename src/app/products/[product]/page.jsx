@@ -1,6 +1,11 @@
-import { Breadcrumb, Carousel, Col, Layout, Row } from 'antd';
+'use client';
+
+import { Breadcrumb, Button, Carousel, Col, Layout, Row, Skeleton } from 'antd';
+import { useDispatch, useSelector } from 'react-redux';
+import { fetchProductById } from '@/lib/features/productSlice';
 import Footer from '@/components/Footer';
 import HeaderSimple from '@/components/HeaderSimple';
+import { useEffect } from 'react';
 
 const contentStyle = {
   margin: 0,
@@ -11,7 +16,32 @@ const contentStyle = {
   background: '#364d79',
 };
 
-function Producto() {
+function Product({ params }) {
+  const dispatch = useDispatch();
+  const productItem = useSelector((state) => state.product.product);
+  const status = useSelector((state) => state.product.status);
+  const error = useSelector((state) => state.product.error);
+
+  useEffect(() => {
+    if (status === 'idle') {
+      dispatch(fetchProductById(params.product));
+    }
+  }, [status, dispatch]);
+
+  if (status === 'loading') {
+    return (
+      <Skeleton.Node
+        active
+        style={{
+          width: 160,
+        }}
+      />
+    );
+  }
+  if (status === 'failed') {
+    return <div>{error}</div>;
+  }
+
   return (
     <div>
       <HeaderSimple />
@@ -39,7 +69,7 @@ function Producto() {
               href: '',
             },
             {
-              title: 'Nombre producto',
+              title: `${productItem.name}`,
             },
           ]}
         />
@@ -75,32 +105,32 @@ function Producto() {
               padding: 20,
             }}
           >
-            <h1 className='pd-pg__title'>Product name</h1>
+            <h1 className='pd-pg__title'>{productItem.name}</h1>
             <div className='pd-pg__price--wrapper'>
-              <h3 className='pd-pg__price'>Bs. 8984</h3>
-              <h3 className='pd-pg__og-price'>Bs. 234</h3>
+              <h3 className='pd-pg__price'>Bs. {productItem.price}</h3>
+              {/* <h3 className='pd-pg__og-price'>Bs. 234</h3> */}
             </div>
             <div className='pd-pg__details'>
-              <p className='pd-pg__description'>Description</p>
+              <p className='pd-pg__description'>{productItem.description}</p>
               <ul className='pd-pg__tech-details'>
-                {/* {product.technicalDetails.map((td) => ( */}
+                {/* {product.technicalDetails.map((td) => (
                 <li
                   className='pd-pg__tech-detail'
-                  // key={td}
+                  key={td}
                 >
                   nose
-                </li>
-                {/* ))} */}
+                </li>))} */}
               </ul>
             </div>
             <div className='pd-pg__opt-details'>
               {/* {product.color && ( */}
               <div className='pd-pg__color--wrapper'>
                 <span className=' pd-pg__opt-label pd-pg__color-label'>Color: </span>
-                <span className='pd-pg__color'>black</span>
+                <span className='pd-pg__color'>Black</span>
               </div>
               {/* )} */}
             </div>
+            <Button type='primary'>Añadir al carrito</Button>
           </Col>
         </Row>
       </Layout>
@@ -109,4 +139,4 @@ function Producto() {
   );
 }
 
-export default Producto;
+export default Product;

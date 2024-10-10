@@ -1,10 +1,10 @@
 'use client';
 
 import { AnimatePresence, motion } from 'framer-motion';
+import { Badge, Button } from 'antd';
 import { LeftOutlined, MenuOutlined, SearchOutlined, ShoppingCartOutlined, UserOutlined } from '@ant-design/icons';
 import { signIn, useSession } from 'next-auth/react';
 import { useEffect, useState } from 'react';
-import { Button } from 'antd';
 import Image from 'next/image';
 import Link from 'next/link';
 import logo from '../assets/img/logo-white.png';
@@ -72,19 +72,19 @@ function NavBarSticky() {
       </Link>
       <ul className='nav__links'>
         <Link
-          href='/lentes'
+          href='/eyeglasses'
           className='nav__link'
         >
           Lentes
         </Link>
         <Link
-          href='/lentesdesol'
+          href='/sunglasses'
           className='nav__link'
         >
           Lentes de Sol
         </Link>
         <Link
-          href='/accesorios'
+          href='/accessories'
           className='nav__link'
         >
           Accesorios
@@ -98,7 +98,7 @@ function NavBarSticky() {
       </ul>
       <div className='nav__icons-wrapper'>
         <Link
-          href='/buscar'
+          href='/products'
           className='nav__btn-icon icon__search material-symbols-outlined'
           style={{
             color: 'white',
@@ -128,11 +128,9 @@ function NavBarSticky() {
           href='/cart'
           className='nav__btn-icon icon__shopping-bag material-symbols-outlined'
         >
-          <ShoppingCartOutlined
-            style={{
-              color: 'white',
-            }}
-          />
+          <Badge count={1}>
+            <ShoppingCartOutlined style={{ fontSize: 32, color: 'white' }} />
+          </Badge>
         </Link>
       </div>
       <AnimatePresence>
@@ -147,19 +145,19 @@ function NavBarSticky() {
           >
             <ul className='nav-menu__links'>
               <Link
-                href='/lentes'
+                href='/eyeglasses'
                 className='nav-menu__link'
               >
                 Lentes
               </Link>
               <Link
-                href='/lentesdesol'
+                href='/sunglasses'
                 className='nav-menu__link'
               >
                 Lentes de sol
               </Link>
               <Link
-                href='/accesorios'
+                href='/accessories'
                 className='nav-menu__link'
               >
                 Accesorios

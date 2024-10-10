@@ -9,56 +9,56 @@ import sunwomen from '../assets/img/category/subcategory/sun-women.jpg';
 
 export const cardEyeglassesMen = {
   title: 'Hombre',
-  link: '/lentes/hombres',
+  link: '/eyeglasses/men',
   img: framemen,
   imgAlt: 'category card eyeglasses men',
 };
 
 export const cardEyeglassesWomen = {
   title: 'Mujer',
-  link: '/lentes/mujeres',
+  link: '/eyeglasses/women',
   img: framewomen,
   imgAlt: 'category card eyeglasses women',
 };
 
 export const cardEyeglassesKids = {
   title: 'Niños',
-  link: '/lentes/ninos',
+  link: '/eyeglasses/kids',
   img: framekids,
   imgAlt: 'category card Sunglasses kids',
 };
 
 export const cardSunglassesMen = {
   title: 'Hombre',
-  link: '/lentesdesol/hombres',
+  link: '/sunglasses/men',
   img: sunmen,
   imgAlt: 'category card Sunglasses men',
 };
 
 export const cardSunglassesWomen = {
   title: 'Mujer',
-  link: '/lentesdesol/mujeres',
+  link: '/sunglasses/women',
   img: sunwomen,
   imgAlt: 'category card Sunglasses women',
 };
 
 export const cardSunglassesKids = {
   title: 'Niños',
-  link: '/lentesdesol/ninos',
+  link: '/sunglasses/kids',
   img: sunkids,
   imgAlt: 'category card Sunglasses kids',
 };
 
 export const cardAccessories = {
-  title: 'Complementos',
-  link: '/accesorios/complementos',
+  title: 'Extras',
+  link: '/accessories/extras',
   img: accessory,
   imgAlt: 'category card accessories',
 };
 
 export const cardClean = {
   title: 'Limpieza',
-  link: '/accesorios/limpieza',
+  link: '/accessories/cleaning',
   img: clean,
   imgAlt: 'category card clean accessories',
 };

@@ -13,19 +13,19 @@ function NavBar() {
     >
       <ul className='nav__links'>
         <Link
-          href='/lentes'
+          href='/eyeglasses'
           className='nav__link'
         >
           Lentes
         </Link>
         <Link
-          href='/lentesdesol'
+          href='/sunglasses'
           className='nav__link'
         >
           Lentes de sol
         </Link>
         <Link
-          href='/accesorios'
+          href='/accessories'
           className='nav__link'
         >
           Accesorios

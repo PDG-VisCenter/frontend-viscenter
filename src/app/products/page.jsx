@@ -230,6 +230,7 @@ function Search() {
                   xxl={8}
                 >
                   <ProductCard
+                    id={product.productID}
                     name={product.name}
                     price={product.price}
                   />
