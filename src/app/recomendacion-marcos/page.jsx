@@ -25,7 +25,7 @@ function FaceLandmarkerComponent() {
   const [isModalVisible, setIsModalVisible] = useState(true);
   const [buttonsDisabled, setButtonsDisabled] = useState(false);
   const [products, setProducts] = useState([]);
-  const [pagination, setPagination] = useState({ page: 1, size: 5, total: 0 });
+  const [pagination, setPagination] = useState({ page: 1, size: 3, total: 0 });
 
   const faceShapeInfo = {
     Oval: {
@@ -62,6 +62,10 @@ function FaceLandmarkerComponent() {
   };
 
   useEffect(() => {
+    if (faceShape.recommendedFrame) {
+      fetchRecommendedFrames(faceShape.recommendedFrame, pagination.page, pagination.size);
+    }
+
     const faceMeshInstance = new FaceMesh({
       locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/${file}`,
     });
@@ -96,24 +100,29 @@ function FaceLandmarkerComponent() {
         camera.stop();
       }
     };
-  }, [cameraActive]);
+  }, [cameraActive, pagination.page, faceShape.recommendedFrame]);
 
-  const fetchRecommendedFrames = async (searchTerm) => {
+  const fetchRecommendedFrames = async (searchTerm, page, size) => {
     try {
       const response = await axios.get(`http://localhost:5203/api/Product/search-shape`, {
         params: {
           searchTerm,
-          page: pagination.page,
-          size: pagination.size,
+          page,
+          size,
         },
       });
 
-      const { data, totalCount, totalPages } = response.data;
+      const { data, totalCount } = response.data;
       setProducts(data);
-      setPagination((prev) => ({ ...prev, total: totalCount, totalPages }));
+      setPagination((prev) => ({ ...prev, total: totalCount }));
     } catch (error) {
       console.error('Error al obtener productos recomendados:', error.message);
     }
+  };
+
+  const handlePaginationChange = (page) => {
+    setPagination((prev) => ({ ...prev, page }));
+    fetchRecommendedFrames(faceShape.recommendedFrame, page, pagination.size);
   };
 
   function onResults(results) {
@@ -210,7 +219,7 @@ function FaceLandmarkerComponent() {
         confidence: (confidence * 100).toFixed(2) + '%',
       });
 
-      fetchRecommendedFrames(faceShapeData.recommendedFrame);
+      fetchRecommendedFrames(faceShapeData.recommendedFrame, pagination.page, pagination.size);
     } catch (error) {
       console.error('Error al subir la imagen:', error.message);
     } finally {
@@ -396,7 +405,7 @@ function FaceLandmarkerComponent() {
                               cover={
                                 <Image
                                   alt={product.name}
-                                  src={product.images.length > 0 ? product.images[0] : marcos}
+                                  src={product.images.length > 0 ? marcos : marcos}
                                   height={200}
                                   style={{ objectFit: 'cover' }}
                                 />
@@ -420,13 +429,15 @@ function FaceLandmarkerComponent() {
                         ))}
                       </Row>
 
-                      <Pagination
-                        current={pagination.page}
-                        total={pagination.total}
-                        pageSize={pagination.size}
-                        onChange={(page) => setPagination((prev) => ({ ...prev, page }))}
-                        style={{ marginTop: '16px', textAlign: 'center' }}
-                      />
+                      {products.length > 0 && (
+                        <Pagination
+                          current={pagination.page}
+                          pageSize={pagination.size}
+                          total={pagination.total}
+                          onChange={handlePaginationChange}
+                          showSizeChanger={false}
+                        />
+                      )}
                     </>
                   )
                 )}

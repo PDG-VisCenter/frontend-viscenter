@@ -38,7 +38,8 @@ function Appointments() {
     const filtered = appointments.filter(appointment =>
       appointment.patientName.toLowerCase().includes(value.toLowerCase()) ||
       appointment.serviceType.toLowerCase().includes(value.toLowerCase()) ||
-      appointment.status.toLowerCase().includes(value.toLowerCase())
+      appointment.status.toLowerCase().includes(value.toLowerCase()) ||
+      appointment.doctorName.toLowerCase().includes(value.toLowerCase())
     );
     setFilteredAppointments(filtered);
     setSearchText(value);
@@ -137,7 +138,7 @@ function Appointments() {
               columns={columns}
               dataSource={filteredAppointments}
               rowKey='historyID'
-              pagination={{ pageSize: 10 }}
+              pagination={{ pageSize: 10, showSizeChanger: false}}
               loading={loading}
               scroll={{ y: 400 }}
             />
