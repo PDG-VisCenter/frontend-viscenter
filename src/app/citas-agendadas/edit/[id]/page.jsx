@@ -118,21 +118,24 @@ function EditAppointment() {
   };
 
   const handleUpdate = () => {
-    console.log(formData);
     if (!validateDate(formData.patientBirthday)) {
       message.error('La fecha de nacimiento no puede ser una fecha futura.');
       return;
     }
 
-    if (!validateTime(selectedAvailability)) {
-      message.error('El horario seleccionado ya ha pasado.');
-      return;
+    const availabilityToUpdate = formData.availabilityID || previousAvailability;
+
+    if (selectedAvailability && selectedAvailability.availabilityID !== previousAvailability) {
+      if (!validateTime(selectedAvailability)) {
+        message.error('El horario seleccionado ya ha pasado.');
+        return;
+      }
     }
 
     axios
       .put('http://localhost:5281/api/Appointment', {
         userID: session.userId,
-        availabilityID: formData.availabilityID,
+        availabilityID: availabilityToUpdate,
         appointmentDate: formData.appointmentDate,
         status: formData.status,
         description: formData.description,
@@ -150,14 +153,18 @@ function EditAppointment() {
             isAvailable: true,
           });
         }
-        axios
-          .patch(`http://localhost:5281/api/Availability/${formData.availabilityID}`, {
-            isAvailable: false,
-          })
-          .then(() => {
-            router.push('/pagina-citas');
-          })
-          .catch((error) => console.error('Error updating new availability:', error));
+        if (availabilityToUpdate !== previousAvailability) {
+          axios
+            .patch(`http://localhost:5281/api/Availability/${availabilityToUpdate}`, {
+              isAvailable: false,
+            })
+            .then(() => {
+              router.push('/pagina-citas');
+            })
+            .catch((error) => console.error('Error updating new availability:', error));
+        } else {
+          router.push('/pagina-citas');
+        }
       })
       .catch((error) => console.error('Error updating appointment:', error));
   };
@@ -303,7 +310,7 @@ function EditAppointment() {
               label='Horario Disponible'
               name='availabilityID'
               initialValue={availabilities.length > 0 ? availabilities[0].availabilityID : ''}
-              rules={[{ required: true, message: 'Por favor, selecciona un horario disponible' }]}
+              rules={[{ required: false, message: 'Por favor, selecciona un horario disponible' }]}
             >
               <Select
                 defaultValue={availabilities.length > 0 ? availabilities[0].availabilityID : ''}

@@ -317,7 +317,7 @@ function ScheduleAppointment() {
               </Text>
               <br />
               <Text>
-                <strong>Fecha de Nacimiento:</strong> {formData.birthDate}
+                <strong>Fecha de Nacimiento:</strong> {formData.patientBirthday}
               </Text>
               <br />
               <Text>

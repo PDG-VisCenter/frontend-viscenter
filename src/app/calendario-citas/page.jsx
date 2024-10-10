@@ -14,6 +14,7 @@ const ExtendedAppointment = () => {
   const [schedules, setSchedules] = useState([]);
   const [serviceTypes, setServiceTypes] = useState([]);
   const [doctors, setDoctors] = useState([]);
+  const [unavailableSchedules, setUnavailableSchedules] = useState([]);
   const [showForm, setShowForm] = useState(false);
   const [showCancelModal, setShowCancelModal] = useState(false);
   const [showDayAppointmentModal, setShowDayAppointmentModal] = useState(false);
@@ -40,23 +41,40 @@ const ExtendedAppointment = () => {
     if (status === 'loading') {
       return;
     }
-  
+
     if (!session || !session.userId) {
       return;
     }
     fetchAppointments();
     fetchServiceTypes();
     fetchDoctors();
-    axios.get('http://localhost:5281/api/ExtendedAppointment/schedules')
-      .then(response => {
-        const schedulesData = response.data.map(schedule => ({
+    axios
+      .get('http://localhost:5281/api/ExtendedAppointment/schedules')
+      .then((response) => {
+        const schedulesData = response.data.map((schedule) => ({
           id: schedule.scheduleID,
           time: `${schedule.startTime} - ${schedule.endTime}`,
         }));
         setSchedules(schedulesData);
       })
-      .catch(error => console.error('Error fetching schedules:', error));
+      .catch((error) => console.error('Error fetching schedules:', error));
+    axios
+      .get('http://localhost:5281/api/ExtendedAvailability')
+      .then((response) => {
+        setUnavailableSchedules(response.data);
+      })
+      .catch((error) => console.error('Error fetching unavailable schedules:', error));
   }, [session, status]);
+
+  const fetchUnavailableSchedules = async () => {
+    try {
+      const response = await axios.get('http://localhost:5281/api/ExtendedAvailability');
+      const unavailableSchedules = response.data.filter((item) => !item.isAvailable);
+      setUnavailableSchedules(unavailableSchedules);
+    } catch (error) {
+      console.error('Error al obtener horarios ocupados:', error);
+    }
+  };
 
   const fetchAppointments = async () => {
     try {
@@ -75,7 +93,7 @@ const ExtendedAppointment = () => {
   const fetchServiceTypes = async () => {
     try {
       const response = await axios.get('http://localhost:5281/api/AppointmentService');
-      const formattedServices = response.data.map(service => ({
+      const formattedServices = response.data.map((service) => ({
         value: service.serviceType,
         label: service.serviceType,
       }));
@@ -88,7 +106,7 @@ const ExtendedAppointment = () => {
   const fetchDoctors = async () => {
     try {
       const response = await axios.get('http://localhost:5281/api/Doctor');
-      const formattedDoctors = response.data.map(doctor => ({
+      const formattedDoctors = response.data.map((doctor) => ({
         value: doctor.doctorName,
         label: doctor.doctorName,
       }));
@@ -125,6 +143,10 @@ const ExtendedAppointment = () => {
       return;
     }
 
+    const unavailableForSelectedDate = unavailableSchedules
+      .filter((ua) => ua.appointmentDate === formattedDate)
+      .map((ua) => ua.scheduleID);
+
     const existingAppointment = appointments.find((app) => app.appointmentDate === formattedDate);
 
     if (existingAppointment) {
@@ -146,6 +168,9 @@ const ExtendedAppointment = () => {
       });
       setShowForm(true);
       form.resetFields();
+      form.setFieldsValue({
+        scheduleID: schedules.find((s) => !unavailableForSelectedDate.includes(s.id))?.id || schedules[0]?.id,
+      });
     }
   };
 
@@ -169,7 +194,7 @@ const ExtendedAppointment = () => {
       ...event,
       patientBirthday: moment(event.patientBirthday),
     });
-};
+  };
 
   const handleFormSubmit = async (values) => {
     const updatedData = { ...formData, ...values };
@@ -185,7 +210,7 @@ const ExtendedAppointment = () => {
       fetchAppointments();
       setShowForm(false);
     } catch (error) {
-      message.error('Error al enviar los datos del formulario');
+      message.error('Horario no disponible, seleccione otro horario.');
     }
   };
 
@@ -279,86 +304,153 @@ const ExtendedAppointment = () => {
         },
       }}
     >
-    <div style={{backgroundColor: '#f0f2f5', padding:'5px'}}>
-    <h1 style={{ fontSize: '24px', marginBottom: '24px', color: '#fe0034' }}>Agendar y Gestionar Citas</h1>
-      <AntCalendar cellRender={dateCellRender} onSelect={handleDateClick} />
-      <Modal
-        title="Cita del Día"
-        open={showDayAppointmentModal}
-        onCancel={() => setShowDayAppointmentModal(false)}
-        footer={[
-          <Button key="cancel" onClick={() => setShowDayAppointmentModal(false)}>
-            Cancelar
-          </Button>,
-          <Button key="confirm" type="primary" onClick={handleConvertToDailyAppointment}>
-            Convertir a Cita del Día
-          </Button>,
-        ]}
-      >
-        {currentAppointment && (
-          <div>
-            <p><strong>Nombre:</strong> {currentAppointment.patientName}</p>
-            <p><strong>Fecha de Nacimiento:</strong> {currentAppointment.patientBirthday}</p>
-            <p><strong>Servicio:</strong> {currentAppointment.serviceType}</p>
-            <p><strong>Doctor Doctora:</strong> {currentAppointment.doctorName}</p>
-            <p><strong>Síntomas:</strong> {currentAppointment.symptoms}</p>
-            <p><strong>Horario:</strong> {schedules.find((s) => s.id === currentAppointment.scheduleID)?.time}</p>
-          </div>
-        )}
-      </Modal>
-      <Modal
-        title="¿Estás seguro de que deseas cancelar esta cita?"
-        open={showCancelModal}
-        onCancel={() => setShowCancelModal(false)}
-        footer={[
-          <Button key="back" onClick={() => setShowCancelModal(false)}>
-            No
-          </Button>,
-          <Button key="submit" type="primary" onClick={confirmDelete}>
-            Sí
-          </Button>,
-        ]}
-      >
-        <Form layout="vertical">
-          <Form.Item label="Motivo de la cancelación">
-            <Input.TextArea
-              value={cancelReason}
-              onChange={(e) => setCancelReason(e.target.value)}
-              rows={4}
-              required
-            />
-          </Form.Item>
-        </Form>
-      </Modal>
-      <Modal
-        title="Formulario de Cita"
-        open={showForm}
-        onCancel={() => setShowForm(false)}
-        footer={null}
-      >
-        <Form form={form} onFinish={handleFormSubmit} layout="vertical">
-          <Form.Item label="Nombre" name="patientName" rules={[{ required: true, message: 'Por favor ingresa tu nombre' }]}>
-            <Input />
-          </Form.Item>
-          <Form.Item label="Fecha de Nacimiento" name="patientBirthday" rules={[{ required: true, message: 'Por favor selecciona tu fecha de nacimiento' }]}>
-            <DatePicker />
-          </Form.Item>
-          <Form.Item label="Servicio" name="serviceType" rules={[{ required: true, message: 'Por favor selecciona un servicio' }]}>
-            <Select options={serviceTypes} />
-          </Form.Item>
-          <Form.Item label="Doctor Doctora" name="doctorName" rules={[{ required: true, message: 'Por favor selecciona un Doctor o Doctora' }]}>
-            <Select options={doctors} />
-          </Form.Item>
-          <Form.Item label="Síntomas" name="symptoms">
-            <Input.TextArea rows={4} />
-          </Form.Item>
-          <Form.Item label="Horario" name="scheduleID" rules={[{ required: true, message: 'Por favor selecciona un horario' }]}>
-            <Select options={schedules.map((schedule) => ({ value: schedule.id, label: schedule.time }))} />
-          </Form.Item>
-          <Button type="primary" htmlType="submit">
-            {formData.appointmentID ? 'Actualizar' : 'Agendar'}
-          </Button>
-          {formData.appointmentID > 0 && (
+      <div style={{ backgroundColor: '#f0f2f5', padding: '5px' }}>
+        <h1 style={{ fontSize: '24px', marginBottom: '24px', color: '#fe0034' }}>Agendar y Gestionar Citas</h1>
+        <AntCalendar
+          cellRender={dateCellRender}
+          onSelect={handleDateClick}
+        />
+        <Modal
+          title='Cita del Día'
+          open={showDayAppointmentModal}
+          onCancel={() => setShowDayAppointmentModal(false)}
+          footer={[
+            <Button
+              key='cancel'
+              onClick={() => setShowDayAppointmentModal(false)}
+            >
+              Cancelar
+            </Button>,
+            <Button
+              key='confirm'
+              type='primary'
+              onClick={handleConvertToDailyAppointment}
+            >
+              Convertir a Cita del Día
+            </Button>,
+          ]}
+        >
+          {currentAppointment && (
+            <div>
+              <p>
+                <strong>Nombre:</strong> {currentAppointment.patientName}
+              </p>
+              <p>
+                <strong>Fecha de Nacimiento:</strong> {currentAppointment.patientBirthday}
+              </p>
+              <p>
+                <strong>Servicio:</strong> {currentAppointment.serviceType}
+              </p>
+              <p>
+                <strong>Doctor Doctora:</strong> {currentAppointment.doctorName}
+              </p>
+              <p>
+                <strong>Síntomas:</strong> {currentAppointment.symptoms}
+              </p>
+              <p>
+                <strong>Horario:</strong> {schedules.find((s) => s.id === currentAppointment.scheduleID)?.time}
+              </p>
+            </div>
+          )}
+        </Modal>
+        <Modal
+          title='¿Estás seguro de que deseas cancelar esta cita?'
+          open={showCancelModal}
+          onCancel={() => setShowCancelModal(false)}
+          footer={[
+            <Button
+              key='back'
+              onClick={() => setShowCancelModal(false)}
+            >
+              No
+            </Button>,
+            <Button
+              key='submit'
+              type='primary'
+              onClick={confirmDelete}
+            >
+              Sí
+            </Button>,
+          ]}
+        >
+          <Form layout='vertical'>
+            <Form.Item label='Motivo de la cancelación'>
+              <Input.TextArea
+                value={cancelReason}
+                onChange={(e) => setCancelReason(e.target.value)}
+                rows={4}
+                required
+              />
+            </Form.Item>
+          </Form>
+        </Modal>
+        <Modal
+          title='Formulario de Cita'
+          open={showForm}
+          onCancel={() => setShowForm(false)}
+          footer={null}
+        >
+          <Form
+            form={form}
+            onFinish={handleFormSubmit}
+            layout='vertical'
+          >
+            <Form.Item
+              label='Nombre'
+              name='patientName'
+              rules={[{ required: true, message: 'Por favor ingresa tu nombre' }]}
+            >
+              <Input />
+            </Form.Item>
+            <Form.Item
+              label='Fecha de Nacimiento'
+              name='patientBirthday'
+              rules={[{ required: true, message: 'Por favor selecciona tu fecha de nacimiento' }]}
+            >
+              <DatePicker />
+            </Form.Item>
+            <Form.Item
+              label='Servicio'
+              name='serviceType'
+              rules={[{ required: true, message: 'Por favor selecciona un servicio' }]}
+            >
+              <Select options={serviceTypes} />
+            </Form.Item>
+            <Form.Item
+              label='Doctor Doctora'
+              name='doctorName'
+              rules={[{ required: true, message: 'Por favor selecciona un Doctor o Doctora' }]}
+            >
+              <Select options={doctors} />
+            </Form.Item>
+            <Form.Item
+              label='Síntomas'
+              name='symptoms'
+            >
+              <Input.TextArea rows={4} />
+            </Form.Item>
+            <Form.Item
+              label='Horario'
+              name='scheduleID'
+              rules={[{ required: true, message: 'Por favor selecciona un horario' }]}
+            >
+              <Select
+                options={schedules.map((schedule) => ({
+                  value: schedule.id,
+                  label: schedule.time,
+                  disabled: unavailableSchedules.some(
+                    (ua) => ua.scheduleID === schedule.id && ua.appointmentDate === formData.appointmentDate
+                  ),
+                }))}
+              />
+            </Form.Item>
+            <Button
+              type='primary'
+              htmlType='submit'
+            >
+              {formData.appointmentID ? 'Actualizar' : 'Agendar'}
+            </Button>
+            {formData.appointmentID > 0 && (
               <Button
                 type='danger'
                 style={{ marginLeft: '8px' }}
@@ -367,9 +459,9 @@ const ExtendedAppointment = () => {
                 Eliminar
               </Button>
             )}
-        </Form>
-      </Modal>
-    </div>
+          </Form>
+        </Modal>
+      </div>
     </ConfigProvider>
   );
 };
