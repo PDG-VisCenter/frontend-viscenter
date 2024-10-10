@@ -9,14 +9,17 @@ import {
   gender,
   sortByElements,
 } from '@/data/searchFilters';
-import { Button, Checkbox, Col, Collapse, Dropdown, Input, Layout, Menu, Pagination, Row } from 'antd';
+import { Button, Checkbox, Col, Collapse, Dropdown, Input, Layout, Menu, Pagination, Row, Skeleton } from 'antd';
+import { useDispatch, useSelector } from 'react-redux';
 import { Content } from 'antd/es/layout/layout';
 import { DownOutlined } from '@ant-design/icons';
+import { fetchAllProducts } from '@/lib/features/productsSlice';
 import Footer from '@/components/Footer';
 import HeaderSimple from '@/components/HeaderSimple';
 import ProductCard from '../components/ProductCard';
 import Sider from 'antd/es/layout/Sider';
 import Title from 'antd/es/typography/Title';
+import { useEffect } from 'react';
 
 const onSearch = (value, _e, info) => console.log(info?.source, value);
 
@@ -138,6 +141,31 @@ const siderStyle = {
 };
 
 function Search() {
+  const dispatch = useDispatch();
+  const productsItems = useSelector((state) => state.products.products);
+  const status = useSelector((state) => state.products.status);
+  const error = useSelector((state) => state.products.error);
+
+  useEffect(() => {
+    if (status === 'idle') {
+      dispatch(fetchAllProducts());
+    }
+  }, [status, dispatch]);
+
+  if (status === 'loading') {
+    return (
+      <Skeleton.Node
+        active
+        style={{
+          width: 160,
+        }}
+      />
+    );
+  }
+  if (status === 'failed') {
+    return <div>{error}</div>;
+  }
+
   return (
     <div>
       <HeaderSimple />
@@ -191,9 +219,9 @@ function Search() {
               Resultados para ...
             </Title>
             <Row gutter={[16, 16]}>
-              {[...Array(12)].map((_, index) => (
+              {productsItems.map((product) => (
                 <Col
-                  key={index}
+                  key={product.productID}
                   xs={24}
                   sm={24}
                   md={12}
@@ -201,7 +229,10 @@ function Search() {
                   xl={8}
                   xxl={8}
                 >
-                  <ProductCard />
+                  <ProductCard
+                    name={product.name}
+                    price={product.price}
+                  />
                 </Col>
               ))}
             </Row>
@@ -210,8 +241,8 @@ function Search() {
             <Pagination
               align='center'
               defaultCurrent={1}
-              defaultPageSize={20}
-              total={50}
+              defaultPageSize={12}
+              total={productsItems.length}
             />
             <br />
             <br />
