@@ -36,6 +36,9 @@ function Appointments() {
   const [location, setLocation] = useState({ lat: 0, lng: 0 });
   const [markerPosition, setMarkerPosition] = useState(location);
 
+  const [isServiceModalVisible, setIsServiceModalVisible] = useState(false);
+  const [isDoctorModalVisible, setIsDoctorModalVisible] = useState(false);
+
   useEffect(() => {
     fetchLocation();
     fetchAvailabilities();
@@ -210,12 +213,12 @@ function Appointments() {
 
   const handleEditService = (service) => {
     setEditingService(service);
-    setIsModalVisible(true);
+    setIsServiceModalVisible(true);
   };
 
   const handleEditDoctor = (doctor) => {
     setEditingDoctor(doctor);
-    setIsModalVisible(true);
+    setIsDoctorModalVisible(true);
   };
 
   const handleUpdateService = async () => {
@@ -412,22 +415,27 @@ function Appointments() {
             </Button>
 
             <Modal
-              title={editingService ? 'Editar Servicio' : 'Editar Doctor'}
-              open={isModalVisible}
-              onOk={editingService ? handleUpdateService : handleUpdateDoctor}
-              onCancel={() => setIsModalVisible(false)}
+              title='Editar Servicio'
+              open={isServiceModalVisible}
+              onOk={handleUpdateService}
+              onCancel={() => setIsServiceModalVisible(false)}
             >
-              {editingService ? (
-                <Input
-                  value={editingService?.serviceType}
-                  onChange={(e) => setEditingService({ ...editingService, serviceType: e.target.value })}
-                />
-              ) : (
-                <Input
-                  value={editingDoctor?.doctorName}
-                  onChange={(e) => setEditingDoctor({ ...editingDoctor, doctorName: e.target.value })}
-                />
-              )}
+              <Input
+                value={editingService?.serviceType}
+                onChange={(e) => setEditingService({ ...editingService, serviceType: e.target.value })}
+              />
+            </Modal>
+
+            <Modal
+              title='Editar Doctor'
+              open={isDoctorModalVisible}
+              onOk={handleUpdateDoctor}
+              onCancel={() => setIsDoctorModalVisible(false)}
+            >
+              <Input
+                value={editingDoctor?.doctorName}
+                onChange={(e) => setEditingDoctor({ ...editingDoctor, doctorName: e.target.value })}
+              />
             </Modal>
 
             <h2 style={{ marginTop: 16, fontWeight: 'bold', fontSize: '24px' }}>Actualizar Ubicación del Centro</h2>
