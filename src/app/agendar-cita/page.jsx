@@ -1,9 +1,10 @@
 'use client';
 
+import { useSession } from 'next-auth/react';
 import { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useRouter } from 'next/navigation';
-import { Button, Form, Input, Select, DatePicker, Alert, Typography, Steps, ConfigProvider } from 'antd';
+import { Button, Form, Input, Select, DatePicker, Alert, Typography, Steps, ConfigProvider, message } from 'antd';
 import moment from 'moment';
 import Map from '../components/Map';
 
@@ -11,6 +12,7 @@ const { Title, Text } = Typography;
 const { Step } = Steps;
 
 function ScheduleAppointment() {
+  const { data: session, status } = useSession();
   const router = useRouter();
   const [step, setStep] = useState(1);
   const [formData, setFormData] = useState({
@@ -34,20 +36,27 @@ function ScheduleAppointment() {
   const [error, setError] = useState('');
 
   useEffect(() => {
+    if (status === 'loading') {
+      return;
+    }
+  
+    if (!session || !session.userId) {
+      return;
+    }
     axios
       .get('http://localhost:5281/api/Availability')
       .then((response) => setAvailabilities(response.data))
-      .catch((error) => console.error(error));
+      .catch(error => console.error('Error fetching availabilities:', error));
 
     axios
       .get('http://localhost:5281/api/AppointmentService')
       .then((response) => setServices(response.data))
-      .catch((error) => console.error(error));
+      .catch(error => console.error('Error fetching services:', error));
 
     axios
       .get('http://localhost:5281/api/Doctor')
       .then((response) => setDoctors(response.data))
-      .catch((error) => console.error(error));
+      .catch(error => console.error('Error fetching doctor:', error));
 
     axios
       .get('http://localhost:5281/api/LocationCenter')
@@ -56,7 +65,7 @@ function ScheduleAppointment() {
         setLOCATION({ lat: location.latitude, lng: location.longitude });
       })
       .catch((error) => console.error(error));
-  }, []);
+  }, [session, status]);
 
   const validateDate = (date) => {
     const today = moment().startOf('day');
@@ -75,14 +84,18 @@ function ScheduleAppointment() {
   };
 
   const handleSubmit = (values) => {
+    if (!session || !session.userId) {
+      message.error('No se ha iniciado sesión. Por favor, inicia sesión primero.');
+      return;
+    }
     if (!validateDate(formData.birthDate)) {
-      setError('La fecha de nacimiento no puede ser una fecha futura.');
+      message.error('La fecha de nacimiento no puede ser una fecha futura.');
       return;
     }
 
     if (step === 1) {
       if (!validateTime(selectedAvailability)) {
-        setError('El horario seleccionado ya ha pasado.');
+        message.error('El horario seleccionado ya ha pasado.');
         return;
       }
       setStep(2);
@@ -92,7 +105,7 @@ function ScheduleAppointment() {
       axios
         .post('http://localhost:5281/api/Appointment', {
           ...formData,
-          userID: 1,
+          userID: session.userId,
           availabilityID: formData.availabilityID,
           appointmentDate: todayDate,
           status: formData.status,
@@ -140,7 +153,6 @@ function ScheduleAppointment() {
         selectedTime: `${selected.startTime} - ${selected.endTime}`,
       }));
       setSelectedAvailability(selected);
-      setError('');
     } else {
       setFormData((prevData) => ({
         ...prevData,
@@ -148,7 +160,6 @@ function ScheduleAppointment() {
         selectedTime: '',
       }));
       setSelectedAvailability(null);
-      setError('');
     }
   };
 

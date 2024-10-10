@@ -1,5 +1,6 @@
 'use client';
 
+import { useSession } from 'next-auth/react';
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import axios from 'axios';
@@ -7,6 +8,7 @@ import moment from 'moment';
 import { Calendar as AntCalendar, Modal, Form, Input, DatePicker, Select, Button, message, ConfigProvider } from 'antd';
 
 const ExtendedAppointment = () => {
+  const { data: session, status } = useSession();
   const [appointments, setAppointments] = useState([]);
   const [selectedDate, setSelectedDate] = useState(null);
   const [schedules, setSchedules] = useState([]);
@@ -18,7 +20,7 @@ const ExtendedAppointment = () => {
   const [cancelReason, setCancelReason] = useState('');
   const [formData, setFormData] = useState({
     appointmentID: 0,
-    userID: 1,
+    userID: 0,
     appointmentDate: '',
     status: 'Scheduled',
     description: '',
@@ -35,6 +37,13 @@ const ExtendedAppointment = () => {
   const [form] = Form.useForm();
 
   useEffect(() => {
+    if (status === 'loading') {
+      return;
+    }
+  
+    if (!session || !session.userId) {
+      return;
+    }
     fetchAppointments();
     fetchServiceTypes();
     fetchDoctors();
@@ -47,11 +56,11 @@ const ExtendedAppointment = () => {
         setSchedules(schedulesData);
       })
       .catch(error => console.error('Error fetching schedules:', error));
-  }, []);
+  }, [session, status]);
 
   const fetchAppointments = async () => {
     try {
-      const response = await axios.get('http://localhost:5281/api/ExtendedAppointment');
+      const response = await axios.get(`http://localhost:5281/api/ExtendedAppointment/user/${session.userId}`);
       const formattedAppointments = response.data.map((appointment) => ({
         ...appointment,
         appointmentDate: moment(appointment.appointmentDate).format('YYYY-MM-DD'),
@@ -124,7 +133,7 @@ const ExtendedAppointment = () => {
       setSelectedDate(date);
       setFormData({
         appointmentID: 0,
-        userID: 1,
+        userID: session.userId,
         appointmentDate: formattedDate,
         status: 'Scheduled',
         description: '',

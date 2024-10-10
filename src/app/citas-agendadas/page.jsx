@@ -1,5 +1,6 @@
 'use client';
 
+import { useSession } from 'next-auth/react';
 import { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useRouter } from 'next/navigation';
@@ -8,6 +9,7 @@ import { List, Card, Button, Typography, Spin, ConfigProvider } from 'antd';
 const { Title, Paragraph } = Typography;
 
 function ScheduledAppointments() {
+  const { data: session, status } = useSession();
   const [appointments, setAppointments] = useState([]);
   const [availabilities, setAvailabilities] = useState({});
   const [loading, setLoading] = useState(true);
@@ -15,7 +17,14 @@ function ScheduledAppointments() {
   const router = useRouter();
 
   useEffect(() => {
-    axios.get('http://localhost:5281/api/Appointment')
+    if (status === 'loading') {
+      return;
+    }
+  
+    if (!session || !session.userId) {
+      return;
+    }
+    axios.get(`http://localhost:5281/api/Appointment/user/${session.userId}`)
       .then(response => {
         const appointmentsData = response.data;
         setAppointments(appointmentsData);
@@ -34,7 +43,7 @@ function ScheduledAppointments() {
       .finally(() => {
         setLoading(false);
       });
-  }, []);
+  }, [session, status]);
 
   const handleEdit = (appointmentID) => {
     router.push(`/citas-agendadas/edit/${appointmentID}`);

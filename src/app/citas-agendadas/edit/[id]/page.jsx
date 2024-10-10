@@ -1,5 +1,6 @@
 'use client';
 
+import { useSession } from 'next-auth/react';
 import { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useRouter, useParams } from 'next/navigation';
@@ -11,11 +12,12 @@ const { Title, Paragraph, Text } = Typography;
 const { Option } = Select;
 
 function EditAppointment() {
+  const { data: session, status } = useSession();
   const router = useRouter();
   const { id } = useParams();
   const [formData, setFormData] = useState({
     appointmentID: '',
-    userID: '',
+    userID: 0,
     patientName: '',
     patientBirthday: '',
     symptoms: '',
@@ -38,6 +40,15 @@ function EditAppointment() {
   const [cancelReason, setCancelReason] = useState('');
 
   useEffect(() => {
+    if (status === 'loading') {
+      return;
+    }
+  
+    if (!session || !session.userId) {
+      setLoading(false);
+      return;
+    }
+
     if (id) {
       axios
         .get(`http://localhost:5281/api/Appointment/${id}`)
@@ -90,7 +101,7 @@ function EditAppointment() {
         })
         .catch((error) => console.error(error));
     }
-  }, [id]);
+  }, [id, session, status]);
 
   const validateDate = (date) => {
     const today = moment().startOf('day');
@@ -120,7 +131,7 @@ function EditAppointment() {
 
     axios
       .put('http://localhost:5281/api/Appointment', {
-        userID: 1,
+        userID: session.userId,
         availabilityID: formData.availabilityID,
         appointmentDate: formData.appointmentDate,
         status: formData.status,
