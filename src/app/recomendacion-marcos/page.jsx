@@ -205,7 +205,7 @@ function FaceLandmarkerComponent() {
       const response = await axios({
         method: 'POST',
         url: 'https://classify.roboflow.com/face-shape-d4mv0/1',
-        params: { api_key: 'DMcwoln0peywtlKgiHHT' },
+        params: { api_key: process.env.NEXT_PUBLIC_FACE_SHAPE_MODEL_KEY },
         data: imageBase64,
         headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
       });
@@ -272,7 +272,7 @@ function FaceLandmarkerComponent() {
 
         <div
           className='site-layout-content'
-          style={{ padding: '24px', minHeight: 'calc(100vh - 64px)' }}
+          style={{ minHeight: 'calc(100vh - 64px)' }}
         >
           <Title
             level={2}
