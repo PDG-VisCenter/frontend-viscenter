@@ -7,7 +7,7 @@ import Footer from '@/components/Footer';
 import HeaderSimple from '@/components/HeaderSimple';
 import Layout from 'antd/es/layout/layout';
 
-function Accesorios() {
+function Accessories() {
   return (
     <Layout
       style={{
@@ -58,4 +58,4 @@ function Accesorios() {
   );
 }
 
-export default Accesorios;
+export default Accessories;

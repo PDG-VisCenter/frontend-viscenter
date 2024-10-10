@@ -2,7 +2,7 @@
 
 import { SearchOutlined, ShoppingCartOutlined, UserOutlined } from '@ant-design/icons';
 import { signIn, useSession } from 'next-auth/react';
-import { Button } from 'antd';
+import { Badge, Button } from 'antd';
 import Image from 'next/image';
 import Link from 'next/link';
 import logo from '../assets/img/logo-black.png';
@@ -40,7 +40,7 @@ function Header() {
         </Link>
         <div className='header__icons-wrapper'>
           <Link
-            href='/buscar'
+            href='/products'
             className='header__btn-icon icon__search material-symbols-outlined'
             data-testid='search-button'
           >
@@ -73,7 +73,9 @@ function Header() {
               color: 'black',
             }}
           >
-            <ShoppingCartOutlined className='header__icon' />
+            <Badge count={1}>
+              <ShoppingCartOutlined style={{ fontSize: 32 }} />
+            </Badge>
           </Link>
         </div>
       </div>
