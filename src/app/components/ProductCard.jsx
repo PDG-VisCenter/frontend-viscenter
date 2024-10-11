@@ -2,10 +2,9 @@ import { Card } from 'antd';
 import Image from 'next/image';
 import Link from 'next/link';
 import PropTypes from 'prop-types';
-import pruebaimg from '../../assets/img/category/accessories.jpg';
 
 function ProductCard(props) {
-  const { id, name, price } = props;
+  const { id, img, name, price } = props;
 
   return (
     <Link href={`/products/${id}`}>
@@ -19,10 +18,9 @@ function ProductCard(props) {
         }}
         cover={
           <Image
-            alt='example'
-            src={pruebaimg}
-            layout='responsive'
-            width={150}
+            alt={name}
+            src={img}
+            width={200}
             height={250}
           />
         }
@@ -36,8 +34,13 @@ function ProductCard(props) {
 
 ProductCard.propTypes = {
   id: PropTypes.number.isRequired,
+  img: PropTypes.string,
   name: PropTypes.string.isRequired,
   price: PropTypes.number.isRequired,
+};
+
+ProductCard.defaultProps = {
+  img: 'https://res.cloudinary.com/dyrgwac0i/image/upload/v1728624039/61Ov6KHH4_L_w4htwj.jpg',
 };
 
 export default ProductCard;

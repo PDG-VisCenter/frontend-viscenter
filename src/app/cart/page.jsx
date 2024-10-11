@@ -1,11 +1,24 @@
-import { Button, Col, Divider, Row, Space } from 'antd';
+'use client';
+
+import { Button, Col, Divider, Empty, Row, Space } from 'antd';
 import CartCard from './CartCard';
 import Footer from '@/components/Footer';
 import HeaderSimple from '@/components/HeaderSimple';
 import Layout from 'antd/es/layout/layout';
 import Link from 'next/link';
+import { useSelector } from 'react-redux';
+import { useRouter } from 'next/navigation';
 
 function Cart() {
+  const cartItems = useSelector((state) => state.cart.items);
+  const cartTotalPrice = useSelector((state) => state.cart.totalPrice);
+  const cartTotalItems = useSelector((state) => state.cart.totalItems);
+  const router = useRouter();
+
+  const onClickCheckout = () => {
+    router.push('https://buy.stripe.com/test_4gw2bw7AL6hI760fYY');
+  };
+
   return (
     <Layout
       style={{
@@ -26,27 +39,67 @@ function Cart() {
           display: 'flex',
         }}
       >
-        <CartCard />
-        <CartCard />
-        <Divider
-          style={{
-            borderColor: 'black',
-          }}
-        />
-        <Row
-          style={{
-            display: 'flex',
-            flexDirection: 'row',
-            justifyContent: 'space-between',
-          }}
-        >
-          <Col
-            style={{
-              display: 'flex',
-              justifyContent: 'center',
-              alignContent: 'center',
-            }}
-          >
+        {cartTotalItems > 0 ? (
+          <>
+            {cartItems.map((item) => (
+              <CartCard
+                key={item.id}
+                img={item.img}
+                name={item.name}
+                price={item.price}
+                color={item.color}
+                sku={item.sku}
+              />
+            ))}
+            <Divider
+              style={{
+                borderColor: 'black',
+              }}
+            />
+            <Row
+              style={{
+                display: 'flex',
+                flexDirection: 'row',
+                justifyContent: 'space-between',
+              }}
+            >
+              <Col
+                style={{
+                  display: 'flex',
+                  justifyContent: 'center',
+                  alignContent: 'center',
+                }}
+              >
+                <Link
+                  href='/'
+                  style={{
+                    fontSize: '16px',
+                  }}
+                >
+                  Continue Shopping
+                </Link>
+              </Col>
+              <Col
+                style={{
+                  width: '300px',
+                }}
+              >
+                <p>Total: {cartTotalPrice}</p>
+                <br />
+                <Button
+                  type='primary'
+                  size='large'
+                  onClick={onClickCheckout}
+                  block
+                >
+                  Checkout
+                </Button>
+              </Col>
+            </Row>
+          </>
+        ) : (
+          <div>
+            <Empty />
             <Link
               href='/'
               style={{
@@ -55,23 +108,8 @@ function Cart() {
             >
               Continue Shopping
             </Link>
-          </Col>
-          <Col
-            style={{
-              width: '300px',
-            }}
-          >
-            <p>Total</p>
-            <br />
-            <Button
-              type='primary'
-              size='large'
-              block
-            >
-              Checkout
-            </Button>
-          </Col>
-        </Row>
+          </div>
+        )}
       </Space>
       <Footer />
     </Layout>

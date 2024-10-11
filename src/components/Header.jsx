@@ -9,9 +9,12 @@ import logo from '../assets/img/logo-black.png';
 import NavBar from './NavBar';
 import NavBarSticky from './NavBarSticky';
 import { useInView } from 'react-intersection-observer';
+import { useSelector } from 'react-redux';
 
 function Header() {
   const { data: session, status } = useSession();
+  const cartTotalItems = useSelector((state) => state.cart.totalItems);
+
   // const [cartItems] = useContext(CartContext);
 
   const [ref, inView] = useInView({
@@ -73,7 +76,7 @@ function Header() {
               color: 'black',
             }}
           >
-            <Badge count={1}>
+            <Badge count={cartTotalItems}>
               <ShoppingCartOutlined style={{ fontSize: 32 }} />
             </Badge>
           </Link>

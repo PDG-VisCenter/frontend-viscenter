@@ -8,9 +8,11 @@ import { useEffect, useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import logo from '../assets/img/logo-white.png';
+import { useSelector } from 'react-redux';
 
 function NavBarSticky() {
   const { data: session, status } = useSession();
+  const cartTotalItems = useSelector((state) => state.cart.totalItems);
 
   const [menuVisible, setMenuVisibility] = useState(false);
   // const [cartItems] = useContext(CartContext);
@@ -128,7 +130,7 @@ function NavBarSticky() {
           href='/cart'
           className='nav__btn-icon icon__shopping-bag material-symbols-outlined'
         >
-          <Badge count={1}>
+          <Badge count={cartTotalItems}>
             <ShoppingCartOutlined style={{ fontSize: 32, color: 'white' }} />
           </Badge>
         </Link>
