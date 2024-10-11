@@ -8,7 +8,7 @@ const initialState = {
 };
 
 export const fetchAllProducts = createAsyncThunk('products/fetchProducts', async () => {
-  const response = await axios.get('https://localhost:7235/api/Product');
+  const response = await axios.get('http://localhost:5203/api/Product');
   return response.data;
 });
 

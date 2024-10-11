@@ -231,6 +231,7 @@ function Search() {
                 >
                   <ProductCard
                     id={product.productID}
+                    img={product.images[0]}
                     name={product.name}
                     price={product.price}
                   />
