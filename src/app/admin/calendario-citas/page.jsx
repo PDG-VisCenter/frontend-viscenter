@@ -2,11 +2,12 @@
 
 import { useState, useEffect } from 'react';
 import axios from 'axios';
-import { Layout, theme, Table, Button, Modal, Input, DatePicker, Typography } from 'antd';
+import { Layout, theme, Table, Button, Modal, Input, DatePicker, Typography, message } from 'antd';
 import { Content } from 'antd/es/layout/layout';
 import HeaderSeller from '../components/HeaderSeller';
 import SiderMenuSeller from '../components/SiderMenuSeller';
 import dayjs from 'dayjs';
+import { fetchUserEmail } from '@/app/services/keycloakServices';
 
 const { Title } = Typography;
 
@@ -24,22 +25,24 @@ function Appointments() {
   } = theme.useToken();
 
   useEffect(() => {
-    axios.get('http://localhost:5281/api/ExtendedAppointment')
-      .then(response => {
+    axios
+      .get('http://localhost:5281/api/ExtendedAppointment')
+      .then((response) => {
         const appointmentsData = response.data;
         setAppointments(appointmentsData);
       })
-      .catch(error => console.error('Error fetching appointments:', error));
+      .catch((error) => console.error('Error fetching appointments:', error));
 
-    axios.get('http://localhost:5281/api/ExtendedAppointment/schedules')
-      .then(response => {
-        const schedulesData = response.data.map(schedule => ({
+    axios
+      .get('http://localhost:5281/api/ExtendedAppointment/schedules')
+      .then((response) => {
+        const schedulesData = response.data.map((schedule) => ({
           id: schedule.scheduleID,
           time: `${schedule.startTime} - ${schedule.endTime}`,
         }));
         setSchedules(schedulesData);
       })
-      .catch(error => console.error('Error fetching schedules:', error));
+      .catch((error) => console.error('Error fetching schedules:', error));
   }, []);
 
   const handleDateChange = (date) => {
@@ -51,36 +54,52 @@ function Appointments() {
     setShowModal(true);
   };
 
-  const confirmCancel = () => {
+  const confirmCancel = async () => {
     if (!cancelReason) {
       setError('Debe ingresar una razón para cancelar la cita.');
       return;
     }
 
     const today = dayjs().format('YYYY-MM-DD');
-    
-    axios
-      .delete(`http://localhost:5281/api/ExtendedAppointment/${appointmentToCancel.appointmentID}`)
-      .then(() => {
-        if (dayjs(appointmentToCancel.appointmentDate).format('YYYY-MM-DD') === today) {
-          return axios.patch(`http://localhost:5281/api/Availability/${appointmentToCancel.scheduleID}`, {
-            isAvailable: true,
-          });
-        }
-      })
-      .then(() => {
-        setAppointments(appointments.filter(app => app.appointmentID !== appointmentToCancel.appointmentID));
-        setShowModal(false);
-        setCancelReason('');
-      })
-      .catch(error => {
-        console.error('Error cancelling appointment:', error);
-        setError('Error al cancelar la cita.');
-      });
+
+    try {
+      await axios.delete(`http://localhost:5281/api/ExtendedAppointment/${appointmentToCancel.appointmentID}`);
+
+      if (dayjs(appointmentToCancel.appointmentDate).format('YYYY-MM-DD') === today) {
+        await axios.patch(`http://localhost:5281/api/Availability/${appointmentToCancel.scheduleID}`, {
+          isAvailable: true,
+        });
+      }
+
+      const userEmail = await fetchUserEmail(appointmentToCancel.userID);
+      const email = userEmail;
+      const subject = 'Cancelación de cita';
+      const schedule = schedules.find((s) => s.id === appointmentToCancel.scheduleID);
+      const timeSlot = schedule ? schedule.time : 'N/A';
+      const emailData = `En el centro oftalmológico lamenta informar que la cita programada para el 
+        ${appointmentToCancel.appointmentDate} a las ${timeSlot} se cancela por el siguiente motivo: ${cancelReason}`;
+
+      const emailResponse = await axios.post(
+        `http://localhost:5281/api/Email/send?toEmail=${email}&subject=${subject}&message=${emailData}`
+      );
+
+      if (emailResponse.status === 200) {
+        message.success('La cita fue cancelada y el correo ha sido enviado.');
+      } else {
+        message.error('La cita fue cancelada, pero no se pudo enviar el correo.');
+      }
+
+      setAppointments(appointments.filter((app) => app.appointmentID !== appointmentToCancel.appointmentID));
+      setShowModal(false);
+      setCancelReason('');
+    } catch (error) {
+      console.error('Error cancelling appointment:', error);
+      setError('Error al cancelar la cita.');
+    }
   };
 
   const filteredAppointments = selectedDate
-    ? appointments.filter(appointment => dayjs(appointment.appointmentDate).format('YYYY-MM-DD') === selectedDate)
+    ? appointments.filter((appointment) => dayjs(appointment.appointmentDate).format('YYYY-MM-DD') === selectedDate)
     : appointments;
 
   const columns = [
@@ -99,7 +118,7 @@ function Appointments() {
       title: 'Horario',
       dataIndex: 'scheduleID',
       render: (scheduleID) => {
-        const schedule = schedules.find(s => s.id === scheduleID);
+        const schedule = schedules.find((s) => s.id === scheduleID);
         return schedule ? schedule.time : 'N/A';
       },
     },
@@ -118,7 +137,10 @@ function Appointments() {
     {
       title: 'Acciones',
       render: (appointment) => (
-        <Button danger onClick={() => handleCancelClick(appointment)}>
+        <Button
+          danger
+          onClick={() => handleCancelClick(appointment)}
+        >
           Cancelar
         </Button>
       ),
@@ -148,7 +170,10 @@ function Appointments() {
               Citas Agendadas
             </Title>
 
-            <DatePicker onChange={handleDateChange} style={{ marginBottom: 20 }} />
+            <DatePicker
+              onChange={handleDateChange}
+              style={{ marginBottom: 20 }}
+            />
 
             <Table
               columns={columns}
@@ -172,7 +197,7 @@ function Appointments() {
           onChange={(e) => setCancelReason(e.target.value)}
           rows={3}
         />
-        {error && <Typography.Text type="danger">{error}</Typography.Text>}
+        {error && <Typography.Text type='danger'>{error}</Typography.Text>}
       </Modal>
     </Layout>
   );

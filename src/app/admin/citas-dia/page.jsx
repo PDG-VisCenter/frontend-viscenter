@@ -2,11 +2,12 @@
 
 import { useState, useEffect } from 'react';
 import axios from 'axios';
-import { Layout, theme, Table, Button, Modal, Input, Typography } from 'antd';
+import { Layout, theme, Table, Button, Modal, Input, Typography, message } from 'antd';
 import { Content } from 'antd/es/layout/layout';
 import HeaderSeller from '../components/HeaderSeller';
 import SiderMenuSeller from '../components/SiderMenuSeller';
 import dayjs from 'dayjs';
+import { fetchUserEmail } from '@/app/services/keycloakServices';
 
 const { Title } = Typography;
 
@@ -53,31 +54,49 @@ function Appointments() {
     setShowModal(true);
   };
 
-  const confirmCancel = () => {
-    if (!cancelReason) {
-      setError('Debe ingresar una razón para cancelar la cita.');
-      return;
+const confirmCancel = async () => {
+  if (!cancelReason) {
+    setError('Debe ingresar una razón para cancelar la cita.');
+    return;
+  }
+
+  const availabilityID = appointmentToCancel.availabilityID;
+  const userID = appointmentToCancel.userID;
+
+  try {
+    await axios.delete(`http://localhost:5281/api/Appointment/${appointmentToCancel.appointmentID}`);
+    
+    await axios.patch(`http://localhost:5281/api/Availability/${availabilityID}`, {
+      isAvailable: true,
+    });
+
+    const userEmail = await fetchUserEmail(userID);
+    const email = userEmail;
+    const subject = 'Cancelación de cita';
+    const availability = availabilities[availabilityID];
+    const timeSlot = availability ? `${availability.startTime} - ${availability.endTime}` : 'N/A';
+    const emailData = `En centro oftalmológico lamenta informar que la cita programada para el 
+      ${appointmentToCancel.appointmentDate} a las ${timeSlot} se cancela por el siguiente motivo: ${cancelReason}`;
+
+    const emailResponse = await axios.post(
+      `http://localhost:5281/api/Email/send?toEmail=${email}&subject=${subject}&message=${emailData}`
+    );
+
+    if (emailResponse.status === 200) {
+      message.success('La cita fue cancelada y el correo ha sido enviado.');
+    } else {
+      message.error('La cita fue cancelada, pero no se pudo enviar el correo.');
     }
 
-    const availabilityID = appointmentToCancel.availabilityID;
+    setAppointments(appointments.filter((app) => app.appointmentID !== appointmentToCancel.appointmentID));
+    setShowModal(false);
+    setCancelReason('');
 
-    axios
-      .delete(`http://localhost:5281/api/Appointment/${appointmentToCancel.appointmentID}`)
-      .then(() => {
-        return axios.patch(`http://localhost:5281/api/Availability/${availabilityID}`, {
-          isAvailable: true,
-        });
-      })
-      .then(() => {
-        setAppointments(appointments.filter(app => app.appointmentID !== appointmentToCancel.appointmentID));
-        setShowModal(false);
-        setCancelReason('');
-      })
-      .catch(error => {
-        console.error('Error cancelling appointment:', error);
-        setError('Error al cancelar la cita.');
-      });
-  };
+  } catch (error) {
+    console.error('Error cancelling appointment or sending email:', error);
+    setError('Error al cancelar la cita o enviar el correo.');
+  }
+};
 
   const filteredAppointments = selectedDate
     ? appointments.filter(appointment => dayjs(appointment.appointmentDate).format('YYYY-MM-DD') === selectedDate)
