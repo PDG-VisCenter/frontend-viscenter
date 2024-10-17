@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import axios from 'axios';
-import { Layout, Table, Input, DatePicker, Typography, theme } from 'antd';
+import { Layout, Table, Input, DatePicker, Typography, theme, Button } from 'antd';
 import { Content } from 'antd/es/layout/layout';
 import HeaderSeller from '../components/HeaderSeller';
 import SiderMenuSeller from '../components/SiderMenuSeller';
@@ -22,25 +22,43 @@ function Appointments() {
   } = theme.useToken();
 
   useEffect(() => {
-    axios.get('http://localhost:5281/api/History')
-      .then(response => {
+    axios
+      .get('http://localhost:5281/api/History')
+      .then((response) => {
         setAppointments(response.data);
         setFilteredAppointments(response.data);
         setLoading(false);
       })
-      .catch(error => {
+      .catch((error) => {
         console.error('Error fetching appointments:', error);
         setLoading(false);
       });
   }, []);
 
+  const handleReset = () => {
+    setFilteredAppointments(appointments);
+    setSearchText('');
+    setSelectedDate(null);
+  };
+
   const handleSearch = (value) => {
-    const filtered = appointments.filter(appointment =>
-      appointment.patientName.toLowerCase().includes(value.toLowerCase()) ||
-      appointment.serviceType.toLowerCase().includes(value.toLowerCase()) ||
-      appointment.status.toLowerCase().includes(value.toLowerCase()) ||
-      appointment.doctorName.toLowerCase().includes(value.toLowerCase())
+    if (!value) {
+      setFilteredAppointments(appointments);
+      setSearchText('');
+      return;
+    }
+
+    const searchValue = value.toLowerCase();
+    const regex = new RegExp(`\\b${searchValue}\\b`, 'i');
+
+    const filtered = appointments.filter(
+      (appointment) =>
+        regex.test(appointment.patientName.toLowerCase()) ||
+        regex.test(appointment.serviceType.toLowerCase()) ||
+        regex.test(appointment.status.toLowerCase()) ||
+        regex.test(appointment.doctorName.toLowerCase())
     );
+
     setFilteredAppointments(filtered);
     setSearchText(value);
   };
@@ -50,8 +68,8 @@ function Appointments() {
     setSelectedDate(formattedDate);
 
     if (formattedDate) {
-      const filtered = appointments.filter(appointment =>
-        dayjs(appointment.appointmentDate).format('YYYY-MM-DD') === formattedDate
+      const filtered = appointments.filter(
+        (appointment) => dayjs(appointment.appointmentDate).format('YYYY-MM-DD') === formattedDate
       );
       setFilteredAppointments(filtered);
     } else {
@@ -138,7 +156,7 @@ function Appointments() {
               columns={columns}
               dataSource={filteredAppointments}
               rowKey='historyID'
-              pagination={{ pageSize: 10, showSizeChanger: false}}
+              pagination={{ pageSize: 10, showSizeChanger: false }}
               loading={loading}
               scroll={{ y: 400 }}
             />

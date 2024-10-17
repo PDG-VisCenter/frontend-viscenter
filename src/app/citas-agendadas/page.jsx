@@ -57,11 +57,6 @@ function ScheduledAppointments() {
     router.push('/agendar-cita');
   };
 
-  const filteredAppointments = appointments.filter(appointment => {
-    const appointmentDate = new Date(appointment.appointmentDate).toLocaleDateString('en-CA');
-    return appointmentDate === currentDate;
-  });
-
   return (
     <ConfigProvider
       theme={{
@@ -81,10 +76,10 @@ function ScheduledAppointments() {
             <p>Cargando citas...</p>
           </Spin>
         ) : (
-          filteredAppointments.length > 0 ? (
+          appointments.length > 0 ? (
             <List
               itemLayout="vertical"
-              dataSource={filteredAppointments}
+              dataSource={appointments}
               renderItem={(appointment) => {
                 const availability = availabilities[appointment.availabilityID] || {};
                 return (

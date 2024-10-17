@@ -235,12 +235,27 @@ const ExtendedAppointment = () => {
         });
       }
 
+      const email = process.env.NEXT_PUBLIC_VISCENTER_EMAIL;
+      const subject = 'Cancelación de cita';
+      const schedule = schedules.find((s) => s.id === formData.scheduleID);
+      const timeSlot = schedule ? schedule.time : 'N/A';
+      const EmailData = `El usuario ${session.user?.email} a cancelado la cita del ${formData.appointmentDate} a las ${timeSlot} 
+        por el siguiente motivo: ${cancelReason}`;
+      const emailResponse = await axios.post(
+        `http://localhost:5281/api/Email/send?toEmail=${email}&subject=${subject}&message=${EmailData}`
+      );
+
+      if (emailResponse.status === 200) {
+        message.success('La cita fue cancelada y el correo ha sido enviado.');
+      } else {
+        message.error('La cita fue cancelada, pero no se pudo enviar el correo.');
+      }
+
       fetchAppointments();
-      message.success('Cita eliminada correctamente');
       setShowForm(false);
       setCancelReason('');
     } catch (error) {
-      message.error('Error eliminando la cita');
+      message.error('Error cancelando la cita');
     } finally {
       setShowCancelModal(false);
     }
@@ -456,7 +471,7 @@ const ExtendedAppointment = () => {
                 style={{ marginLeft: '8px' }}
                 onClick={handleDelete}
               >
-                Eliminar
+                Cancelar Cita
               </Button>
             )}
           </Form>

@@ -43,7 +43,7 @@ function EditAppointment() {
     if (status === 'loading') {
       return;
     }
-  
+
     if (!session || !session.userId) {
       setLoading(false);
       return;
@@ -171,29 +171,42 @@ function EditAppointment() {
 
   const handleCancel = () => setShowModal(true);
 
-  const confirmCancel = () => {
+  const confirmCancel = async () => {
     if (!cancelReason) {
       message.warning('Debe ingresar una razón para cancelar la cita.');
       return;
     }
 
-    axios
-      .delete(`http://localhost:5281/api/Appointment/${id}`)
-      .then(() => {
-        if (formData.availabilityID) {
-          axios
-            .patch(`http://localhost:5281/api/Availability/${formData.availabilityID}`, {
-              isAvailable: true,
-            })
-            .then(() => {
-              router.push('/pagina-citas');
-            })
-            .catch((error) => console.error(error));
-        } else {
-          router.push('/pagina-citas');
-        }
-      })
-      .catch((error) => console.error('Error deleting appointment:', error));
+    try {
+      await axios.delete(`http://localhost:5281/api/Appointment/${id}`);
+
+      if (formData.availabilityID) {
+        await axios.patch(`http://localhost:5281/api/Availability/${formData.availabilityID}`, {
+          isAvailable: true,
+        });
+      }
+
+      const email = process.env.NEXT_PUBLIC_VISCENTER_EMAIL;
+      const subject = 'Cancelación de cita';
+      const availability = availabilities[formData.availabilityID];
+      const timeSlot = availability ? `${availability.startTime} - ${availability.endTime}` : 'N/A';
+      const EmailData = `El usuario ${session.user?.email} a cancelado la cita del ${formData.appointmentDate} a las ${timeSlot} 
+        por el siguiente motivo: ${cancelReason}`;
+      const emailResponse = await axios.post(
+        `http://localhost:5281/api/Email/send?toEmail=${email}&subject=${subject}&message=${EmailData}`
+      );
+
+      if (emailResponse.status === 200) {
+        message.success('La cita fue cancelada y el correo ha sido enviado.');
+      } else {
+        message.error('La cita fue cancelada, pero no se pudo enviar el correo.');
+      }
+
+      router.push('/pagina-citas');
+    } catch (error) {
+      console.error('Error cancelando cita:', error);
+      message.error('Hubo un error al cancelar la cita.');
+    }
   };
 
   const isTimeInThePast = (startTime) => {
