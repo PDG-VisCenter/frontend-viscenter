@@ -10,6 +10,7 @@ import Webcam from 'react-webcam';
 import axios from 'axios';
 import Image from 'next/image';
 import marcos from '../../assets/img/citas/marcosLentes.jpg';
+import FaceShapeInfoPage from '../components/FaceShapeInfoPage';
 
 const { Title, Paragraph } = Typography;
 
@@ -26,23 +27,24 @@ function FaceLandmarkerComponent() {
   const [buttonsDisabled, setButtonsDisabled] = useState(false);
   const [products, setProducts] = useState([]);
   const [pagination, setPagination] = useState({ page: 1, size: 3, total: 0 });
+  const [showInfoPage, setShowInfoPage] = useState(true);
 
   const faceShapeInfo = {
     Oval: {
       translation: 'Ovalado',
       description:
         'El rostro ovalado tiene proporciones equilibradas, con la frente ligeramente más ancha que la mandíbula.',
-      recommendedFrame: 'rectangular',
+      recommendedFrame: 'rectangulares',
     },
     Round: {
       translation: 'Redondo',
       description: 'El rostro redondo tiene mejillas llenas y una línea de mandíbula suave.',
-      recommendedFrame: 'cuadrado',
+      recommendedFrame: 'cuadrados',
     },
     Square: {
       translation: 'Cuadrado',
       description: 'El rostro cuadrado tiene una mandíbula prominente y frente ancha.',
-      recommendedFrame: 'redondeados',
+      recommendedFrame: 'redondos',
     },
     Heart: {
       translation: 'Corazón',
@@ -52,7 +54,7 @@ function FaceLandmarkerComponent() {
     Oblong: {
       translation: 'Alargado',
       description: 'El rostro alargado es más largo que ancho, con una barbilla prominente.',
-      recommendedFrame: 'anchos',
+      recommendedFrame: 'cat-eye',
     },
     Unlabeled: {
       translation: 'No etiquetado',
@@ -234,6 +236,8 @@ function FaceLandmarkerComponent() {
   const handleOk = () => {
     setIsModalVisible(false);
   };
+
+  const handleProceed = () => setShowInfoPage(false);
 
   return (
     <ConfigProvider

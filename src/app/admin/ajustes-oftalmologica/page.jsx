@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import { Layout, theme, message, Form, Input, Button, TimePicker, Select, List, Switch, Modal } from 'antd';
+import { Layout, theme, message, DatePicker, Input, Button, TimePicker, Select, List, Switch, Modal } from 'antd';
 import { Content } from 'antd/es/layout/layout';
 import HeaderSeller from '../components/HeaderSeller';
 import SiderMenuSeller from '../components/SiderMenuSeller';
@@ -39,13 +39,27 @@ function Appointments() {
   const [isServiceModalVisible, setIsServiceModalVisible] = useState(false);
   const [isDoctorModalVisible, setIsDoctorModalVisible] = useState(false);
 
+  const [selectedDate, setSelectedDate] = useState(null);
+  const [selectedSchedule, setSelectedSchedule] = useState(null);
+  const [disabledAvailabilities, setDisabledAvailabilities] = useState([]);
+
   useEffect(() => {
     fetchLocation();
     fetchAvailabilities();
     fetchAppointments();
     fetchServices();
     fetchDoctors();
+    fetchDisabledAvailabilities();
   }, []);
+
+  const fetchDisabledAvailabilities = async () => {
+    try {
+      const { data } = await axios.get('http://localhost:5281/api/ExtendedAvailability');
+      setDisabledAvailabilities(data);
+    } catch (error) {
+      message.error('Error obteniendo las disponibilidades desactivadas.');
+    }
+  };
 
   const fetchAvailabilities = async () => {
     try {
@@ -175,6 +189,41 @@ function Appointments() {
     }
   };
 
+  const handleDeactivateAvailability = async () => {
+    if (!selectedDate || !selectedSchedule) {
+      message.warning('Por favor selecciona una fecha y un horario.');
+      return;
+    }
+  
+    try {
+      await axios.post('http://localhost:5281/api/ExtendedAvailability', {
+        scheduleID: selectedSchedule,
+        appointmentDate: selectedDate.toISOString(),
+      });
+  
+      setDisabledAvailabilities((prevDisabled) => [
+        ...prevDisabled,
+        { scheduleID: selectedSchedule, appointmentDate: selectedDate.toISOString() }
+      ]);
+  
+      setAvailabilities((prevAvailabilities) =>
+        prevAvailabilities.map((availability) =>
+          availability.availabilityID === selectedSchedule
+            ? { ...availability, isAvailable: false }
+            : availability
+        )
+      );
+  
+      message.success('Disponibilidad desactivada exitosamente.');
+    } catch (error) {
+      if (error.response && error.response.status === 500) {
+        message.error('Error: no se puede desactivar, existe una cita asociada.');
+      } else {
+        message.error('Error desactivando la disponibilidad.');
+      }
+    }
+  };  
+
   const handleAddService = async () => {
     if (!newServiceType) {
       message.warning('Por favor ingresa un tipo de servicio.');
@@ -273,6 +322,21 @@ function Appointments() {
     }
   };
 
+  const handleReactivateAvailability = async (scheduleID, appointmentDate) => {
+    try {
+      await axios.delete('http://localhost:5281/api/ExtendedAvailability', {
+        data: {
+          scheduleID,
+          appointmentDate,
+        },
+      });
+      message.success('Disponibilidad reactivada exitosamente.');
+      fetchDisabledAvailabilities();
+    } catch (error) {
+      message.error('Error reactivando la disponibilidad.');
+    }
+  };
+
   return (
     <Layout style={{ minHeight: '100vh' }}>
       <HeaderSeller />
@@ -342,6 +406,59 @@ function Appointments() {
                   />
                 </List.Item>
               )}
+            />
+
+            <h2 style={{ marginTop: 16, marginBottom: 16, fontWeight: 'bold', fontSize: '24px' }}>
+              Disponibilidad del Calendario
+            </h2>
+            <DatePicker
+              style={{ width: '100%' }}
+              placeholder='Selecciona una fecha'
+              disabledDate={(current) => current && current < moment().endOf('day')}
+              onChange={(date) => setSelectedDate(date)}
+            />
+            <Select
+              style={{ width: '100%', marginTop: 16 }}
+              placeholder='Selecciona un horario'
+              onChange={(availabilityID) => {
+                setSelectedSchedule(availabilityID);
+              }}
+            >
+              {availabilities.map((availability) => (
+                <Option
+                  key={availability.availabilityID}
+                  value={availability.availabilityID}
+                >
+                  {`Horario: ${availability.startTime} - ${availability.endTime}`}
+                </Option>
+              ))}
+            </Select>
+            <Button
+              type='primary'
+              block
+              style={{ marginTop: 16 }}
+              onClick={handleDeactivateAvailability}
+            >
+              Desactivar Disponibilidad
+            </Button>
+
+            <h2 style={{ marginTop: 16, fontWeight: 'bold', fontSize: '24px' }}>Disponibilidades Desactivadas</h2>
+            <List
+              dataSource={disabledAvailabilities}
+              renderItem={(item) => {
+                const availability = availabilities.find((a) => a.availabilityID === item.scheduleID);
+                return (
+                  <List.Item>
+                    <div>{`Fecha: ${item.appointmentDate}, Horario: ${availability?.startTime || 'N/A'} - ${availability?.endTime || 'N/A'}`}</div>
+                    <Button
+                      type='primary'
+                      onClick={() => handleReactivateAvailability(item.scheduleID, item.appointmentDate)}
+                    >
+                      Reactivar
+                    </Button>
+                  </List.Item>
+                );
+              }}
             />
 
             <h2 style={{ marginTop: 16, fontWeight: 'bold', fontSize: '24px' }}>Servicios del Centro</h2>
