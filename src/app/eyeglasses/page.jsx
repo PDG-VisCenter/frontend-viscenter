@@ -1,13 +1,27 @@
-import { cardEyeglassesKids, cardEyeglassesMen, cardEyeglassesWomen } from '@/data/subcategoryData';
+'use client';
+
 import { Col, Row } from 'antd';
+import { useDispatch, useSelector } from 'react-redux';
 import BannerCategory from '../components/BannerCategory';
-import { bannerEyeglasses } from '@/data/categoryData';
 import CardCategory from '../components/CardCategory';
+import { fetchCategoriesByParentId } from '@/lib/features/categoriesSlice';
+import { fetchCategoryById } from '@/lib/features/categorySlice';
 import Footer from '@/components/Footer';
 import HeaderSimple from '@/components/HeaderSimple';
 import Layout from 'antd/es/layout/layout';
+import { useEffect } from 'react';
 
-function Lentes() {
+function Eyeglasses() {
+  const dispatch = useDispatch();
+  const categoryItem = useSelector((state) => state.category.category);
+  const categoriesItem = useSelector((state) => state.categories.categories);
+  const links = ['men', 'women', 'kids'];
+
+  useEffect(() => {
+    dispatch(fetchCategoryById(1));
+    dispatch(fetchCategoriesByParentId(1));
+  }, [dispatch]);
+
   return (
     <Layout
       style={{
@@ -15,55 +29,44 @@ function Lentes() {
       }}
     >
       <HeaderSimple />
-      <BannerCategory content={bannerEyeglasses} />
+      <BannerCategory
+        content={{
+          title: categoryItem.name,
+          description: categoryItem.description,
+          img: categoryItem.image,
+          imgAlt: categoryItem.name,
+        }}
+      />
       <Layout
         style={{
           margin: 40,
         }}
       >
         <Row gutter={[16, 16]}>
-          <Col
-            style={{
-              display: 'flex',
-              justifyContent: 'center',
-            }}
-            xs={24}
-            sm={24}
-            md={12}
-            lg={12}
-            xl={8}
-            xxl={8}
-          >
-            <CardCategory content={cardEyeglassesMen} />
-          </Col>
-          <Col
-            style={{
-              display: 'flex',
-              justifyContent: 'center',
-            }}
-            xs={24}
-            sm={24}
-            md={12}
-            lg={12}
-            xl={8}
-            xxl={8}
-          >
-            <CardCategory content={cardEyeglassesWomen} />
-          </Col>
-          <Col
-            style={{
-              display: 'flex',
-              justifyContent: 'center',
-            }}
-            xs={24}
-            sm={24}
-            md={12}
-            lg={12}
-            xl={8}
-            xxl={8}
-          >
-            <CardCategory content={cardEyeglassesKids} />
-          </Col>
+          {categoriesItem.map((category, index) => (
+            <Col
+              key={category.id}
+              style={{
+                display: 'flex',
+                justifyContent: 'center',
+              }}
+              xs={24}
+              sm={24}
+              md={12}
+              lg={12}
+              xl={8}
+              xxl={8}
+            >
+              <CardCategory
+                content={{
+                  title: categoriesItem[index]?.name,
+                  link: `/eyeglasses/${links[index]}`,
+                  img: categoriesItem[index]?.image,
+                  imgAlt: categoriesItem[index]?.name,
+                }}
+              />
+            </Col>
+          ))}
         </Row>
       </Layout>
       <Footer />
@@ -71,4 +74,4 @@ function Lentes() {
   );
 }
 
-export default Lentes;
+export default Eyeglasses;

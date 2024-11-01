@@ -14,6 +14,8 @@ function BannerCategory(props) {
         src={content.img}
         alt={content.imgAlt}
         className='banner-img banner-img--wrapper'
+        width={875}
+        height={420}
       />
     </section>
   );
