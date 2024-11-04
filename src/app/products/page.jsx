@@ -19,7 +19,7 @@ import HeaderSimple from '@/components/HeaderSimple';
 import ProductCard from '../components/ProductCard';
 import Sider from 'antd/es/layout/Sider';
 import Title from 'antd/es/typography/Title';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 
 const onSearch = (value, _e, info) => console.log(info?.source, value);
 
@@ -145,26 +145,15 @@ function Search() {
   const productsItems = useSelector((state) => state.products.products);
   const status = useSelector((state) => state.products.status);
   const error = useSelector((state) => state.products.error);
+  const [currentPage, setCurrentPage] = useState(1);
 
   useEffect(() => {
-    if (status === 'idle') {
-      dispatch(fetchAllProducts());
-    }
-  }, [status, dispatch]);
+    dispatch(fetchAllProducts(currentPage));
+  }, [currentPage, dispatch]);
 
-  if (status === 'loading') {
-    return (
-      <Skeleton.Node
-        active
-        style={{
-          width: 160,
-        }}
-      />
-    );
-  }
-  if (status === 'failed') {
-    return <div>{error}</div>;
-  }
+  const handlePaginationOnChange = (page) => {
+    setCurrentPage(page);
+  };
 
   return (
     <div>
@@ -219,9 +208,9 @@ function Search() {
               Resultados para ...
             </Title>
             <Row gutter={[16, 16]}>
-              {productsItems.map((product) => (
+              {productsItems.data?.map((product) => (
                 <Col
-                  key={product.productID}
+                  key={product.id}
                   xs={24}
                   sm={24}
                   md={12}
@@ -230,10 +219,10 @@ function Search() {
                   xxl={8}
                 >
                   <ProductCard
-                    id={product.productID}
-                    img={product.images[0]}
+                    id={product.id}
+                    img={product.image}
                     name={product.name}
-                    price={product.price}
+                    price={product.salePrice}
                   />
                 </Col>
               ))}
@@ -243,8 +232,11 @@ function Search() {
             <Pagination
               align='center'
               defaultCurrent={1}
+              current={currentPage}
               defaultPageSize={12}
-              total={productsItems.length}
+              total={productsItems?.totalCount}
+              onChange={handlePaginationOnChange}
+              showSizeChanger={false}
             />
             <br />
             <br />

@@ -7,8 +7,8 @@ const initialState = {
   error: null,
 };
 
-export const fetchAllProducts = createAsyncThunk('products/fetchProducts', async () => {
-  const response = await axios.get('http://localhost:5203/api/Product');
+export const fetchAllProducts = createAsyncThunk('products/fetchProducts', async (page) => {
+  const response = await axios.get(`https://localhost:7235/api/Product?page=${page}&pageSize=12`);
   return response.data;
 });
 
