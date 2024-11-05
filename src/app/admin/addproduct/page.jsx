@@ -120,7 +120,7 @@ function AddProduct() {
                       options={[
                         {
                           value: 'glasses',
-                          label: 'Lentes',
+                          label: 'Marcos',
                         },
                         {
                           value: 'sunglasses',

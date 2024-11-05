@@ -9,8 +9,9 @@ import {
   gender,
   sortByElements,
 } from '@/data/searchFilters';
-import { Button, Checkbox, Col, Collapse, Dropdown, Input, Layout, Menu, Pagination, Row, Skeleton } from 'antd';
+import { Button, Checkbox, Col, Collapse, Dropdown, Input, Layout, Menu, Pagination, Row } from 'antd';
 import { useDispatch, useSelector } from 'react-redux';
+import { useEffect, useState } from 'react';
 import { Content } from 'antd/es/layout/layout';
 import { DownOutlined } from '@ant-design/icons';
 import { fetchAllProducts } from '@/lib/features/productsSlice';
@@ -19,7 +20,6 @@ import HeaderSimple from '@/components/HeaderSimple';
 import ProductCard from '../components/ProductCard';
 import Sider from 'antd/es/layout/Sider';
 import Title from 'antd/es/typography/Title';
-import { useEffect, useState } from 'react';
 
 const onSearch = (value, _e, info) => console.log(info?.source, value);
 

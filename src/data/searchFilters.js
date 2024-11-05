@@ -1,7 +1,7 @@
 export const categories = [
   {
-    label: 'Lentes',
-    value: 'Lentes',
+    label: 'Marcos',
+    value: 'Marcos',
   },
   {
     label: 'Lentes de sol',

@@ -1,8 +1,8 @@
 'use client';
 
+import { Badge, Button } from 'antd';
 import { SearchOutlined, ShoppingCartOutlined, UserOutlined } from '@ant-design/icons';
 import { signIn, useSession } from 'next-auth/react';
-import { Badge, Button } from 'antd';
 import Image from 'next/image';
 import Link from 'next/link';
 import logo from '../assets/img/logo-black.png';
