@@ -15,7 +15,6 @@ function Sunglasses() {
   const dispatch = useDispatch();
   const categoryItem = useSelector((state) => state.category.category);
   const categoriesItem = useSelector((state) => state.categories.categories);
-  const links = ['men', 'women', 'kids'];
 
   useEffect(() => {
     dispatch(fetchCategoryById(2));
@@ -60,7 +59,7 @@ function Sunglasses() {
               <CardCategory
                 content={{
                   title: categoriesItem[index]?.name,
-                  link: `/sunglasses/${links[index]}`,
+                  link: '/products',
                   img: categoriesItem[index]?.image,
                   imgAlt: categoriesItem[index]?.name,
                 }}
