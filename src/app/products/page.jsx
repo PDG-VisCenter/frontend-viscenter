@@ -6,22 +6,19 @@ import {
   frameColors,
   frameMaterial,
   frameShape,
-  gender,
   sortByElements,
+  subcategory,
 } from '@/data/searchFilters';
-import { Button, Checkbox, Col, Collapse, Dropdown, Input, Layout, Menu, Pagination, Row } from 'antd';
+import { Checkbox, Col, Collapse, Input, Layout, Pagination, Row, Select } from 'antd';
 import { useDispatch, useSelector } from 'react-redux';
 import { useEffect, useState } from 'react';
 import { Content } from 'antd/es/layout/layout';
-import { DownOutlined } from '@ant-design/icons';
 import { fetchAllProducts } from '@/lib/features/productsSlice';
 import Footer from '@/components/Footer';
 import HeaderSimple from '@/components/HeaderSimple';
 import ProductCard from '../components/ProductCard';
 import Sider from 'antd/es/layout/Sider';
 import Title from 'antd/es/typography/Title';
-
-const onSearch = (value, _e, info) => console.log(info?.source, value);
 
 const onChange = (checkedValues) => {
   console.log('checked = ', checkedValues);
@@ -45,6 +42,20 @@ const items = [
   },
   {
     key: '2',
+    label: 'Subcategoria',
+    children: (
+      <Checkbox.Group
+        options={subcategory}
+        onChange={onChange}
+        style={{
+          display: 'flex',
+          flexDirection: 'column',
+        }}
+      />
+    ),
+  },
+  {
+    key: '3',
     label: 'Color del Marco',
     children: (
       <Checkbox.Group
@@ -58,7 +69,7 @@ const items = [
     ),
   },
   {
-    key: '3',
+    key: '4',
     label: 'Marca',
     children: (
       <Checkbox.Group
@@ -72,7 +83,7 @@ const items = [
     ),
   },
   {
-    key: '4',
+    key: '5',
     label: 'Forma del Marco',
     children: (
       <Checkbox.Group
@@ -86,7 +97,7 @@ const items = [
     ),
   },
   {
-    key: '5',
+    key: '6',
     label: 'Material del Marco',
     children: (
       <Checkbox.Group
@@ -99,33 +110,7 @@ const items = [
       />
     ),
   },
-  {
-    key: '6',
-    label: 'Genero',
-    children: (
-      <Checkbox.Group
-        options={gender}
-        onChange={onChange}
-        style={{
-          display: 'flex',
-          flexDirection: 'column',
-        }}
-      />
-    ),
-  },
 ];
-
-const handleMenuClick = (e) => {
-  console.log('click', e);
-};
-
-const menu = (
-  <Menu onClick={handleMenuClick}>
-    {sortByElements.map((item) => (
-      <Menu.Item key={item.key}>{item.label}</Menu.Item>
-    ))}
-  </Menu>
-);
 
 const siderStyle = {
   overflow: 'auto',
@@ -143,8 +128,6 @@ const siderStyle = {
 function Search() {
   const dispatch = useDispatch();
   const productsItems = useSelector((state) => state.products.products);
-  const status = useSelector((state) => state.products.status);
-  const error = useSelector((state) => state.products.error);
   const [currentPage, setCurrentPage] = useState(1);
 
   useEffect(() => {
@@ -154,6 +137,12 @@ function Search() {
   const handlePaginationOnChange = (page) => {
     setCurrentPage(page);
   };
+
+  const handleChange = (value) => {
+    console.log(`selected ${value}`);
+  };
+
+  const onSearch = (value, _e, info) => console.log(info?.source, value);
 
   return (
     <div>
@@ -193,11 +182,13 @@ function Search() {
                   paddingRight: '50px',
                 }}
               />
-              <Dropdown overlay={menu}>
-                <Button>
-                  Ordenar por: <DownOutlined />
-                </Button>
-              </Dropdown>
+              <Select
+                placeholder='Ordenar por:'
+                style={{ width: 200 }}
+                size='medium'
+                onChange={handleChange}
+                options={sortByElements}
+              />
             </div>
             <br />
             <br />
