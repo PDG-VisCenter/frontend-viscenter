@@ -206,6 +206,16 @@ function Search() {
             <br />
             <br />
             {searchWord.trim() === '' ? (
+              <br />
+            ) : (
+              <Title
+                level={4}
+                className='search__subtitle'
+              >
+                Resultados para &ldquo;{searchWord}&ldquo;
+              </Title>
+            )}
+            {productsItems?.data && productsItems.data.length > 0 ? (
               <Row gutter={[16, 16]}>
                 {productsItems.data?.map((product) => (
                   <Col
@@ -227,34 +237,12 @@ function Search() {
                 ))}
               </Row>
             ) : (
-              <div>
-                <Title
-                  level={4}
-                  className='search__subtitle'
-                >
-                  Resultados para &ldquo;{searchWord}&ldquo;
-                </Title>
-                <Row gutter={[16, 16]}>
-                  {productsItems.data?.map((product) => (
-                    <Col
-                      key={product.id}
-                      xs={24}
-                      sm={24}
-                      md={12}
-                      lg={12}
-                      xl={8}
-                      xxl={8}
-                    >
-                      <ProductCard
-                        id={product.id}
-                        img={product.image}
-                        name={product.name}
-                        price={product.salePrice}
-                      />
-                    </Col>
-                  ))}
-                </Row>
-              </div>
+              <Title
+                level={3}
+                style={{ display: 'flex', justifyContent: 'center' }}
+              >
+                No hay productos relacionados a la búsqueda.
+              </Title>
             )}
             <br />
             <br />
