@@ -1,14 +1,6 @@
 'use client';
 
-import {
-  brands,
-  categories,
-  colors,
-  materials,
-  shapes,
-  sortByElements,
-  subcategories,
-} from '@/data/searchFilters';
+import { brands, categories, colors, materials, shapes, sortByElements, subcategories } from '@/data/searchFilters';
 import { Checkbox, Col, Collapse, Input, Layout, Pagination, Row, Select } from 'antd';
 import { useDispatch, useSelector } from 'react-redux';
 import { useEffect, useState } from 'react';
@@ -37,6 +29,7 @@ function Search() {
   const dispatch = useDispatch();
   const productsItems = useSelector((state) => state.products.products);
   const [currentPage, setCurrentPage] = useState(1);
+  const [searchWord, setSearchWord] = useState('');
   const [filters, setFilters] = useState({
     brands: [],
     colors: [],
@@ -64,6 +57,7 @@ function Search() {
   };
 
   const handleSearch = (value) => {
+    setSearchWord(value);
     setFilters((prevFilters) => ({
       ...prevFilters,
       productName: value,
@@ -211,32 +205,57 @@ function Search() {
             </div>
             <br />
             <br />
-            <Title
-              level={4}
-              className='search__subtitle'
-            >
-              Resultados para ...
-            </Title>
-            <Row gutter={[16, 16]}>
-              {productsItems.data?.map((product) => (
-                <Col
-                  key={product.id}
-                  xs={24}
-                  sm={24}
-                  md={12}
-                  lg={12}
-                  xl={8}
-                  xxl={8}
+            {searchWord.trim() === '' ? (
+              <Row gutter={[16, 16]}>
+                {productsItems.data?.map((product) => (
+                  <Col
+                    key={product.id}
+                    xs={24}
+                    sm={24}
+                    md={12}
+                    lg={12}
+                    xl={8}
+                    xxl={8}
+                  >
+                    <ProductCard
+                      id={product.id}
+                      img={product.image}
+                      name={product.name}
+                      price={product.salePrice}
+                    />
+                  </Col>
+                ))}
+              </Row>
+            ) : (
+              <div>
+                <Title
+                  level={4}
+                  className='search__subtitle'
                 >
-                  <ProductCard
-                    id={product.id}
-                    img={product.image}
-                    name={product.name}
-                    price={product.salePrice}
-                  />
-                </Col>
-              ))}
-            </Row>
+                  Resultados para &ldquo;{searchWord}&ldquo;
+                </Title>
+                <Row gutter={[16, 16]}>
+                  {productsItems.data?.map((product) => (
+                    <Col
+                      key={product.id}
+                      xs={24}
+                      sm={24}
+                      md={12}
+                      lg={12}
+                      xl={8}
+                      xxl={8}
+                    >
+                      <ProductCard
+                        id={product.id}
+                        img={product.image}
+                        name={product.name}
+                        price={product.salePrice}
+                      />
+                    </Col>
+                  ))}
+                </Row>
+              </div>
+            )}
             <br />
             <br />
             <Pagination
