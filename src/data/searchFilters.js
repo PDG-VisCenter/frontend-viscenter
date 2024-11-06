@@ -13,7 +13,7 @@ export const categories = [
   },
 ];
 
-export const frameColors = [
+export const colors = [
   {
     label: 'Negro',
     value: 1,
@@ -119,7 +119,7 @@ export const brands = [
   },
 ];
 
-export const frameShape = [
+export const shapes = [
   {
     label: 'Redondo',
     value: 'Redondo',
@@ -150,7 +150,7 @@ export const frameShape = [
   },
 ];
 
-export const frameMaterial = [
+export const materials = [
   {
     label: 'Plástico',
     value: 'Plástico',
@@ -169,18 +169,30 @@ export const frameMaterial = [
   },
 ];
 
-export const subcategory = [
+export const subcategories = [
   {
-    label: 'Hombre',
-    value: '4 7',
+    label: 'Hombre - Marcos',
+    value: 4,
   },
   {
-    label: 'Mujer',
-    value: '5 8',
+    label: 'Mujer - Marcos',
+    value: 5,
   },
   {
-    label: 'Niños',
-    value: '6 9',
+    label: 'Niños - Marcos',
+    value: 6,
+  },
+  {
+    label: 'Hombre - Sol',
+    value: 7,
+  },
+  {
+    label: 'Mujer - Sol',
+    value: 8,
+  },
+  {
+    label: 'Niños - Sol',
+    value: 9,
   },
   {
     label: 'Extras',
