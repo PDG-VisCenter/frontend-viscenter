@@ -77,7 +77,7 @@ function NavBarSticky() {
           href='/eyeglasses'
           className='nav__link'
         >
-          Lentes
+          Marcos
         </Link>
         <Link
           href='/sunglasses'
@@ -150,7 +150,7 @@ function NavBarSticky() {
                 href='/eyeglasses'
                 className='nav-menu__link'
               >
-                Lentes
+                Marcos
               </Link>
               <Link
                 href='/sunglasses'

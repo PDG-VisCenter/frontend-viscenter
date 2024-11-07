@@ -16,7 +16,7 @@ function NavBar() {
           href='/eyeglasses'
           className='nav__link'
         >
-          Lentes
+          Marcos
         </Link>
         <Link
           href='/sunglasses'

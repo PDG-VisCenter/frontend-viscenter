@@ -20,8 +20,11 @@ function ProductCard(props) {
           <Image
             alt={name}
             src={img}
-            width={200}
+            width={410}
             height={250}
+            style={{
+              objectFit: 'cover',
+            }}
           />
         }
       >

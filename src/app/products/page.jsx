@@ -1,131 +1,16 @@
 'use client';
 
-import {
-  brands,
-  categories,
-  frameColors,
-  frameMaterial,
-  frameShape,
-  gender,
-  sortByElements,
-} from '@/data/searchFilters';
-import { Button, Checkbox, Col, Collapse, Dropdown, Input, Layout, Menu, Pagination, Row, Skeleton } from 'antd';
+import { brands, categories, colors, materials, shapes, sortByElements, subcategories } from '@/data/searchFilters';
+import { Checkbox, Col, Collapse, Input, Layout, Pagination, Row, Select } from 'antd';
 import { useDispatch, useSelector } from 'react-redux';
+import { useEffect, useState } from 'react';
 import { Content } from 'antd/es/layout/layout';
-import { DownOutlined } from '@ant-design/icons';
-import { fetchAllProducts } from '@/lib/features/productsSlice';
+import { fetchFilteredProducts } from '@/lib/features/productsSlice';
 import Footer from '@/components/Footer';
 import HeaderSimple from '@/components/HeaderSimple';
 import ProductCard from '../components/ProductCard';
 import Sider from 'antd/es/layout/Sider';
 import Title from 'antd/es/typography/Title';
-import { useEffect } from 'react';
-
-const onSearch = (value, _e, info) => console.log(info?.source, value);
-
-const onChange = (checkedValues) => {
-  console.log('checked = ', checkedValues);
-};
-
-const items = [
-  {
-    key: '1',
-    label: 'Categorias',
-    children: (
-      <Checkbox.Group
-        options={categories}
-        onChange={onChange}
-        defaultValue={['Lentes', 'LentesSol', 'Accesorios']}
-        style={{
-          display: 'flex',
-          flexDirection: 'column',
-        }}
-      />
-    ),
-  },
-  {
-    key: '2',
-    label: 'Color del Marco',
-    children: (
-      <Checkbox.Group
-        options={frameColors}
-        onChange={onChange}
-        style={{
-          display: 'flex',
-          flexDirection: 'column',
-        }}
-      />
-    ),
-  },
-  {
-    key: '3',
-    label: 'Marca',
-    children: (
-      <Checkbox.Group
-        options={brands}
-        onChange={onChange}
-        style={{
-          display: 'flex',
-          flexDirection: 'column',
-        }}
-      />
-    ),
-  },
-  {
-    key: '4',
-    label: 'Forma del Marco',
-    children: (
-      <Checkbox.Group
-        options={frameShape}
-        onChange={onChange}
-        style={{
-          display: 'flex',
-          flexDirection: 'column',
-        }}
-      />
-    ),
-  },
-  {
-    key: '5',
-    label: 'Material del Marco',
-    children: (
-      <Checkbox.Group
-        options={frameMaterial}
-        onChange={onChange}
-        style={{
-          display: 'flex',
-          flexDirection: 'column',
-        }}
-      />
-    ),
-  },
-  {
-    key: '6',
-    label: 'Genero',
-    children: (
-      <Checkbox.Group
-        options={gender}
-        onChange={onChange}
-        style={{
-          display: 'flex',
-          flexDirection: 'column',
-        }}
-      />
-    ),
-  },
-];
-
-const handleMenuClick = (e) => {
-  console.log('click', e);
-};
-
-const menu = (
-  <Menu onClick={handleMenuClick}>
-    {sortByElements.map((item) => (
-      <Menu.Item key={item.key}>{item.label}</Menu.Item>
-    ))}
-  </Menu>
-);
 
 const siderStyle = {
   overflow: 'auto',
@@ -143,28 +28,135 @@ const siderStyle = {
 function Search() {
   const dispatch = useDispatch();
   const productsItems = useSelector((state) => state.products.products);
-  const status = useSelector((state) => state.products.status);
-  const error = useSelector((state) => state.products.error);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [searchWord, setSearchWord] = useState('');
+  const [filters, setFilters] = useState({
+    brands: [],
+    colors: [],
+    materials: [],
+    shapes: [],
+    categories: [],
+    subCategories: [],
+    productName: '',
+    sortOption: '',
+  });
 
   useEffect(() => {
-    if (status === 'idle') {
-      dispatch(fetchAllProducts());
-    }
-  }, [status, dispatch]);
+    dispatch(fetchFilteredProducts({ filters, page: currentPage }));
+  }, [filters, currentPage, dispatch]);
 
-  if (status === 'loading') {
-    return (
-      <Skeleton.Node
-        active
-        style={{
-          width: 160,
-        }}
-      />
-    );
-  }
-  if (status === 'failed') {
-    return <div>{error}</div>;
-  }
+  const handlePaginationOnChange = (page) => {
+    setCurrentPage(page);
+  };
+
+  const handleSortChange = (value) => {
+    setFilters((prevFilters) => ({
+      ...prevFilters,
+      sortOption: value,
+    }));
+  };
+
+  const handleSearch = (value) => {
+    setSearchWord(value);
+    setFilters((prevFilters) => ({
+      ...prevFilters,
+      productName: value,
+    }));
+  };
+
+  const handleFilterChange = (filterType, values) => {
+    setFilters((prevFilters) => ({
+      ...prevFilters,
+      [filterType]: values,
+    }));
+  };
+
+  const items = [
+    {
+      key: '1',
+      label: 'Categorias',
+      children: (
+        <Checkbox.Group
+          options={categories}
+          onChange={(values) => handleFilterChange('categories', values)}
+          style={{
+            display: 'flex',
+            flexDirection: 'column',
+          }}
+        />
+      ),
+    },
+    {
+      key: '2',
+      label: 'Subcategoria',
+      children: (
+        <Checkbox.Group
+          options={subcategories}
+          onChange={(values) => handleFilterChange('subcategories', values)}
+          style={{
+            display: 'flex',
+            flexDirection: 'column',
+          }}
+        />
+      ),
+    },
+    {
+      key: '3',
+      label: 'Color del Marco',
+      children: (
+        <Checkbox.Group
+          options={colors}
+          onChange={(values) => handleFilterChange('colors', values)}
+          style={{
+            display: 'flex',
+            flexDirection: 'column',
+          }}
+        />
+      ),
+    },
+    {
+      key: '4',
+      label: 'Marca',
+      children: (
+        <Checkbox.Group
+          options={brands}
+          onChange={(values) => handleFilterChange('brands', values)}
+          style={{
+            display: 'flex',
+            flexDirection: 'column',
+          }}
+        />
+      ),
+    },
+    {
+      key: '5',
+      label: 'Forma del Marco',
+      children: (
+        <Checkbox.Group
+          options={shapes}
+          onChange={(values) => handleFilterChange('shapes', values)}
+          style={{
+            display: 'flex',
+            flexDirection: 'column',
+          }}
+        />
+      ),
+    },
+    {
+      key: '6',
+      label: 'Material del Marco',
+      children: (
+        <Checkbox.Group
+          options={materials}
+          onChange={(values) => handleFilterChange('materials', values)}
+          style={{
+            display: 'flex',
+            flexDirection: 'column',
+          }}
+        />
+      ),
+    },
+  ];
 
   return (
     <div>
@@ -176,8 +168,7 @@ function Search() {
         >
           <Collapse
             items={items}
-            defaultActiveKey={['1', '2', '3']}
-            onChange={onChange}
+            onChange={handleFilterChange}
           />
         </Sider>
         <Layout
@@ -199,52 +190,70 @@ function Search() {
                 allowClear
                 enterButton='Search'
                 size='large'
-                onSearch={onSearch}
+                onSearch={handleSearch}
                 style={{
                   paddingRight: '50px',
                 }}
               />
-              <Dropdown overlay={menu}>
-                <Button>
-                  Ordenar por: <DownOutlined />
-                </Button>
-              </Dropdown>
+              <Select
+                placeholder='Ordenar por:'
+                style={{ width: 200 }}
+                size='medium'
+                onChange={handleSortChange}
+                options={sortByElements}
+              />
             </div>
             <br />
             <br />
-            <Title
-              level={4}
-              className='search__subtitle'
-            >
-              Resultados para ...
-            </Title>
-            <Row gutter={[16, 16]}>
-              {productsItems.map((product) => (
-                <Col
-                  key={product.productID}
-                  xs={24}
-                  sm={24}
-                  md={12}
-                  lg={12}
-                  xl={8}
-                  xxl={8}
-                >
-                  <ProductCard
-                    id={product.productID}
-                    img={product.images[0]}
-                    name={product.name}
-                    price={product.price}
-                  />
-                </Col>
-              ))}
-            </Row>
+            {searchWord.trim() === '' ? (
+              <br />
+            ) : (
+              <Title
+                level={4}
+                className='search__subtitle'
+              >
+                Resultados para &ldquo;{searchWord}&ldquo;
+              </Title>
+            )}
+            {productsItems?.data && productsItems.data.length > 0 ? (
+              <Row gutter={[16, 16]}>
+                {productsItems.data?.map((product) => (
+                  <Col
+                    key={product.id}
+                    xs={24}
+                    sm={24}
+                    md={12}
+                    lg={12}
+                    xl={8}
+                    xxl={8}
+                  >
+                    <ProductCard
+                      id={product.id}
+                      img={product.image}
+                      name={product.name}
+                      price={product.salePrice}
+                    />
+                  </Col>
+                ))}
+              </Row>
+            ) : (
+              <Title
+                level={3}
+                style={{ display: 'flex', justifyContent: 'center' }}
+              >
+                No hay productos relacionados a la búsqueda.
+              </Title>
+            )}
             <br />
             <br />
             <Pagination
               align='center'
               defaultCurrent={1}
+              current={currentPage}
               defaultPageSize={12}
-              total={productsItems.length}
+              total={productsItems?.totalCount}
+              onChange={handlePaginationOnChange}
+              showSizeChanger={false}
             />
             <br />
             <br />

@@ -1,13 +1,26 @@
-import { cardAccessories, cardClean } from '@/data/subcategoryData';
+'use client';
+
 import { Col, Row } from 'antd';
-import { bannerAccessories } from '@/data/categoryData';
+import { useDispatch, useSelector } from 'react-redux';
 import BannerCategory from '../components/BannerCategory';
 import CardCategory from '../components/CardCategory';
+import { fetchCategoriesByParentId } from '@/lib/features/categoriesSlice';
+import { fetchCategoryById } from '@/lib/features/categorySlice';
 import Footer from '@/components/Footer';
 import HeaderSimple from '@/components/HeaderSimple';
 import Layout from 'antd/es/layout/layout';
+import { useEffect } from 'react';
 
 function Accessories() {
+  const dispatch = useDispatch();
+  const categoryItem = useSelector((state) => state.category.category);
+  const categoriesItem = useSelector((state) => state.categories.categories);
+
+  useEffect(() => {
+    dispatch(fetchCategoryById(3));
+    dispatch(fetchCategoriesByParentId(3));
+  }, [dispatch]);
+
   return (
     <Layout
       style={{
@@ -15,7 +28,14 @@ function Accessories() {
       }}
     >
       <HeaderSimple />
-      <BannerCategory content={bannerAccessories} />
+      <BannerCategory
+        content={{
+          title: categoryItem.name,
+          description: categoryItem.description,
+          img: categoryItem.image,
+          imgAlt: categoryItem.name,
+        }}
+      />
       <Layout
         style={{
           margin: 40,
@@ -25,32 +45,29 @@ function Accessories() {
           gutter={[16, 16]}
           style={{ marginLeft: '10%', marginRight: '10%' }}
         >
-          <Col
-            style={{
-              display: 'flex',
-              justifyContent: 'center',
-            }}
-            xs={24}
-            sm={24}
-            md={24}
-            lg={24}
-            xl={12}
-          >
-            <CardCategory content={cardAccessories} />
-          </Col>
-          <Col
-            style={{
-              display: 'flex',
-              justifyContent: 'center',
-            }}
-            xs={24}
-            sm={24}
-            md={24}
-            lg={24}
-            xl={12}
-          >
-            <CardCategory content={cardClean} />
-          </Col>
+          {categoriesItem.map((category, index) => (
+            <Col
+              key={category.id}
+              style={{
+                display: 'flex',
+                justifyContent: 'center',
+              }}
+              xs={24}
+              sm={24}
+              md={24}
+              lg={24}
+              xl={12}
+            >
+              <CardCategory
+                content={{
+                  title: categoriesItem[index]?.name,
+                  link: '/products',
+                  img: categoriesItem[index]?.image,
+                  imgAlt: categoriesItem[index]?.name,
+                }}
+              />
+            </Col>
+          ))}
         </Row>
       </Layout>
       <Footer />

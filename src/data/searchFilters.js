@@ -1,73 +1,125 @@
 export const categories = [
   {
-    label: 'Lentes',
-    value: 'Lentes',
+    label: 'Marcos',
+    value: 1,
   },
   {
-    label: 'Lentes de sol',
-    value: 'LentesSol',
+    label: 'Lentes de Sol',
+    value: 2,
   },
   {
     label: 'Accesorios',
-    value: 'Accesorios',
+    value: 3,
   },
 ];
 
-export const frameColors = [
+export const colors = [
   {
     label: 'Negro',
-    value: 'Negro',
+    value: 1,
   },
   {
     label: 'Blanco',
-    value: 'Blanco',
+    value: 2,
   },
   {
     label: 'Gris',
-    value: 'Gris',
+    value: 3,
   },
   {
-    label: 'Transparente',
-    value: 'Transparente',
-  },
-  {
-    label: 'Cafe',
-    value: 'Cafe',
+    label: 'Marron',
+    value: 4,
   },
   {
     label: 'Azul',
-    value: 'Azul',
+    value: 5,
+  },
+  {
+    label: 'Rojo',
+    value: 6,
+  },
+  {
+    label: 'Verde',
+    value: 7,
+  },
+  {
+    label: 'Morado',
+    value: 8,
+  },
+  {
+    label: 'Rosado',
+    value: 9,
+  },
+  {
+    label: 'Dorado',
+    value: 10,
+  },
+  {
+    label: 'Naranja',
+    value: 11,
   },
 ];
 
 export const brands = [
   {
-    label: 'Armani',
-    value: 'Armani',
-  },
-  {
-    label: 'Gucci',
-    value: 'Gucci',
-  },
-  {
     label: 'Carolina Herrera',
-    value: 'CarolinaHerrera',
+    value: 1,
+  },
+  {
+    label: 'Oliver Peoples',
+    value: 2,
+  },
+  {
+    label: 'Nike Vision',
+    value: 3,
   },
   {
     label: 'Ray-Ban',
-    value: 'RayBan',
+    value: 4,
+  },
+  {
+    label: 'Emporio Armani',
+    value: 5,
   },
   {
     label: 'Tom Ford',
-    value: 'Tom Ford',
+    value: 6,
   },
   {
-    label: 'Michael Kors',
-    value: 'Michael Kors',
+    label: 'Harley Davidson',
+    value: 7,
+  },
+  {
+    label: 'Carrera',
+    value: 8,
+  },
+  {
+    label: 'Gucci',
+    value: 9,
+  },
+  {
+    label: 'Miraflex',
+    value: 10,
+  },
+  {
+    label: 'Prada',
+    value: 11,
+  },
+  {
+    label: 'Guess',
+    value: 12,
+  },
+  {
+    label: 'Zeiss',
+    value: 13,
+  },
+  {
+    label: 'Choice.lk',
+    value: 14,
   },
 ];
 
-export const frameShape = [
+export const shapes = [
   {
     label: 'Redondo',
     value: 'Redondo',
@@ -89,52 +141,84 @@ export const frameShape = [
     value: 'Aviador',
   },
   {
-    label: 'Cat-eye',
-    value: 'Cat-eye',
+    label: 'Cat-Eye',
+    value: 'Cat-Eye',
+  },
+  {
+    label: 'Irregular',
+    value: 'Irregular',
   },
 ];
 
-export const frameMaterial = [
+export const materials = [
   {
-    label: 'Plastico',
-    value: 'Plastico',
+    label: 'Plástico',
+    value: 'Plástico',
   },
   {
     label: 'Metal',
     value: 'Metal',
   },
+  {
+    label: 'Acetato',
+    value: 'Acetato',
+  },
+  {
+    label: 'Nailon',
+    value: 'Nailon',
+  },
 ];
 
-export const gender = [
+export const subcategories = [
   {
-    label: 'Hombre',
-    value: 'Hombre',
+    label: 'Hombre - Marcos',
+    value: 4,
   },
   {
-    label: 'Mujer',
-    value: 'Mujer',
+    label: 'Mujer - Marcos',
+    value: 5,
   },
   {
-    label: 'Unisex',
-    value: 'Unisex',
+    label: 'Niños - Marcos',
+    value: 6,
+  },
+  {
+    label: 'Hombre - Sol',
+    value: 7,
+  },
+  {
+    label: 'Mujer - Sol',
+    value: 8,
+  },
+  {
+    label: 'Niños - Sol',
+    value: 9,
+  },
+  {
+    label: 'Extras',
+    value: 10,
+  },
+  {
+    label: 'Limpieza',
+    value: 11,
   },
 ];
 
 export const sortByElements = [
   {
     label: 'Alfabetico: A-Z',
-    key: '1',
+    value: 'name_asc',
   },
   {
     label: 'Alfabetico: Z-A',
-    key: '2',
+    value: 'name_desc',
   },
   {
     label: 'Precio: Bajo a Alto',
-    key: '3',
+    value: 'price_asc',
   },
   {
     label: 'Precio: Alto a Bajo',
-    key: '4',
+    value: 'price_desc',
   },
 ];
