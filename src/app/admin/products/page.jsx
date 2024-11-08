@@ -1,6 +1,6 @@
 'use client';
 
-import { brands, categories, colors, materials, shapes, sortByElements, subcategories } from '@/data/searchFilters';
+import { brands, categories, colors, materials, shapes, sortByElements, subcategories, treeCategoriesAndSubcategories } from '@/data/searchFilters';
 import { Button, Checkbox, Collapse, Drawer, Input, Layout, Select, Space, Table, theme } from 'antd';
 import { useDispatch, useSelector } from 'react-redux';
 import { useEffect, useState } from 'react';
@@ -10,6 +10,7 @@ import HeaderSeller from '../components/HeaderSeller';
 import Image from 'next/image';
 import Link from 'next/link';
 import SiderMenuSeller from '../components/SiderMenuSeller';
+import TreeCategories from '@/app/components/TreeCategories';
 
 function Products() {
   const dispatch = useDispatch();
@@ -68,32 +69,19 @@ function Products() {
     }));
   };
 
+  const handleTreeCheck = ({ parents, children }) => {
+    handleFilterChange('categories', parents);
+    handleFilterChange('subcategories', children);
+  };
+
   const items = [
     {
       key: '1',
       label: 'Categorias',
       children: (
-        <Checkbox.Group
-          options={categories}
-          onChange={(values) => handleFilterChange('categories', values)}
-          style={{
-            display: 'flex',
-            flexDirection: 'column',
-          }}
-        />
-      ),
-    },
-    {
-      key: '2',
-      label: 'Subcategoria',
-      children: (
-        <Checkbox.Group
-          options={subcategories}
-          onChange={(values) => handleFilterChange('subcategories', values)}
-          style={{
-            display: 'flex',
-            flexDirection: 'column',
-          }}
+        <TreeCategories
+          treeData={treeCategoriesAndSubcategories}
+          onCheck={handleTreeCheck}
         />
       ),
     },

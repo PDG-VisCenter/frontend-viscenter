@@ -1,18 +1,3 @@
-export const categories = [
-  {
-    label: 'Marcos',
-    value: 1,
-  },
-  {
-    label: 'Lentes de Sol',
-    value: 2,
-  },
-  {
-    label: 'Accesorios',
-    value: 3,
-  },
-];
-
 export const colors = [
   {
     label: 'Negro',
@@ -169,41 +154,6 @@ export const materials = [
   },
 ];
 
-export const subcategories = [
-  {
-    label: 'Hombre - Marcos',
-    value: 4,
-  },
-  {
-    label: 'Mujer - Marcos',
-    value: 5,
-  },
-  {
-    label: 'Niños - Marcos',
-    value: 6,
-  },
-  {
-    label: 'Hombre - Sol',
-    value: 7,
-  },
-  {
-    label: 'Mujer - Sol',
-    value: 8,
-  },
-  {
-    label: 'Niños - Sol',
-    value: 9,
-  },
-  {
-    label: 'Extras',
-    value: 10,
-  },
-  {
-    label: 'Limpieza',
-    value: 11,
-  },
-];
-
 export const sortByElements = [
   {
     label: 'Alfabetico: A-Z',
@@ -220,5 +170,111 @@ export const sortByElements = [
   {
     label: 'Precio: Alto a Bajo',
     value: 'price_desc',
+  },
+];
+
+export const categoriesAndSubcategories = [
+  {
+    label: 'Marcos',
+    value: 1,
+    children: [
+      {
+        label: 'Hombres',
+        value: 4,
+      },
+      {
+        label: 'Mujeres',
+        value: 5,
+      },
+      {
+        label: 'Niños',
+        value: 6,
+      },
+    ],
+  },
+  {
+    label: 'Lentes de Sol',
+    value: 2,
+    children: [
+      {
+        label: 'Hombres',
+        value: 7,
+      },
+      {
+        label: 'Mujeres',
+        value: 8,
+      },
+      {
+        label: 'Niños',
+        value: 9,
+      },
+    ],
+  },
+  {
+    label: 'Accesorios',
+    value: 3,
+    children: [
+      {
+        label: 'Extras',
+        value: 10,
+      },
+      {
+        label: 'Limpieza',
+        value: 11,
+      },
+    ],
+  },
+];
+
+export const treeCategoriesAndSubcategories = [
+  {
+    title: 'Marcos',
+    key: 1,
+    children: [
+      {
+        title: 'Hombres',
+        key: 4,
+      },
+      {
+        title: 'Mujeres',
+        key: 5,
+      },
+      {
+        title: 'Niños',
+        key: 6,
+      },
+    ],
+  },
+  {
+    title: 'Lentes de Sol',
+    key: 2,
+    children: [
+      {
+        title: 'Hombres',
+        key: 7,
+      },
+      {
+        title: 'Mujeres',
+        key: 8,
+      },
+      {
+        title: 'Niños',
+        key: 9,
+      },
+    ],
+  },
+  {
+    title: 'Accesorios',
+    key: 3,
+    children: [
+      {
+        title: 'Extras',
+        key: 10,
+      },
+      {
+        title: 'Limpieza',
+        key: 11,
+      },
+    ],
   },
 ];
