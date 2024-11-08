@@ -1,7 +1,7 @@
 'use client';
 
 import { brands, categories, colors, materials, shapes, sortByElements, subcategories } from '@/data/searchFilters';
-import { Button, Checkbox, Collapse, Drawer, Input, Layout, Select, Skeleton, Space, Table, theme } from 'antd';
+import { Button, Checkbox, Collapse, Drawer, Input, Layout, Select, Space, Table, theme } from 'antd';
 import { useDispatch, useSelector } from 'react-redux';
 import { useEffect, useState } from 'react';
 import { Content } from 'antd/es/layout/layout';
