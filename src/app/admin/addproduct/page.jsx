@@ -4,6 +4,7 @@ import { brands, categories, colors, materials, shapes, subcategories } from '@/
 import {
   Button,
   Col,
+  Divider,
   Flex,
   Form,
   Image,
@@ -13,6 +14,7 @@ import {
   message,
   Row,
   Select,
+  Space,
   Steps,
   theme,
   Upload,
@@ -44,14 +46,15 @@ function AddProduct() {
   const [previewOpen, setPreviewOpen] = useState(false);
   const [previewImage, setPreviewImage] = useState('');
   const [fileList, setFileList] = useState([]);
-  const [current, setCurrent] = useState(0);
+  const [currentStep, setCurrentStep] = useState(0);
+  const [productItemNumber, setProductItemNumber] = useState(1);
   const { token } = theme.useToken();
 
   const next = () => {
-    setCurrent(current + 1);
+    setCurrentStep(currentStep + 1);
   };
   const prev = () => {
-    setCurrent(current - 1);
+    setCurrentStep(currentStep - 1);
   };
 
   const {
@@ -65,7 +68,14 @@ function AddProduct() {
     setPreviewImage(file.url || file.preview);
     setPreviewOpen(true);
   };
-  const handleChange = ({ fileList: newFileList }) => setFileList(newFileList);
+
+  const handleChange = ({ fileList: newFileList }) => {
+    setFileList(newFileList);
+  };
+
+  const onFinish = (values) => {
+    console.log('Received values of form:', values);
+  };
 
   const contentStyle = {
     lineHeight: '260px',
@@ -212,87 +222,233 @@ function AddProduct() {
     {
       title: 'Especificaciones',
       render: () => (
-        <Form
-          labelCol={{ span: 24 }}
-          wrapperCol={{ span: 24 }}
-          layout='vertical'
-          style={{
-            paddingTop: 25,
-            paddingLeft: 40,
-            paddingRight: 40,
-          }}
-        >
-          <Row gutter={16}>
-            <Col span={8}>
-              <Form.Item
-                label='Stock'
-                required
-              >
-                <InputNumber
-                  style={{ width: '100%' }}
-                  size='large'
-                />
-              </Form.Item>
-            </Col>
-            <Col span={8}>
-              <Form.Item
-                label='Código del Producto'
-                required
-              >
-                <Input
-                  style={{ width: '100%' }}
-                  size='large'
-                />
-              </Form.Item>
-            </Col>
-            <Col span={8}>
-              <Form.Item
-                name='color'
-                label='Colores'
-              >
-                <Select
-                  placeholder='Elige un color'
-                  size='large'
-                  options={colors}
-                />
-              </Form.Item>
-            </Col>
-          </Row>
-          <Form.Item
-            label='Imagenes'
-            valuePropName='fileList'
-            getValueFromEvent={normFile}
+        <>
+          <Form
+            labelCol={{ span: 24 }}
+            wrapperCol={{ span: 24 }}
+            layout='vertical'
+            style={{
+              paddingTop: 25,
+              paddingLeft: 40,
+              paddingRight: 40,
+            }}
           >
-            <Upload
-              listType='picture-card'
-              fileList={fileList}
-              onPreview={handlePreview}
-              onChange={handleChange}
+            <Divider
+              style={{
+                borderColor: '#000000',
+              }}
             >
-              <button
-                style={{ border: 0, background: 'none' }}
-                type='button'
+              Item 1
+            </Divider>
+            <Row gutter={16}>
+              <Col span={8}>
+                <Form.Item
+                  label='Stock'
+                  required
+                >
+                  <InputNumber
+                    style={{ width: '100%' }}
+                    size='large'
+                  />
+                </Form.Item>
+              </Col>
+              <Col span={8}>
+                <Form.Item
+                  label='Código del Producto'
+                  required
+                >
+                  <Input
+                    style={{ width: '100%' }}
+                    size='large'
+                  />
+                </Form.Item>
+              </Col>
+              <Col span={8}>
+                <Form.Item
+                  name='color'
+                  label='Colores'
+                >
+                  <Select
+                    placeholder='Elige un color'
+                    size='large'
+                    options={colors}
+                  />
+                </Form.Item>
+              </Col>
+            </Row>
+            <Form.Item
+              label='Imagenes'
+              valuePropName='fileList'
+              getValueFromEvent={normFile}
+            >
+              <Upload
+                listType='picture-card'
+                fileList={fileList}
+                onPreview={handlePreview}
+                onChange={handleChange}
               >
-                <PlusOutlined />
-                <div style={{ marginTop: 8 }}>Subir</div>
-              </button>
-            </Upload>
-            {previewImage && (
-              <Image
-                alt=''
-                wrapperStyle={{
-                  display: 'none',
-                }}
-                preview={{
-                  visible: previewOpen,
-                  onVisibleChange: (visible) => setPreviewOpen(visible),
-                  afterOpenChange: (visible) => !visible && setPreviewImage(''),
-                }}
-                src={previewImage}
-              />
-            )}
-          </Form.Item>
-        </Form>
+                <button
+                  style={{ border: 0, background: 'none' }}
+                  type='button'
+                >
+                  <PlusOutlined />
+                  <div style={{ marginTop: 8 }}>Subir</div>
+                </button>
+              </Upload>
+              {previewImage && (
+                <Image
+                  alt=''
+                  wrapperStyle={{
+                    display: 'none',
+                  }}
+                  preview={{
+                    visible: previewOpen,
+                    onVisibleChange: (visible) => setPreviewOpen(visible),
+                    afterOpenChange: (visible) => !visible && setPreviewImage(''),
+                  }}
+                  src={previewImage}
+                />
+              )}
+            </Form.Item>
+          </Form>
+          <Form
+            name='dynamic_form_nest_item'
+            labelCol={{ span: 24 }}
+            wrapperCol={{ span: 24 }}
+            layout='vertical'
+            onFinish={onFinish}
+            autoComplete='off'
+          >
+            <Form.List name='users'>
+              {(fields, { add, remove }) => (
+                <>
+                  {fields.map(({ key, name, ...restField }) => (
+                    <Space
+                      key={key}
+                      direction='vertical'
+                      style={{
+                        display: 'flex',
+                        paddingLeft: 40,
+                        paddingRight: 40,
+                        marginBottom: 10,
+                      }}
+                    >
+                      <Divider
+                        style={{
+                          borderColor: '#000000',
+                        }}
+                      >
+                        Item {key + 2}
+                      </Divider>
+                      <Button
+                        type='dashed'
+                        onClick={() => remove(name)}
+                        icon={<MinusCircleOutlined />}
+                        style={{
+                          marginBottom: 15,
+                        }}
+                        danger
+                        block
+                      >
+                        Remover campo
+                      </Button>
+                      <Row gutter={16}>
+                        <Col span={8}>
+                          <Form.Item
+                            {...restField}
+                            label='Stock'
+                            required
+                          >
+                            <InputNumber
+                              style={{ width: '100%' }}
+                              size='large'
+                            />
+                          </Form.Item>
+                        </Col>
+                        <Col span={8}>
+                          <Form.Item
+                            {...restField}
+                            label='Código del Producto'
+                            required
+                          >
+                            <Input
+                              style={{ width: '100%' }}
+                              size='large'
+                            />
+                          </Form.Item>
+                        </Col>
+                        <Col span={8}>
+                          <Form.Item
+                            {...restField}
+                            name='color'
+                            label='Colores'
+                          >
+                            <Select
+                              placeholder='Elige un color'
+                              size='large'
+                              options={colors}
+                            />
+                          </Form.Item>
+                        </Col>
+                      </Row>
+                      <Form.Item
+                        {...restField}
+                        label='Imagenes'
+                        valuePropName='fileList'
+                        getValueFromEvent={normFile}
+                      >
+                        <Upload
+                          listType='picture-card'
+                          fileList={fileList}
+                          onPreview={handlePreview}
+                          onChange={handleChange}
+                        >
+                          <button
+                            style={{ border: 0, background: 'none' }}
+                            type='button'
+                          >
+                            <PlusOutlined />
+                            <div style={{ marginTop: 8 }}>Subir</div>
+                          </button>
+                        </Upload>
+                        {previewImage && (
+                          <Image
+                            alt=''
+                            wrapperStyle={{
+                              display: 'none',
+                            }}
+                            preview={{
+                              visible: previewOpen,
+                              onVisibleChange: (visible) => setPreviewOpen(visible),
+                              afterOpenChange: (visible) => !visible && setPreviewImage(''),
+                            }}
+                            src={previewImage}
+                          />
+                        )}
+                      </Form.Item>
+                    </Space>
+                  ))}
+                  <Form.Item
+                    style={{
+                      paddingTop: 25,
+                      paddingLeft: 40,
+                      paddingRight: 40,
+                    }}
+                  >
+                    <Button
+                      type='dashed'
+                      onClick={() => add()}
+                      icon={<PlusOutlined />}
+                      block
+                    >
+                      Añadir campo
+                    </Button>
+                  </Form.Item>
+                </>
+              )}
+            </Form.List>
+          </Form>
+        </>
       ),
     },
     {
@@ -348,10 +504,10 @@ function AddProduct() {
           >
             <Title level={3}>Crear Producto</Title>
             <Steps
-              current={current}
+              current={currentStep}
               items={items}
             />
-            <div style={contentStyle}>{steps[current].render()}</div>
+            <div style={contentStyle}>{steps[currentStep].render()}</div>
             <Flex
               justify='space-between'
               align='center'
@@ -359,7 +515,7 @@ function AddProduct() {
                 marginTop: 20,
               }}
             >
-              {current > 0 && (
+              {currentStep > 0 && (
                 <Button
                   size='large'
                   onClick={() => prev()}
@@ -367,7 +523,7 @@ function AddProduct() {
                   Anterior
                 </Button>
               )}
-              {current < steps.length - 1 && (
+              {currentStep < steps.length - 1 && (
                 <Button
                   type='primary'
                   size='large'
@@ -377,7 +533,7 @@ function AddProduct() {
                   Siguiente
                 </Button>
               )}
-              {current === steps.length - 1 && (
+              {currentStep === steps.length - 1 && (
                 <Button
                   type='primary'
                   size='large'
