@@ -1,16 +1,20 @@
 'use client';
 
 import { Button, Flex, Layout, message, Steps, theme } from 'antd';
+import { useDispatch, useSelector } from 'react-redux';
 import { Content } from 'antd/es/layout/layout';
 import HeaderSeller from '../components/HeaderSeller';
 import ProductInfo from './ProductInfo';
 import ProductReview from './ProductReview';
 import ProductVariants from './ProductVariants';
+import { setProduct } from '@/lib/features/addProductSlice';
 import SiderMenuSeller from '../components/SiderMenuSeller';
 import Title from 'antd/es/typography/Title';
 import { useState } from 'react';
 
 function AddProduct() {
+  const dispatch = useDispatch();
+  const productData = useSelector((state) => state.product);
   const [currentStep, setCurrentStep] = useState(0);
   const { token } = theme.useToken();
 
@@ -34,10 +38,14 @@ function AddProduct() {
     setCurrentStep(currentStep - 1);
   };
 
+  const handleProductDataChange = (newData) => {
+    dispatch(setProduct(newData));
+  };
+
   const steps = [
     {
       title: 'Información del Producto',
-      render: () => <ProductInfo />,
+      render: () => <ProductInfo onProductDataChange={handleProductDataChange} />,
     },
     {
       title: 'Variantes del Producto',

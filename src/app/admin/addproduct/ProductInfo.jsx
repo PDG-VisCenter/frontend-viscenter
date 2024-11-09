@@ -1,8 +1,16 @@
 import { brands, categoriesAndSubcategories, materials, shapes } from '@/data/searchFilters';
 import { Cascader, Col, Form, Input, InputNumber, Row, Select } from 'antd';
 import TextArea from 'antd/es/input/TextArea';
+import { useSelector } from 'react-redux';
 
-function ProductInfo() {
+function ProductInfo({ onProductDataChange }) {
+  const productData = useSelector((state) => state.addProduct);
+
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    onProductDataChange({ [name]: value });
+  };
+
   return (
     <Form
       labelCol={{ span: 24 }}
@@ -18,7 +26,12 @@ function ProductInfo() {
         label='Nombre'
         required
       >
-        <Input size='large' />
+        <Input
+          name='name'
+          value={productData.name}
+          onChange={handleInputChange}
+          size='large'
+        />
       </Form.Item>
       <Row gutter={16}>
         <Col span={12}>
@@ -27,7 +40,13 @@ function ProductInfo() {
             required
           >
             <InputNumber
+              type='number'
+              name='price'
               addonAfter='Bs'
+              value={productData.price}
+              min={0}
+              step={1}
+              onChange={(value) => onProductDataChange({ price: value })}
               size='large'
               style={{ width: '100%' }}
             />
@@ -37,16 +56,13 @@ function ProductInfo() {
           <Form.Item
             name='brand'
             label='Marca'
-            rules={[
-              {
-                required: true,
-                message: 'Por favor, elige una marca',
-              },
-            ]}
+            required
           >
             <Select
               placeholder='Elige una marca'
+              defaultValue={productData.brand}
               size='large'
+              onChange={(value) => onProductDataChange({ brand: value })}
               options={brands}
             />
           </Form.Item>
@@ -57,16 +73,13 @@ function ProductInfo() {
           <Form.Item
             name='category'
             label='Categoria y Subcategoria'
-            rules={[
-              {
-                required: true,
-                message: 'Por favor, elige una categoria',
-              },
-            ]}
+            required
           >
             <Cascader
               placeholder='Elige una categoria y subcategoria'
               size='large'
+              onChange={(value) => onProductDataChange({ category: value })}
+              defaultValue={productData.category}
               options={categoriesAndSubcategories}
             />
           </Form.Item>
@@ -77,15 +90,13 @@ function ProductInfo() {
           <Form.Item
             name='shape'
             label='Forma'
-            rules={[
-              {
-                message: 'Por favor, elige una forma',
-              },
-            ]}
+            required
           >
             <Select
               placeholder='Elige una forma'
               size='large'
+              onChange={(value) => onProductDataChange({ shape: value })}
+              defaultValue={productData.shape}
               options={shapes}
             />
           </Form.Item>
@@ -94,23 +105,25 @@ function ProductInfo() {
           <Form.Item
             name='material'
             label='Material'
-            rules={[
-              {
-                required: true,
-                message: 'Por favor, elige un material',
-              },
-            ]}
+            required
           >
             <Select
               placeholder='Elige un material'
               size='large'
+              onChange={(value) => onProductDataChange({ material: value })}
+              defaultValue={productData.material}
               options={materials}
             />
           </Form.Item>
         </Col>
       </Row>
       <Form.Item label='Descripcion'>
-        <TextArea rows={4} />
+        <TextArea
+          name='description'
+          rows={4}
+          onChange={handleInputChange}
+          value={productData.description}
+        />
       </Form.Item>
     </Form>
   );
