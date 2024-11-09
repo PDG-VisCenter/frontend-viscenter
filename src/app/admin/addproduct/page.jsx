@@ -5,6 +5,7 @@ import {
   Button,
   Cascader,
   Col,
+  Descriptions,
   Divider,
   Flex,
   Form,
@@ -85,6 +86,57 @@ function AddProduct() {
   const onFinish = (values) => {
     console.log('Received values of form:', values);
   };
+
+  const productDetailsItems = [
+    {
+      label: 'Nombre',
+      children: 'Cloud Database',
+    },
+    {
+      label: 'Precio',
+      children: 'Prepaid',
+    },
+    {
+      label: 'Marca',
+      children: '18:00:00',
+    },
+    {
+      label: 'Categoria',
+      children: '$80.00',
+    },
+    {
+      label: 'Forma',
+      children: '$20.00',
+    },
+    {
+      label: 'Material',
+      children: '$60.00',
+    },
+    {
+      label: 'Colores',
+      children: (
+        <>
+          Data disk type: MongoDB
+          <br />
+          Database version: 3.4
+          <br />
+          Package: dds.mongo.mid
+        </>
+      ),
+    },
+    {
+      label: 'Descripción',
+      children: (
+        <>
+          Data disk type: MongoDB
+          <br />
+          Database version: 3.4
+          <br />
+          Package: dds.mongo.mid
+        </>
+      ),
+    },
+  ];
 
   const steps = [
     {
@@ -436,24 +488,34 @@ function AddProduct() {
     {
       title: 'Revisión',
       render: () => (
-        <Flex
-          justify='space-between'
-          align='center'
-        >
-          <Button
-            type='primary'
-            size='large'
-            danger
+        <div>
+          <Title
+            level={2}
+            style={{
+              marginTop: 30,
+              marginBottom: 20,
+            }}
           >
-            Cancelar
-          </Button>
-          <Button
-            type='primary'
-            size='large'
-          >
-            Guardar
-          </Button>
-        </Flex>
+            Detalles del Producto
+          </Title>
+          <Descriptions
+            bordered
+            column={{
+              xs: 1,
+              sm: 1,
+              md: 1,
+              lg: 1,
+              xl: 1,
+              xxl: 1,
+            }}
+            items={productDetailsItems}
+            style={{
+              marginLeft: 300,
+              marginRight: 300,
+              marginBottom: 20,
+            }}
+          />
+        </div>
       ),
     },
   ];
