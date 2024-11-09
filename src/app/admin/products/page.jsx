@@ -1,6 +1,13 @@
 'use client';
 
-import { brands, categories, colors, materials, shapes, sortByElements, subcategories, treeCategoriesAndSubcategories } from '@/data/searchFilters';
+import {
+  brands,
+  colors,
+  materials,
+  shapes,
+  sortByElements,
+  treeCategoriesAndSubcategories,
+} from '@/data/searchFilters';
 import { Button, Checkbox, Collapse, Drawer, Input, Layout, Select, Space, Table, theme } from 'antd';
 import { useDispatch, useSelector } from 'react-redux';
 import { useEffect, useState } from 'react';

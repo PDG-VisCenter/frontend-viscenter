@@ -8,7 +8,7 @@ import {
   sortByElements,
   treeCategoriesAndSubcategories,
 } from '@/data/searchFilters';
-import { Checkbox, Col, Collapse, Input, Layout, Pagination, Row, Select, Tree } from 'antd';
+import { Checkbox, Col, Collapse, Input, Layout, Pagination, Row, Select } from 'antd';
 import { useDispatch, useSelector } from 'react-redux';
 import { useEffect, useState } from 'react';
 import { Content } from 'antd/es/layout/layout';

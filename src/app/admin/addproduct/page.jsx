@@ -1,8 +1,9 @@
 'use client';
 
-import { brands, categories, colors, materials, shapes, subcategories } from '@/data/searchFilters';
+import { brands, categoriesAndSubcategories, colors, materials, shapes } from '@/data/searchFilters';
 import {
   Button,
+  Cascader,
   Col,
   Divider,
   Flex,
@@ -47,35 +48,11 @@ function AddProduct() {
   const [previewImage, setPreviewImage] = useState('');
   const [fileList, setFileList] = useState([]);
   const [currentStep, setCurrentStep] = useState(0);
-  const [productItemNumber, setProductItemNumber] = useState(1);
   const { token } = theme.useToken();
-
-  const next = () => {
-    setCurrentStep(currentStep + 1);
-  };
-  const prev = () => {
-    setCurrentStep(currentStep - 1);
-  };
 
   const {
     token: { colorBgContainer, borderRadiusLG },
   } = theme.useToken();
-
-  const handlePreview = async (file) => {
-    if (!file.url && !file.preview) {
-      file.preview = await getBase64(file.originFileObj);
-    }
-    setPreviewImage(file.url || file.preview);
-    setPreviewOpen(true);
-  };
-
-  const handleChange = ({ fileList: newFileList }) => {
-    setFileList(newFileList);
-  };
-
-  const onFinish = (values) => {
-    console.log('Received values of form:', values);
-  };
 
   const contentStyle = {
     lineHeight: '260px',
@@ -86,9 +63,32 @@ function AddProduct() {
     marginTop: 24,
   };
 
+  const nextStep = () => {
+    setCurrentStep(currentStep + 1);
+  };
+  const prevStep = () => {
+    setCurrentStep(currentStep - 1);
+  };
+
+  const handleImagePreview = async (file) => {
+    if (!file.url && !file.preview) {
+      file.preview = await getBase64(file.originFileObj);
+    }
+    setPreviewImage(file.url || file.preview);
+    setPreviewOpen(true);
+  };
+
+  const handleChangeImage = ({ fileList: newFileList }) => {
+    setFileList(newFileList);
+  };
+
+  const onFinish = (values) => {
+    console.log('Received values of form:', values);
+  };
+
   const steps = [
     {
-      title: 'Producto',
+      title: 'Información del Producto',
       render: () => (
         <Form
           labelCol={{ span: 24 }}
@@ -139,10 +139,10 @@ function AddProduct() {
             </Col>
           </Row>
           <Row gutter={16}>
-            <Col span={12}>
+            <Col span={24}>
               <Form.Item
                 name='category'
-                label='Categoria'
+                label='Categoria y Subcategoria'
                 rules={[
                   {
                     required: true,
@@ -150,28 +150,10 @@ function AddProduct() {
                   },
                 ]}
               >
-                <Select
-                  placeholder='Elige una categoria'
+                <Cascader
+                  placeholder='Elige una categoria y subcategoria'
                   size='large'
-                  options={categories}
-                />
-              </Form.Item>
-            </Col>
-            <Col span={12}>
-              <Form.Item
-                name='category'
-                label='Subcategoria'
-                rules={[
-                  {
-                    required: true,
-                    message: 'Por favor, elige una categoria',
-                  },
-                ]}
-              >
-                <Select
-                  placeholder='Elige una categoria'
-                  size='large'
-                  options={subcategories}
+                  options={categoriesAndSubcategories}
                 />
               </Form.Item>
             </Col>
@@ -220,7 +202,7 @@ function AddProduct() {
       ),
     },
     {
-      title: 'Especificaciones',
+      title: 'Variantes del Producto',
       render: () => (
         <>
           <Form
@@ -284,8 +266,8 @@ function AddProduct() {
               <Upload
                 listType='picture-card'
                 fileList={fileList}
-                onPreview={handlePreview}
-                onChange={handleChange}
+                onPreview={handleImagePreview}
+                onChange={handleChangeImage}
               >
                 <button
                   style={{ border: 0, background: 'none' }}
@@ -350,7 +332,7 @@ function AddProduct() {
                         danger
                         block
                       >
-                        Remover campo
+                        Eliminar item
                       </Button>
                       <Row gutter={16}>
                         <Col span={8}>
@@ -400,8 +382,8 @@ function AddProduct() {
                         <Upload
                           listType='picture-card'
                           fileList={fileList}
-                          onPreview={handlePreview}
-                          onChange={handleChange}
+                          onPreview={handleImagePreview}
+                          onChange={handleChangeImage}
                         >
                           <button
                             style={{ border: 0, background: 'none' }}
@@ -441,7 +423,7 @@ function AddProduct() {
                       icon={<PlusOutlined />}
                       block
                     >
-                      Añadir campo
+                      Añadir item
                     </Button>
                   </Form.Item>
                 </>
@@ -452,7 +434,7 @@ function AddProduct() {
       ),
     },
     {
-      title: 'Verificación',
+      title: 'Revisión',
       render: () => (
         <Flex
           justify='space-between'
@@ -518,7 +500,7 @@ function AddProduct() {
               {currentStep > 0 && (
                 <Button
                   size='large'
-                  onClick={() => prev()}
+                  onClick={() => prevStep()}
                 >
                   Anterior
                 </Button>
@@ -527,20 +509,35 @@ function AddProduct() {
                 <Button
                   type='primary'
                   size='large'
-                  onClick={() => next()}
+                  onClick={() => nextStep()}
                   style={{ marginLeft: 'auto' }}
                 >
                   Siguiente
                 </Button>
               )}
               {currentStep === steps.length - 1 && (
-                <Button
-                  type='primary'
-                  size='large'
-                  onClick={() => message.success('Processing complete!')}
+                <div
+                  style={{
+                    width: '200px',
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                  }}
                 >
-                  Guardar
-                </Button>
+                  <Button
+                    type='primary'
+                    size='large'
+                    danger
+                  >
+                    Cancelar
+                  </Button>
+                  <Button
+                    type='primary'
+                    size='large'
+                    onClick={() => message.success('Processing complete!')}
+                  >
+                    Guardar
+                  </Button>
+                </div>
               )}
             </Flex>
           </div>
