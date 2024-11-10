@@ -52,21 +52,29 @@ function ProductVariants() {
     setPreviewOpen(true);
   };
 
-  const handleChangeImage = (index, { fileList: newFileList }) => {
+  const handleChangeImage = async (index, { fileList: newFileList }) => {
     const files = Array.isArray(newFileList) ? newFileList : [];
-
     const updatedFileLists = [...fileLists];
     updatedFileLists[index] = files;
-
     setFileLists(updatedFileLists);
 
-    const images = newFileList.map((file) => file.originFileObj);
+    const updatedFileData = await Promise.all(
+      newFileList.map(async (file) => {
+        const base64 = file.originFileObj ? await getBase64(file.originFileObj) : null;
+        return {
+          uid: file.uid,
+          name: file.name,
+          status: file.status,
+          url: base64 || file.url,
+        };
+      })
+    );
 
     dispatch(
       setProductItem({
         index,
         item: {
-          images: images,
+          images: updatedFileData,
         },
       })
     );
@@ -189,7 +197,7 @@ function ProductVariants() {
         >
           <Upload
             listType='picture-card'
-            fileList={fileLists[0]}
+            fileList={productItemData[0].images}
             onPreview={handleImagePreview}
             onChange={(files) => handleChangeImage(0, files)}
           >
@@ -318,7 +326,7 @@ function ProductVariants() {
                   >
                     <Upload
                       listType='picture-card'
-                      fileList={fileLists[key + 1]}
+                      fileList={productItemData[key + 1].images}
                       onPreview={handleImagePreview}
                       onChange={(files) => handleChangeImage(key + 1, files)}
                     >
