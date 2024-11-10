@@ -2,8 +2,13 @@ import { Button, Col, Divider, Form, Image, Input, InputNumber, Row, Select, Spa
 import { MinusCircleOutlined, PlusOutlined } from '@ant-design/icons';
 import { useDispatch, useSelector } from 'react-redux';
 import { colors } from '@/data/searchFilters';
-import { addProductItem, deleteProductItem, setProductItem } from '@/lib/features/addProductItemSlice';
-import { useState } from 'react';
+import {
+  addProductItem,
+  deleteProductItem,
+  saveProductItemUi,
+  setProductItem,
+} from '@/lib/features/addProductItemSlice';
+import { useEffect, useState } from 'react';
 
 const getBase64 = (file) =>
   new Promise((resolve, reject) => {
@@ -22,10 +27,22 @@ const normFile = (e) => {
 
 function ProductVariants() {
   const dispatch = useDispatch();
-  const productItemData = useSelector((state) => state.addProductItem);
+  const [form] = Form.useForm();
+  const productItemData = useSelector((state) => state.addProductItem.addProductItems);
+  const productItemUi = useSelector((state) => state.addProductItem.productItemsUi);
   const [previewOpen, setPreviewOpen] = useState(false);
   const [previewImage, setPreviewImage] = useState('');
   const [fileLists, setFileLists] = useState([]);
+
+  useEffect(() => {
+    if (productItemUi.length) {
+      form.setFieldsValue({ 'product-items': productItemUi });
+    }
+  }, [form]);
+
+  const handleValuesChange = (changedValues, allValues) => {
+    dispatch(saveProductItemUi(allValues['product-items']));
+  };
 
   const handleImagePreview = async (file) => {
     if (!file.url && !file.preview) {
@@ -128,6 +145,7 @@ function ProductVariants() {
             >
               <InputNumber
                 type='number'
+                value={productItemData[0].stock}
                 style={{ width: '100%' }}
                 size='large'
                 min={0}
@@ -142,8 +160,9 @@ function ProductVariants() {
               required
             >
               <Input
-                style={{ width: '100%' }}
                 size='large'
+                style={{ width: '100%' }}
+                value={productItemData[0].productCode}
                 onChange={(value) => handleProductCodeChange(0, value)}
               />
             </Form.Item>
@@ -152,6 +171,7 @@ function ProductVariants() {
             <Form.Item
               name='color'
               label='Color'
+              initialValue={productItemData[0].color}
             >
               <Select
                 placeholder='Elige un color'
@@ -198,6 +218,8 @@ function ProductVariants() {
         </Form.Item>
       </Form>
       <Form
+        form={form}
+        onValuesChange={handleValuesChange}
         name='dynamic_form_nest_item'
         labelCol={{ span: 24 }}
         wrapperCol={{ span: 24 }}
@@ -252,6 +274,7 @@ function ProductVariants() {
                           step={1}
                           size='large'
                           style={{ width: '100%' }}
+                          value={productItemData[key + 1]?.stock}
                           onChange={(value) => handleStockChange(key + 1, value)}
                         />
                       </Form.Item>
@@ -266,6 +289,7 @@ function ProductVariants() {
                           id={`productCode-${key}`}
                           style={{ width: '100%' }}
                           size='large'
+                          value={productItemData[key + 1]?.productCode}
                           onChange={(value) => handleProductCodeChange(key + 1, value)}
                         />
                       </Form.Item>
@@ -279,6 +303,7 @@ function ProductVariants() {
                           id={`color-${key}`}
                           placeholder='Elige un color'
                           size='large'
+                          value={productItemData[key + 1]?.color}
                           options={colors}
                           onChange={(value) => handleColorChange(key + 1, value)}
                         />

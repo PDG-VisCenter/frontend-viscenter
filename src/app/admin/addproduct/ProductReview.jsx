@@ -57,13 +57,9 @@ function ProductReview() {
       label: 'Colores/Items',
       children: (
         <>
-          {productItemsData.map((item) => (
-            <div key={item.id}>{getColorLabelByValue(item.color)}</div>
+          {productItemsData.map((item, index) => (
+            <div key={index}>{getColorLabelByValue(item.color)}</div>
           ))}
-          <br />
-          Database version: 3.4
-          <br />
-          Package: dds.mongo.mid
         </>
       ),
     },

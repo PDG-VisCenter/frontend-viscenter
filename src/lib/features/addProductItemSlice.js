@@ -10,6 +10,7 @@ const initialState = {
       images: [],
     },
   ],
+  productItemsUi: [],
 };
 
 const addProductItemSlice = createSlice({
@@ -43,10 +44,20 @@ const addProductItemSlice = createSlice({
     setProductId: (state, action) => {
       state.productId = action.payload;
     },
+    saveProductItemUi: (state, action) => {
+      state.productItemsUi = [...state.productItemsUi, null];
+    },
     resetProductItemData: () => initialState,
   },
 });
 
-export const { addProductItem, setProductItem, deleteProductItem, setProductId, resetProductItemData } = addProductItemSlice.actions;
+export const {
+  addProductItem,
+  setProductItem,
+  deleteProductItem,
+  setProductId,
+  saveProductItemUi,
+  resetProductItemData,
+} = addProductItemSlice.actions;
 
 export default addProductItemSlice.reducer;
