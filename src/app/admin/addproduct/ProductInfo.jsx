@@ -56,11 +56,11 @@ function ProductInfo({ onProductDataChange }) {
           <Form.Item
             name='brand'
             label='Marca'
+            initialValue={productData.brand}
             required
           >
             <Select
               placeholder='Elige una marca'
-              defaultValue={productData.brand}
               size='large'
               onChange={(value) => onProductDataChange({ brand: value })}
               options={brands}
@@ -73,13 +73,13 @@ function ProductInfo({ onProductDataChange }) {
           <Form.Item
             name='category'
             label='Categoria y Subcategoria'
+            initialValue={productData.category}
             required
           >
             <Cascader
               placeholder='Elige una categoria y subcategoria'
               size='large'
               onChange={(value) => onProductDataChange({ category: value })}
-              defaultValue={productData.category}
               options={categoriesAndSubcategories}
             />
           </Form.Item>
@@ -90,13 +90,13 @@ function ProductInfo({ onProductDataChange }) {
           <Form.Item
             name='shape'
             label='Forma'
+            initialValue={productData.shape}
             required
           >
             <Select
               placeholder='Elige una forma'
               size='large'
               onChange={(value) => onProductDataChange({ shape: value })}
-              defaultValue={productData.shape}
               options={shapes}
             />
           </Form.Item>
@@ -105,13 +105,13 @@ function ProductInfo({ onProductDataChange }) {
           <Form.Item
             name='material'
             label='Material'
+            initialValue={productData.material}
             required
           >
             <Select
               placeholder='Elige un material'
               size='large'
               onChange={(value) => onProductDataChange({ material: value })}
-              defaultValue={productData.material}
               options={materials}
             />
           </Form.Item>

@@ -65,8 +65,11 @@ function ProductVariants() {
               required
             >
               <InputNumber
+                type='number'
                 style={{ width: '100%' }}
                 size='large'
+                min={0}
+                step={1}
               />
             </Form.Item>
           </Col>
@@ -84,7 +87,7 @@ function ProductVariants() {
           <Col span={8}>
             <Form.Item
               name='color'
-              label='Colores'
+              label='Color'
             >
               <Select
                 placeholder='Elige un color'
@@ -137,7 +140,7 @@ function ProductVariants() {
         onFinish={onFinish}
         autoComplete='off'
       >
-        <Form.List name='users'>
+        <Form.List name='product-items'>
           {(fields, { add, remove }) => (
             <>
               {fields.map(({ key, name, ...restField }) => (
@@ -178,8 +181,13 @@ function ProductVariants() {
                         required
                       >
                         <InputNumber
-                          style={{ width: '100%' }}
+                          id={`stock-${key}`}
+                          name='stock'
+                          type='number'
+                          min={0}
+                          step={1}
                           size='large'
+                          style={{ width: '100%' }}
                         />
                       </Form.Item>
                     </Col>
@@ -190,6 +198,7 @@ function ProductVariants() {
                         required
                       >
                         <Input
+                          id={`productCode-${key}`}
                           style={{ width: '100%' }}
                           size='large'
                         />
@@ -198,10 +207,10 @@ function ProductVariants() {
                     <Col span={8}>
                       <Form.Item
                         {...restField}
-                        name='color'
-                        label='Colores'
+                        label='Color'
                       >
                         <Select
+                          id={`color-${key}`}
                           placeholder='Elige un color'
                           size='large'
                           options={colors}
