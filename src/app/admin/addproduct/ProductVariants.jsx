@@ -25,7 +25,7 @@ function ProductVariants() {
   const productItemData = useSelector((state) => state.addProductItem);
   const [previewOpen, setPreviewOpen] = useState(false);
   const [previewImage, setPreviewImage] = useState('');
-  const [fileList, setFileList] = useState([]);
+  const [fileLists, setFileLists] = useState([]);
 
   const handleImagePreview = async (file) => {
     if (!file.url && !file.preview) {
@@ -36,17 +36,23 @@ function ProductVariants() {
   };
 
   const handleChangeImage = (index, { fileList: newFileList }) => {
-    setFileList(newFileList);
-    const images = newFileList.map(file => file.originFileObj);
+    const files = Array.isArray(newFileList) ? newFileList : [];
+
+    const updatedFileLists = [...fileLists];
+    updatedFileLists[index] = files;
+
+    setFileLists(updatedFileLists);
+
+    const images = newFileList.map((file) => file.originFileObj);
+
     dispatch(
       setProductItem({
         index,
         item: {
           images: images,
-        }
+        },
       })
     );
-    //console.log(fileList);
   };
 
   const handleStockChange = (index, value) => {
@@ -89,6 +95,9 @@ function ProductVariants() {
 
   const addItem = (add, name) => {
     add(name);
+    const updatedFileLists = [...fileLists];
+    updatedFileLists.push([]);
+    setFileLists(updatedFileLists);
     dispatch(addProductItem());
   };
 
@@ -160,10 +169,10 @@ function ProductVariants() {
         >
           <Upload
             listType='picture-card'
-            fileList={fileList}
+            fileList={fileLists[0]}
             onPreview={handleImagePreview}
             onChange={(files) => handleChangeImage(0, files)}
-          > 
+          >
             <button
               style={{ border: 0, background: 'none' }}
               type='button'
@@ -284,9 +293,9 @@ function ProductVariants() {
                   >
                     <Upload
                       listType='picture-card'
-                      fileList={fileList}
+                      fileList={fileLists[key + 1]}
                       onPreview={handleImagePreview}
-                      onChange={handleChangeImage}
+                      onChange={(files) => handleChangeImage(key + 1, files)}
                     >
                       <button
                         style={{ border: 0, background: 'none' }}
