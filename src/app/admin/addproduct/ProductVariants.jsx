@@ -1,6 +1,7 @@
 import {
   addProductItem,
   deleteProductItem,
+  deleteProductItemUi,
   saveProductItemUi,
   setProductItem,
 } from '@/lib/features/addProductItemSlice';
@@ -116,6 +117,7 @@ function ProductVariants() {
   const removeItem = (remove, name, index) => {
     remove(name);
     dispatch(deleteProductItem(index));
+    dispatch(deleteProductItemUi());
   };
 
   const addItem = (add, name) => {
@@ -237,9 +239,9 @@ function ProductVariants() {
         <Form.List name='product-items'>
           {(fields, { add, remove }) => (
             <>
-              {fields.map(({ key, name, ...restField }) => (
+              {fields.map(({ key, name, ...restField }, index) => (
                 <Space
-                  key={key}
+                  key={productItemData[index]?.id}
                   direction='vertical'
                   style={{
                     display: 'flex',
@@ -253,11 +255,11 @@ function ProductVariants() {
                       borderColor: '#000000',
                     }}
                   >
-                    Item {key + 2}
+                    Item {index + 2}
                   </Divider>
                   <Button
                     type='dashed'
-                    onClick={() => removeItem(remove, name, key + 1)}
+                    onClick={() => removeItem(remove, name, index + 1)}
                     icon={<MinusCircleOutlined />}
                     style={{
                       marginBottom: 15,
@@ -282,8 +284,8 @@ function ProductVariants() {
                           step={1}
                           size='large'
                           style={{ width: '100%' }}
-                          value={productItemData[key + 1]?.stock}
-                          onChange={(value) => handleStockChange(key + 1, value)}
+                          value={productItemData[index + 1]?.stock}
+                          onChange={(value) => handleStockChange(index + 1, value)}
                         />
                       </Form.Item>
                     </Col>
@@ -297,8 +299,8 @@ function ProductVariants() {
                           id={`productCode-${key}`}
                           style={{ width: '100%' }}
                           size='large'
-                          value={productItemData[key + 1]?.productCode}
-                          onChange={(value) => handleProductCodeChange(key + 1, value)}
+                          value={productItemData[index + 1]?.productCode}
+                          onChange={(value) => handleProductCodeChange(index + 1, value)}
                         />
                       </Form.Item>
                     </Col>
@@ -311,9 +313,9 @@ function ProductVariants() {
                           id={`color-${key}`}
                           placeholder='Elige un color'
                           size='large'
-                          value={productItemData[key + 1]?.color}
+                          value={productItemData[index + 1]?.color}
                           options={colors}
-                          onChange={(value) => handleColorChange(key + 1, value)}
+                          onChange={(value) => handleColorChange(index + 1, value)}
                         />
                       </Form.Item>
                     </Col>
@@ -326,9 +328,9 @@ function ProductVariants() {
                   >
                     <Upload
                       listType='picture-card'
-                      fileList={productItemData[key + 1].images}
+                      fileList={productItemData[index + 1]?.images || []}
                       onPreview={handleImagePreview}
-                      onChange={(files) => handleChangeImage(key + 1, files)}
+                      onChange={(files) => handleChangeImage(index + 1, files)}
                     >
                       <button
                         style={{ border: 0, background: 'none' }}

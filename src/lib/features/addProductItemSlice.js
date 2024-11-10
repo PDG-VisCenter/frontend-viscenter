@@ -4,6 +4,7 @@ const initialState = {
   productId: null,
   addProductItems: [
     {
+      id: 0,
       color: null,
       productCode: null,
       stock: null,
@@ -11,6 +12,7 @@ const initialState = {
     },
   ],
   productItemsUi: [],
+  nextId: 1,
 };
 
 const addProductItemSlice = createSlice({
@@ -19,11 +21,13 @@ const addProductItemSlice = createSlice({
   reducers: {
     addProductItem: (state, action) => {
       state.addProductItems.push({
+        id: state.nextId,
         color: null,
         productCode: null,
         stock: null,
         images: [],
       });
+      state.nextId += 1;
     },
     setProductItem: (state, action) => {
       const { index, item } = action.payload;
@@ -47,6 +51,9 @@ const addProductItemSlice = createSlice({
     saveProductItemUi: (state, action) => {
       state.productItemsUi = [...state.productItemsUi, null];
     },
+    deleteProductItemUi: (state, action) => {
+      state.productItemsUi = state.productItemsUi.slice(0, -2);
+    },
     resetProductItemData: () => initialState,
   },
 });
@@ -57,6 +64,7 @@ export const {
   deleteProductItem,
   setProductId,
   saveProductItemUi,
+  deleteProductItemUi,
   resetProductItemData,
 } = addProductItemSlice.actions;
 
