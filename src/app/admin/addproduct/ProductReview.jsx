@@ -14,7 +14,7 @@ function getCategoryAndSubcategoryLabel(categoryArray) {
 
 function getBrandLabel(brandId) {
   if (brandId == null) return '';
-  const brand = brands.find((brand) => brand.value === brandId);
+  const brand = brands.find((b) => b.value === brandId);
   return brand.label;
 }
 
@@ -26,7 +26,6 @@ function getColorLabelByValue(colorId) {
 function ProductReview() {
   const productData = useSelector((state) => state.addProduct);
   const productItemsData = useSelector((state) => state.addProductItem.addProductItems);
-  console.log(productItemsData);
 
   const productDetailsItems = [
     {

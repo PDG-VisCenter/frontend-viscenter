@@ -1,14 +1,14 @@
-import { Button, Col, Divider, Form, Image, Input, InputNumber, Row, Select, Space, Upload } from 'antd';
-import { MinusCircleOutlined, PlusOutlined } from '@ant-design/icons';
-import { useDispatch, useSelector } from 'react-redux';
-import { colors } from '@/data/searchFilters';
 import {
   addProductItem,
   deleteProductItem,
   saveProductItemUi,
   setProductItem,
 } from '@/lib/features/addProductItemSlice';
+import { Button, Col, Divider, Form, Image, Input, InputNumber, Row, Select, Space, Upload } from 'antd';
+import { MinusCircleOutlined, PlusOutlined } from '@ant-design/icons';
+import { useDispatch, useSelector } from 'react-redux';
 import { useEffect, useState } from 'react';
+import { colors } from '@/data/searchFilters';
 
 const getBase64 = (file) =>
   new Promise((resolve, reject) => {
