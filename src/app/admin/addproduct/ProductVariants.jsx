@@ -1,6 +1,8 @@
 import { Button, Col, Divider, Form, Image, Input, InputNumber, Row, Select, Space, Upload } from 'antd';
 import { MinusCircleOutlined, PlusOutlined } from '@ant-design/icons';
+import { useDispatch, useSelector } from 'react-redux';
 import { colors } from '@/data/searchFilters';
+import { addProductItem, deleteProductItem, setProductItem } from '@/lib/features/addProductItemSlice';
 import { useState } from 'react';
 
 const getBase64 = (file) =>
@@ -19,6 +21,8 @@ const normFile = (e) => {
 };
 
 function ProductVariants() {
+  const dispatch = useDispatch();
+  const productItemData = useSelector((state) => state.addProductItem);
   const [previewOpen, setPreviewOpen] = useState(false);
   const [previewImage, setPreviewImage] = useState('');
   const [fileList, setFileList] = useState([]);
@@ -31,12 +35,61 @@ function ProductVariants() {
     setPreviewOpen(true);
   };
 
-  const handleChangeImage = ({ fileList: newFileList }) => {
+  const handleChangeImage = (index, { fileList: newFileList }) => {
     setFileList(newFileList);
+    const images = newFileList.map(file => file.originFileObj);
+    dispatch(
+      setProductItem({
+        index,
+        item: {
+          images: images,
+        }
+      })
+    );
+    //console.log(fileList);
   };
 
-  const onFinish = (values) => {
-    console.log('Received values of form:', values);
+  const handleStockChange = (index, value) => {
+    dispatch(
+      setProductItem({
+        index,
+        item: {
+          stock: value,
+        },
+      })
+    );
+  };
+
+  const handleProductCodeChange = (index, event) => {
+    dispatch(
+      setProductItem({
+        index,
+        item: {
+          productCode: event.target.value,
+        },
+      })
+    );
+  };
+
+  const handleColorChange = (index, value) => {
+    dispatch(
+      setProductItem({
+        index,
+        item: {
+          color: value,
+        },
+      })
+    );
+  };
+
+  const removeItem = (remove, name, index) => {
+    remove(name);
+    dispatch(deleteProductItem(index));
+  };
+
+  const addItem = (add, name) => {
+    add(name);
+    dispatch(addProductItem());
   };
 
   return (
@@ -70,6 +123,7 @@ function ProductVariants() {
                 size='large'
                 min={0}
                 step={1}
+                onChange={(value) => handleStockChange(0, value)}
               />
             </Form.Item>
           </Col>
@@ -81,6 +135,7 @@ function ProductVariants() {
               <Input
                 style={{ width: '100%' }}
                 size='large'
+                onChange={(value) => handleProductCodeChange(0, value)}
               />
             </Form.Item>
           </Col>
@@ -93,6 +148,7 @@ function ProductVariants() {
                 placeholder='Elige un color'
                 size='large'
                 options={colors}
+                onChange={(value) => handleColorChange(0, value)}
               />
             </Form.Item>
           </Col>
@@ -106,8 +162,8 @@ function ProductVariants() {
             listType='picture-card'
             fileList={fileList}
             onPreview={handleImagePreview}
-            onChange={handleChangeImage}
-          >
+            onChange={(files) => handleChangeImage(0, files)}
+          > 
             <button
               style={{ border: 0, background: 'none' }}
               type='button'
@@ -137,7 +193,6 @@ function ProductVariants() {
         labelCol={{ span: 24 }}
         wrapperCol={{ span: 24 }}
         layout='vertical'
-        onFinish={onFinish}
         autoComplete='off'
       >
         <Form.List name='product-items'>
@@ -163,7 +218,7 @@ function ProductVariants() {
                   </Divider>
                   <Button
                     type='dashed'
-                    onClick={() => remove(name)}
+                    onClick={() => removeItem(remove, name, key + 1)}
                     icon={<MinusCircleOutlined />}
                     style={{
                       marginBottom: 15,
@@ -188,6 +243,7 @@ function ProductVariants() {
                           step={1}
                           size='large'
                           style={{ width: '100%' }}
+                          onChange={(value) => handleStockChange(key + 1, value)}
                         />
                       </Form.Item>
                     </Col>
@@ -201,6 +257,7 @@ function ProductVariants() {
                           id={`productCode-${key}`}
                           style={{ width: '100%' }}
                           size='large'
+                          onChange={(value) => handleProductCodeChange(key + 1, value)}
                         />
                       </Form.Item>
                     </Col>
@@ -214,6 +271,7 @@ function ProductVariants() {
                           placeholder='Elige un color'
                           size='large'
                           options={colors}
+                          onChange={(value) => handleColorChange(key + 1, value)}
                         />
                       </Form.Item>
                     </Col>
@@ -264,7 +322,7 @@ function ProductVariants() {
               >
                 <Button
                   type='dashed'
-                  onClick={() => add()}
+                  onClick={() => addItem(add)}
                   icon={<PlusOutlined />}
                   block
                 >
