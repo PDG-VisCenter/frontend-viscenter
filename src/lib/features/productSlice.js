@@ -17,6 +17,11 @@ export const addProduct = createAsyncThunk('product/addProduct', async (newProdu
   return response.data;
 });
 
+export const updateProduct = createAsyncThunk('product/updateProduct', async ({ id, newProduct }) => {
+  const response = await axios.put(`https://localhost:7235/api/Product/${id}`, newProduct);
+  return response.data;
+});
+
 const productSlice = createSlice({
   name: 'product',
   initialState,
@@ -43,6 +48,19 @@ const productSlice = createSlice({
       state.product = action.payload;
     });
     builder.addCase(addProduct.rejected, (state, action) => {
+      state.status = 'failed';
+      state.error = action.error.message;
+    });
+
+    // Update a product
+    builder.addCase(updateProduct.pending, (state) => {
+      state.status = 'loading';
+    });
+    builder.addCase(updateProduct.fulfilled, (state, action) => {
+      state.status = 'success';
+      state.product = action.payload;
+    });
+    builder.addCase(updateProduct.rejected, (state, action) => {
       state.status = 'failed';
       state.error = action.error.message;
     });
