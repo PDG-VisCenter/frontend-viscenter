@@ -1,5 +1,7 @@
 import { combineReducers } from 'redux';
 
+import addProductItemSlice from './features/addProductItemSlice';
+import addProductSlice from './features/addProductSlice';
 import cartSlice from './features/cartSlice';
 import categoriesSlice from './features/categoriesSlice';
 import categorySlice from './features/categorySlice';
@@ -11,6 +13,8 @@ import sellerAppSliceReducer from './features/sellerSlice';
 
 const rootReducer = combineReducers({
   seller: sellerAppSliceReducer,
+  addProduct: addProductSlice,
+  addProductItem: addProductItemSlice,
   products: productsSlice,
   product: productSlice,
   productItems: productItemsSlice,

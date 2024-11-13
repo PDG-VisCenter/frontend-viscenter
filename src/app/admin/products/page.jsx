@@ -1,98 +1,206 @@
 'use client';
 
-import { Input, Layout, Skeleton, Space, Table, theme } from 'antd';
+import {
+  brands,
+  colors,
+  materials,
+  shapes,
+  sortByElements,
+  treeCategoriesAndSubcategories,
+} from '@/data/searchFilters';
+import { Button, Checkbox, Collapse, Drawer, Input, Layout, Select, Space, Table, theme } from 'antd';
 import { useDispatch, useSelector } from 'react-redux';
+import { useEffect, useState } from 'react';
 import { Content } from 'antd/es/layout/layout';
-import { fetchAllProducts } from '@/lib/features/productsSlice';
+import { fetchFilteredProducts } from '@/lib/features/productsSlice';
 import HeaderSeller from '../components/HeaderSeller';
 import Image from 'next/image';
-import imgprueba from '../../../assets/img/hero/hero-7.jpg';
 import Link from 'next/link';
 import SiderMenuSeller from '../components/SiderMenuSeller';
-import Title from 'antd/es/typography/Title';
-import { useEffect } from 'react';
-
-const columns = [
-  {
-    title: 'Imagen',
-    dataIndex: 'image',
-    width: 110,
-    align: 'center',
-    render: (_) => (
-      <Image
-        src={imgprueba}
-        alt='productimg'
-        layout='responsive'
-        width={80}
-        height={60}
-      />
-    ),
-  },
-  {
-    title: 'Nombre',
-    dataIndex: 'name',
-    width: 250,
-    className: 'center-vertically',
-  },
-  {
-    title: 'Precio',
-    dataIndex: 'price',
-    width: 80,
-  },
-  {
-    title: 'SKU',
-    dataIndex: 'code',
-    width: 150,
-  },
-  {
-    title: 'Stock',
-    dataIndex: 'stock',
-    width: 100,
-  },
-  {
-    title: 'Accciones',
-    key: 'action',
-    width: 110,
-    render: (_) => (
-      <Space size='middle'>
-        <Link href='/'>Edit</Link>
-        <Link href='/'>Delete</Link>
-      </Space>
-    ),
-  },
-];
+import TreeCategories from '@/app/components/TreeCategories';
 
 function Products() {
-  const onSearch = (value, _e, info) => console.log(info?.source, value);
+  const dispatch = useDispatch();
+  const productsItems = useSelector((state) => state.products.products);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [openDrawer, setOpenDrawer] = useState(false);
+  const [filters, setFilters] = useState({
+    brands: [],
+    colors: [],
+    materials: [],
+    shapes: [],
+    categories: [],
+    subCategories: [],
+    productName: '',
+    sortOption: '',
+  });
+
+  useEffect(() => {
+    dispatch(fetchFilteredProducts({ filters, page: currentPage }));
+  }, [filters, currentPage, dispatch]);
+
+  const showDrawer = () => {
+    setOpenDrawer(true);
+  };
+
+  const closeDrawer = () => {
+    setOpenDrawer(false);
+  };
+
+  const handleSortChange = (value) => {
+    setFilters((prevFilters) => ({
+      ...prevFilters,
+      sortOption: value,
+    }));
+  };
+
+  const handleSearch = (value) => {
+    setFilters((prevFilters) => ({
+      ...prevFilters,
+      productName: value,
+    }));
+  };
 
   const {
     token: { colorBgContainer, borderRadiusLG },
   } = theme.useToken();
 
-  const dispatch = useDispatch();
-  const productsItems = useSelector((state) => state.products.products);
-  const status = useSelector((state) => state.products.status);
-  const error = useSelector((state) => state.products.error);
+  const handlePaginationOnChange = (page) => {
+    setCurrentPage(page);
+  };
 
-  useEffect(() => {
-    if (status === 'idle') {
-      dispatch(fetchAllProducts());
-    }
-  }, [status, dispatch]);
+  const handleFilterChange = (filterType, values) => {
+    setFilters((prevFilters) => ({
+      ...prevFilters,
+      [filterType]: values,
+    }));
+  };
 
-  if (status === 'loading') {
-    return (
-      <Skeleton.Node
-        active
-        style={{
-          width: 160,
-        }}
-      />
-    );
-  }
-  if (status === 'failed') {
-    return <div>{error}</div>;
-  }
+  const handleTreeCheck = ({ parents, children }) => {
+    handleFilterChange('categories', parents);
+    handleFilterChange('subcategories', children);
+  };
+
+  const items = [
+    {
+      key: '1',
+      label: 'Categorias',
+      children: (
+        <TreeCategories
+          treeData={treeCategoriesAndSubcategories}
+          onCheck={handleTreeCheck}
+        />
+      ),
+    },
+    {
+      key: '3',
+      label: 'Color del Marco',
+      children: (
+        <Checkbox.Group
+          options={colors}
+          onChange={(values) => handleFilterChange('colors', values)}
+          style={{
+            display: 'flex',
+            flexDirection: 'column',
+          }}
+        />
+      ),
+    },
+    {
+      key: '4',
+      label: 'Marca',
+      children: (
+        <Checkbox.Group
+          options={brands}
+          onChange={(values) => handleFilterChange('brands', values)}
+          style={{
+            display: 'flex',
+            flexDirection: 'column',
+          }}
+        />
+      ),
+    },
+    {
+      key: '5',
+      label: 'Forma del Marco',
+      children: (
+        <Checkbox.Group
+          options={shapes}
+          onChange={(values) => handleFilterChange('shapes', values)}
+          style={{
+            display: 'flex',
+            flexDirection: 'column',
+          }}
+        />
+      ),
+    },
+    {
+      key: '6',
+      label: 'Material del Marco',
+      children: (
+        <Checkbox.Group
+          options={materials}
+          onChange={(values) => handleFilterChange('materials', values)}
+          style={{
+            display: 'flex',
+            flexDirection: 'column',
+          }}
+        />
+      ),
+    },
+  ];
+
+  const columns = [
+    {
+      title: 'Imagen',
+      dataIndex: 'image',
+      width: 110,
+      align: 'center',
+      render: (image) => (
+        <Image
+          src={image}
+          alt='productimg'
+          width={100}
+          height={90}
+          style={{
+            objectFit: 'contain',
+          }}
+        />
+      ),
+    },
+    {
+      title: 'Nombre',
+      dataIndex: 'name',
+      width: 250,
+      className: 'center-vertically',
+    },
+    {
+      title: 'Precio',
+      dataIndex: 'salePrice',
+      width: 80,
+    },
+    {
+      title: 'Forma',
+      dataIndex: 'shape',
+      width: 150,
+    },
+    {
+      title: 'Material',
+      dataIndex: 'material',
+      width: 100,
+    },
+    {
+      title: 'Accciones',
+      key: 'action',
+      width: 110,
+      render: (_) => (
+        <Space size='middle'>
+          <Link href='/'>Edit</Link>
+          <Link href='/'>Delete</Link>
+        </Space>
+      ),
+    },
+  ];
 
   return (
     <Layout style={{ minHeight: '100vh' }}>
@@ -108,29 +216,59 @@ function Products() {
               borderRadius: borderRadiusLG,
             }}
           >
-            <Title
-              level={2}
-              style={{
-                textAlign: 'center',
-              }}
+            <div className='search__filter'>
+              <Button
+                type='primary'
+                onClick={showDrawer}
+                size='large'
+                style={{
+                  marginRight: '30px',
+                }}
+              >
+                Añadir filtros
+              </Button>
+              <Input.Search
+                placeholder='Busca productos...'
+                allowClear
+                enterButton='Search'
+                size='large'
+                onSearch={handleSearch}
+                style={{
+                  paddingRight: '30px',
+                }}
+              />
+              <Select
+                placeholder='Ordenar por:'
+                style={{ width: 200 }}
+                size='medium'
+                onChange={handleSortChange}
+                options={sortByElements}
+              />
+            </div>
+            <Drawer
+              title='Filtros'
+              placement='left'
+              onClose={closeDrawer}
+              open={openDrawer}
             >
-              Productos
-            </Title>
-            <Input.Search
-              placeholder='Busca productos por nombre o SKU...'
-              allowClear
-              enterButton='Search'
-              size='large'
-              onSearch={onSearch}
-              style={{
-                marginBottom: 20,
-              }}
-            />
+              <Collapse
+                items={items}
+                onChange={handleFilterChange}
+              />
+            </Drawer>
+            <br />
+            <br />
             <Table
               columns={columns}
-              dataSource={productsItems}
-              pagination={{ pageSize: 12 }}
-              scroll={{ y: 380 }}
+              dataSource={productsItems.data}
+              pagination={{
+                defaultPageSize: 12,
+                current: currentPage,
+                onChange: handlePaginationOnChange,
+                total: productsItems?.totalCount,
+                showSizeChanger: false,
+              }}
+              scroll={{ y: 400 }}
             />
           </div>
         </Content>
