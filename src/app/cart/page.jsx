@@ -6,8 +6,8 @@ import Footer from '@/components/Footer';
 import HeaderSimple from '@/components/HeaderSimple';
 import Layout from 'antd/es/layout/layout';
 import Link from 'next/link';
-import { useSelector } from 'react-redux';
 import { useRouter } from 'next/navigation';
+import { useSelector } from 'react-redux';
 
 function Cart() {
   const cartItems = useSelector((state) => state.cart.items);
@@ -48,7 +48,7 @@ function Cart() {
                 name={item.name}
                 price={item.price}
                 color={item.color}
-                sku={item.sku}
+                quantity={item.quantity}
               />
             ))}
             <Divider
@@ -76,7 +76,7 @@ function Cart() {
                     fontSize: '16px',
                   }}
                 >
-                  Continue Shopping
+                  Continuar Comprando
                 </Link>
               </Col>
               <Col
@@ -106,7 +106,7 @@ function Cart() {
                 fontSize: '16px',
               }}
             >
-              Continue Shopping
+              Continuar Comprando
             </Link>
           </div>
         )}

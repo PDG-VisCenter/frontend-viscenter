@@ -3,6 +3,7 @@
 import { Breadcrumb, Button, Collapse, Empty, Rate, Skeleton } from 'antd';
 import { useDispatch, useSelector } from 'react-redux';
 import { useEffect, useState } from 'react';
+import { addCartItem } from '@/lib/features/cartItemSlice';
 import { addItemToCart } from '@/lib/features/cartSlice';
 import { fetchColorsByProduct } from '@/lib/features/colorsSlice';
 import { fetchProductById } from '@/lib/features/productSlice';
@@ -10,6 +11,7 @@ import { fetchProductItemsByProduct } from '@/lib/features/productItemsSlice';
 import Footer from '@/components/Footer';
 import HeaderSimple from '@/components/HeaderSimple';
 import Image from 'next/image';
+import { useSession } from 'next-auth/react';
 
 function generatePath(category, subCategory = '') {
   const categoryPath = {
@@ -40,17 +42,41 @@ function Product({ params }) {
   const productItem = useSelector((state) => state.product.product);
   const productSpecifications = useSelector((state) => state.productItems.productItems);
   const colorItems = useSelector((state) => state.colors.colors);
-  const status = useSelector((state) => state.product.status);
+  const productStatus = useSelector((state) => state.product.status);
   const error = useSelector((state) => state.product.error);
+  const cart = useSelector((state) => state.cart.items);
+  const cartUser = useSelector((state) => state.cart.cart);
+  const { data: session, status } = useSession();
+
+  useEffect(() => {
+    dispatch(fetchProductById(params.product));
+    dispatch(fetchProductItemsByProduct(params.product));
+    dispatch(fetchColorsByProduct(params.product));
+  }, [dispatch, params.product]);
+
+  useEffect(() => {
+    if (cart.length > 0) {
+      if (status === 'authenticated') {
+        const cartItemFormData = new FormData();
+        cartItemFormData.append('cartId', cartUser.id);
+        cartItemFormData.append('productItemId', productSpecifications[activeColorItem]?.id);
+        cartItemFormData.append('quantity', cart[cart.length - 1].quantity);
+        dispatch(addCartItem(cartItemFormData));
+      } else if (status === 'unauthenticated') {
+        localStorage.setItem('cart', JSON.stringify(cart));
+      }
+    }
+  }, [cart, dispatch]);
 
   const handleAddToCart = () => {
     dispatch(
       addItemToCart({
-        img: productItem.images[0],
+        id: productItem.id,
+        img: productItem.image,
         name: productItem.name,
-        price: productItem.price,
-        color: productItem.color,
-        sku: productItem.code,
+        price: productItem.salePrice,
+        color: colorItems[activeColorItem]?.name,
+        quantity,
       })
     );
   };
@@ -65,13 +91,7 @@ function Product({ params }) {
     setQuantity((prevQuantity) => (prevQuantity > 1 ? prevQuantity - 1 : 1));
   };
 
-  useEffect(() => {
-    dispatch(fetchProductById(params.product));
-    dispatch(fetchProductItemsByProduct(params.product));
-    dispatch(fetchColorsByProduct(params.product));
-  }, [dispatch, params.product]);
-
-  if (status === 'loading') {
+  if (productStatus === 'loading') {
     return (
       <Skeleton.Node
         active
@@ -81,7 +101,7 @@ function Product({ params }) {
       />
     );
   }
-  if (status === 'failed') {
+  if (productStatus === 'failed') {
     return <div>{error}</div>;
   }
 

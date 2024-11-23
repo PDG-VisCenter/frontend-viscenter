@@ -2,6 +2,7 @@ import { combineReducers } from 'redux';
 
 import addProductItemSlice from './features/addProductItemSlice';
 import addProductSlice from './features/addProductSlice';
+import cartItemSlice from './features/cartItemSlice';
 import cartSlice from './features/cartSlice';
 import categoriesSlice from './features/categoriesSlice';
 import categorySlice from './features/categorySlice';
@@ -20,6 +21,7 @@ const rootReducer = combineReducers({
   productItems: productItemsSlice,
   colors: colorsSlice,
   cart: cartSlice,
+  cartItem: cartItemSlice,
   category: categorySlice,
   categories: categoriesSlice,
 });
