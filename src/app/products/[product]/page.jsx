@@ -76,6 +76,7 @@ function Product({ params }) {
         name: productItem.name,
         price: productItem.salePrice,
         color: colorItems[activeColorItem]?.name,
+        productItemId: productSpecifications.id,
         quantity,
       })
     );

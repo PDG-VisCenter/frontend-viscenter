@@ -1,19 +1,68 @@
 'use client';
 
 import { Button, Col, Divider, Empty, Row, Space } from 'antd';
+import { removeAllCartRedux, updateCartItem } from '@/lib/features/cartSlice';
+import { useDispatch, useSelector } from 'react-redux';
+import axios from 'axios';
 import CartCard from './CartCard';
 import Footer from '@/components/Footer';
 import HeaderSimple from '@/components/HeaderSimple';
 import Layout from 'antd/es/layout/layout';
 import Link from 'next/link';
+import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { useSelector } from 'react-redux';
 
 function Cart() {
+  const dispatch = useDispatch();
   const cartItems = useSelector((state) => state.cart.items);
+  const cartItemsFetched = useSelector((state) => state.cart.itemsFetched);
   const cartTotalPrice = useSelector((state) => state.cart.totalPrice);
   const cartTotalItems = useSelector((state) => state.cart.totalItems);
   const router = useRouter();
+
+  const updateCartItems = async () => {
+    if (cartItemsFetched.length > 0) {
+      try {
+        const updatedItems = await Promise.all(
+          cartItemsFetched.map(async (item) => {
+            if (!item.name || !item.img || !item.color) {
+              const productItem = await axios.get(`https://localhost:7235/api/ProductItem/${item.productItemId}`);
+              const product = await axios.get(`https://localhost:7235/api/Product/${productItem.data.productId}`);
+              const color = await axios.get(`https://localhost:7235/api/Color/${productItem.data.colorId}`);
+
+              return {
+                id: item.id,
+                img: productItem.data.images[0],
+                name: product.data.name,
+                price: item.price,
+                quantity: item.quantity,
+                color: color.data.name,
+              };
+            }
+            return item;
+          })
+        );
+
+        return updatedItems;
+      } catch (error) {
+        console.error('Error loading cart items:', error);
+        return [];
+      }
+    }
+    return [];
+  };
+
+  useEffect(() => {
+    const updateAndDispatch = async () => {
+      const updatedItems = await updateCartItems();
+      if (updatedItems.length > 0) {
+        dispatch(removeAllCartRedux());
+        dispatch(updateCartItem(updatedItems));
+      }
+    };
+
+    updateAndDispatch();
+  }, [cartItemsFetched]);
 
   const onClickCheckout = () => {
     router.push('https://buy.stripe.com/test_4gw2bw7AL6hI760fYY');

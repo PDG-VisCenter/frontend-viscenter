@@ -3,6 +3,7 @@ import axios from 'axios';
 
 const initialState = {
   items: [],
+  itemsFetched: [],
   cart: {},
   status: 'idle',
   cartStatus: 'idle',
@@ -33,11 +34,26 @@ const cartSlice = createSlice({
         img: newItem.img,
         price: newItem.price,
         color: newItem.color,
+        productItemId: newItem.productItemId,
+        quantity: newItem.quantity,
+      });
+
+      state.itemsFetched.push({
+        id: newItem.id,
+        name: newItem.name,
+        img: newItem.img,
+        price: newItem.price,
+        color: newItem.color,
+        productItemId: newItem.productItemId,
         quantity: newItem.quantity,
       });
 
       state.totalItems += 1;
       state.totalPrice += newItem.price;
+    },
+    updateCartItem: (state, action) => {
+      state.items = action.payload;
+      state.totalItems = action.payload.length;
     },
     removeAllCartRedux: (state, action) => {
       state.items = [];
@@ -78,6 +94,6 @@ const cartSlice = createSlice({
   },
 });
 
-export const { addItemToCart, removeAllCartRedux, removeItemFromCart } = cartSlice.actions;
+export const { addItemToCart, updateCartItem, removeAllCartRedux, removeItemFromCart } = cartSlice.actions;
 
 export default cartSlice.reducer;
