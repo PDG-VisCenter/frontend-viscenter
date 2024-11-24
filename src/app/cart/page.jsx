@@ -74,11 +74,10 @@ function Cart() {
 
     const data = {
       products,
-      successRedirectUrl: 'http://localhost:3000',
+      successRedirectUrl: 'http://localhost:3000/payment-success',
       cancelRedirectUrl: 'http://localhost:3000/cart',
     };
 
-    console.log('Data sent to API:', data);
     try {
       const response = await axios.post('https://localhost:7235/api/Stripe/create-session', data);
       router.push(response.data.checkoutUrl);

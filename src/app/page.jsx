@@ -22,6 +22,7 @@ function Home() {
         });
       } else if (status === 'authenticated') {
         try {
+          localStorage.setItem('userId', session?.userId);
           await dispatch(fetchCartByUserId(session?.userId)).unwrap();
           const cartItems = await dispatch(fetchCartItemsByUserId(session?.userId)).unwrap();
           if (cartItems.length > 0) {
