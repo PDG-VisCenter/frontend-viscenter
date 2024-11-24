@@ -1,63 +1,151 @@
 'use client';
 
-import { Input, Layout, Space, Table, theme } from 'antd';
+import { Input, Layout, Select, Space, Table, theme } from 'antd';
 import { Content } from 'antd/es/layout/layout';
-import { EditOutlined } from '@ant-design/icons';
 import HeaderSeller from '../components/HeaderSeller';
-import Link from 'next/link';
 import SiderMenuSeller from '../components/SiderMenuSeller';
 import Title from 'antd/es/typography/Title';
+import { orderStatus } from '@/data/statusOrders';
 
 const columns = [
   {
     title: 'N° Pedido',
-    dataIndex: 'number',
-    width: 90,
+    dataIndex: 'order_number',
+    key: 'order_number',
+    width: 60,
     className: 'center-vertically',
   },
   {
     title: 'Fecha',
     dataIndex: 'date',
-    width: 90,
+    width: 100,
   },
   {
-    title: 'Email Cliente',
-    dataIndex: 'email',
-    width: 170,
+    title: 'Nombre Cliente',
+    dataIndex: 'name',
+    width: 120,
   },
   {
-    title: 'Status',
+    title: 'Estado',
     dataIndex: 'status',
-    width: 90,
+    width: 80,
+    render: (_, record) => (
+      <Space size='middle'>
+        <Select
+          options={orderStatus}
+          defaultValue={record.status}
+          style={{
+            width: 170,
+          }}
+        />
+      </Space>
+    ),
   },
   {
     title: 'Total',
     dataIndex: 'total',
-    width: 90,
+    width: 60,
   },
   {
-    title: 'Acccion',
-    key: 'action',
-    width: 110,
-    render: (_, record) => (
-      <Space size='middle'>
-        <Link href='/'>
-          <EditOutlined /> Edit
-        </Link>
-      </Space>
-    ),
+    title: 'Items',
+    key: 'items',
+    dataIndex: 'items',
+    width: 40,
   },
 ];
 
-const data = [];
-for (let i = 0; i < 50; i++) {
-  data.push({
-    key: i,
-    number: 32,
-    email: `London, Park Lane no. ${i}`,
-    date: `Dec ${i}, 2024`,
-  });
-}
+const data = [
+  {
+    key: '1',
+    order_number: '#9844',
+    date: '24 de Noviembre, 2024',
+    name: 'Sofía Rodríguez',
+    status: 'Pendiente',
+    total: 'Bs. 1200',
+    items: 3,
+  },
+  {
+    key: '2',
+    order_number: '#5652',
+    date: '11 de Noviembre, 2024',
+    name: 'Sofía Rodríguez',
+    status: 'En proceso',
+    total: 'Bs. 150',
+    items: 1,
+  },
+  {
+    key: '3',
+    order_number: '#4567',
+    date: '1 de Octubre, 2024',
+    name: 'Sofía Rodríguez',
+    status: 'Listo para recojo',
+    total: 'Bs. 380',
+    items: 1,
+  },
+  {
+    key: '4',
+    order_number: '#1111',
+    date: '25 de Junio, 2024',
+    name: 'Sofía Rodríguez',
+    status: 'Entregado',
+    total: 'Bs. 530',
+    items: 2,
+  },
+  {
+    key: '5',
+    order_number: '#560',
+    date: '3 de Abril, 2024',
+    name: 'Sofía Rodríguez',
+    status: 'Cancelado',
+    total: 'Bs. 200',
+    items: 1,
+  },
+  {
+    key: '6',
+    order_number: '#423',
+    date: '29 de Marzo, 2024',
+    name: 'Carla López',
+    status: 'Pendiente',
+    total: 'Bs. 1200',
+    items: 1,
+  },
+  {
+    key: '7',
+    order_number: '#321',
+    date: '9 de Marzo, 2024',
+    name: 'Fernando Rojas',
+    status: 'En proceso',
+    total: 'Bs. 150',
+    items: 2,
+  },
+  {
+    key: '8',
+    order_number: '#121',
+    date: '22 de Febrero, 2024',
+    name: 'Ricardo Salinas Chávez',
+    status: 'Listo para recojo',
+    total: 'Bs. 380',
+    items: 1,
+  },
+  {
+    key: '9',
+    order_number: '#20',
+    date: '30 de Enero, 2024',
+    name: 'Carlos Soria Lima',
+    status: 'Entregado',
+    total: 'Bs. 530',
+    items: 2,
+  },
+  {
+    key: '10',
+    order_number: '#1',
+    date: '15 de Enero, 2024',
+    name: 'Isabel Vargas',
+    status: 'Cancelado',
+    total: 'Bs. 200',
+    items: 2,
+  },
+];
 
 function Orders() {
   const onSearch = (value, _e, info) => console.log(info?.source, value);
@@ -99,11 +187,10 @@ function Orders() {
               }}
             />
             <Table
+              bordered
               columns={columns}
               dataSource={data}
-              pagination={{
-                pageSize: 20,
-              }}
+              pagination={false}
               scroll={{
                 y: 380,
               }}

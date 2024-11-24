@@ -17,7 +17,7 @@ function Orders() {
   const router = useRouter();
   const columns = [
     {
-      title: 'Order',
+      title: 'N° Pedido',
       dataIndex: 'order_number',
       key: 'order_number',
       width: 150,
@@ -137,7 +137,7 @@ function Orders() {
 
   return (
     <Content style={contentStyle}>
-      <Title>Historial de pedidos</Title>
+      <Title>Historial de Pedidos</Title>
       <Table
         bordered
         size='large'
