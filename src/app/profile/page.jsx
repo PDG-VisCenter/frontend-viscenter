@@ -9,6 +9,7 @@ import Sider from 'antd/es/layout/Sider';
 import Title from 'antd/es/typography/Title';
 import { UserOutlined } from '@ant-design/icons';
 import { useState } from 'react';
+import Orders from './Orders';
 
 const items = [
   {
@@ -137,12 +138,7 @@ function Profile() {
             </Flex>
           </Content>
         )}
-        {selectedMenu === 'orders' && (
-          <Content style={contentStyle}>
-            <Title>Historial de pedidos</Title>
-            <p>Aún no has realizado ningún pedido</p>
-          </Content>
-        )}
+        {selectedMenu === 'orders' && <Orders />}
       </Layout>
       <Footer />
     </Layout>
