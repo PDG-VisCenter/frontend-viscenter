@@ -93,6 +93,7 @@ function Cart() {
             {cartItems.map((item) => (
               <CartCard
                 key={item.id}
+                id={item.id}
                 img={item.img}
                 name={item.name}
                 price={item.price}

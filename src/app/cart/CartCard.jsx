@@ -1,4 +1,5 @@
 import { Button, Card, Col, Row } from 'antd';
+import { deleteCartItem } from '@/lib/features/cartItemSlice';
 import { DeleteOutlined } from '@ant-design/icons';
 import Image from 'next/image';
 import PropTypes from 'prop-types';
@@ -11,6 +12,7 @@ function CartCard(props) {
   const { id, img, name, price, color, quantity } = props;
 
   const handleRemoveFromCart = (idItem) => {
+    dispatch(deleteCartItem(idItem));
     dispatch(removeItemFromCart(idItem));
   };
 
@@ -56,7 +58,7 @@ function CartCard(props) {
           <Button
             type='primary'
             icon={<DeleteOutlined />}
-            onClick={handleRemoveFromCart(id)}
+            onClick={() => handleRemoveFromCart(id)}
             danger
           >
             Eliminar

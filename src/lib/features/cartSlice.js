@@ -57,6 +57,7 @@ const cartSlice = createSlice({
     },
     removeAllCartRedux: (state, action) => {
       state.items = [];
+      state.itemsFetched = [];
       state.totalItems = 0;
     },
     removeItemFromCart: (state, action) => {
@@ -65,8 +66,9 @@ const cartSlice = createSlice({
 
       if (existingItem) {
         state.items = state.items.filter((item) => item.id !== id);
+        state.itemsFetched = state.items.filter((item) => item.id !== id);
         state.totalItems -= 1;
-        state.totalPrice -= existingItem.price;
+        state.totalPrice -= existingItem.price * existingItem.quantity;
       }
     },
   },

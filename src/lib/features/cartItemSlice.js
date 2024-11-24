@@ -6,6 +6,7 @@ const initialState = {
   cartItem: {},
   status: 'idle',
   statusAdd: 'idle',
+  statusDelete: 'idle',
   error: null,
 };
 
@@ -16,6 +17,11 @@ export const fetchCartItemsByUserId = createAsyncThunk('cartItems/fetchCartItems
 
 export const addCartItem = createAsyncThunk('cartItem/addCartItem', async (cartItem) => {
   const response = await axios.post('https://localhost:7235/api/CartItem', cartItem);
+  return response.data;
+});
+
+export const deleteCartItem = createAsyncThunk('cartItem/deleteCartItem', async (id) => {
+  const response = await axios.delete(`https://localhost:7235/api/CartItem/${id}`);
   return response.data;
 });
 
@@ -46,6 +52,19 @@ const cartItemsSlice = createSlice({
     });
     builder.addCase(addCartItem.rejected, (state, action) => {
       state.statusAdd = 'failed';
+      state.error = action.error.message;
+    });
+
+    // delete cart item
+    builder.addCase(deleteCartItem.pending, (state) => {
+      state.statusDelete = 'loading';
+    });
+    builder.addCase(deleteCartItem.fulfilled, (state, action) => {
+      state.statusDelete = 'success';
+      state.cartItem = action.payload;
+    });
+    builder.addCase(deleteCartItem.rejected, (state, action) => {
+      state.statusDelete = 'failed';
       state.error = action.error.message;
     });
   },
