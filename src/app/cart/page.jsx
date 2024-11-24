@@ -64,8 +64,27 @@ function Cart() {
     updateAndDispatch();
   }, [cartItemsFetched]);
 
-  const onClickCheckout = () => {
-    router.push('https://buy.stripe.com/test_4gw2bw7AL6hI760fYY');
+  const onClickCheckout = async () => {
+    const products = cartItems.map((item) => ({
+      price: item.price,
+      name: item.name,
+      description: `Color: ${item.color}`,
+      quantity: item.quantity,
+    }));
+
+    const data = {
+      products,
+      successRedirectUrl: 'http://localhost:3000',
+      cancelRedirectUrl: 'http://localhost:3000/cart',
+    };
+
+    console.log('Data sent to API:', data);
+    try {
+      const response = await axios.post('https://localhost:7235/api/Stripe/create-session', data);
+      router.push(response.data.checkoutUrl);
+    } catch (error) {
+      console.error('Error creating Stripe session:', error);
+    }
   };
 
   return (
