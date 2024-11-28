@@ -1,6 +1,6 @@
 import { getServerSession } from 'next-auth';
 import { authOptions } from '../auth/[...nextauth]/route';
-import { decrypt } from 'utils/encryption';
+import { decrypt } from '../../../utils/encryption';
 
 export async function GET(req) {
   try {
