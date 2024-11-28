@@ -5,6 +5,7 @@ import { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useRouter } from 'next/navigation';
 import { List, Card, Button, Typography, Spin, ConfigProvider } from 'antd';
+import { fetchUserAccessToken } from '../services/keycloakServices';
 
 const { Title, Paragraph } = Typography;
 
@@ -20,17 +21,33 @@ function ScheduledAppointments() {
     if (status === 'loading') {
       return;
     }
-  
     if (!session || !session.userId) {
       return;
     }
-    axios.get(`http://localhost:5281/api/Appointment/user/${session.userId}`)
-      .then(response => {
+
+    fetchData();
+  }, [session, status]);
+
+  const fetchData = async () => {
+    const token = await fetchUserAccessToken();
+    console.log(token);
+
+    axios
+      .get(`http://localhost:5270/viscenter/api/v1/Appointment/user/${session.userId}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      })
+      .then((response) => {
         const appointmentsData = response.data;
         setAppointments(appointmentsData);
 
-        const availabilityIds = appointmentsData.map(app => app.availabilityID);
-        return axios.get('http://localhost:5281/api/Availability').then(response => {
+        const availabilityIds = appointmentsData.map((app) => app.availabilityID);
+        return axios.get('http://localhost:5270/viscenter/api/v1/Availability', {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }).then((response) => {
           const availabilitiesData = response.data;
           const availabilityMap = availabilitiesData.reduce((map, item) => {
             map[item.availabilityID] = item;
@@ -39,11 +56,11 @@ function ScheduledAppointments() {
           setAvailabilities(availabilityMap);
         });
       })
-      .catch(error => console.error('Error fetching appointments:', error))
+      .catch((error) => console.error('Error fetching appointments:', error))
       .finally(() => {
         setLoading(false);
       });
-  }, [session, status]);
+  };
 
   const handleEdit = (appointmentID) => {
     router.push(`/citas-agendadas/edit/${appointmentID}`);
@@ -69,27 +86,44 @@ function ScheduledAppointments() {
         },
       }}
     >
-    <div style={{backgroundColor: '#f0f2f5', padding:'20px'}} className="min-h-screen bg-gray-100 p-6">
-      <Card title={<Title level={2} className="text-red-600">Citas Agendadas</Title>} bordered={false}>
-        {loading ? (
-          <Spin tip="Cargando citas...">
-            <p>Cargando citas...</p>
-          </Spin>
-        ) : (
-          appointments.length > 0 ? (
+      <div
+        style={{ backgroundColor: '#f0f2f5', padding: '20px' }}
+        className='min-h-screen bg-gray-100 p-6'
+      >
+        <Card
+          title={
+            <Title
+              level={2}
+              className='text-red-600'
+            >
+              Citas Agendadas
+            </Title>
+          }
+          bordered={false}
+        >
+          {loading ? (
+            <Spin tip='Cargando citas...'>
+              <p>Cargando citas...</p>
+            </Spin>
+          ) : appointments.length > 0 ? (
             <List
-              itemLayout="vertical"
+              itemLayout='vertical'
               dataSource={appointments}
               renderItem={(appointment) => {
                 const availability = availabilities[appointment.availabilityID] || {};
                 return (
                   <List.Item key={appointment.appointmentID}>
                     <Card
-                      type="inner"
+                      type='inner'
                       title={`Fecha: ${new Date(appointment.appointmentDate).toLocaleDateString('en-CA')}`}
                       extra={availability.startTime && `Horario: ${availability.startTime} - ${availability.endTime}`}
                       actions={[
-                        <Button type="primary" onClick={() => handleEdit(appointment.appointmentID)}>Editar</Button>,
+                        <Button
+                          type='primary'
+                          onClick={() => handleEdit(appointment.appointmentID)}
+                        >
+                          Editar
+                        </Button>,
                       ]}
                     >
                       <Paragraph>Tipo de servicio: {appointment.serviceType}</Paragraph>
@@ -102,16 +136,29 @@ function ScheduledAppointments() {
             <>
               <p>No hay citas agendadas desde citas del Día.</p>
               <p>
-                Consulta el <Button type="link" onClick={handleConsultCalendar}>calendario de citas</Button> para ver las citas hechas desde el calendario.
+                Consulta el{' '}
+                <Button
+                  type='link'
+                  onClick={handleConsultCalendar}
+                >
+                  calendario de citas
+                </Button>{' '}
+                para ver las citas hechas desde el calendario.
               </p>
               <p>
-                O crea una cita del día en <Button type="link" onClick={handleConsultAppointmentDay}>agendar citas</Button> para agendar una nueva cita.
+                O crea una cita del día en{' '}
+                <Button
+                  type='link'
+                  onClick={handleConsultAppointmentDay}
+                >
+                  agendar citas
+                </Button>{' '}
+                para agendar una nueva cita.
               </p>
             </>
-          )
-        )}
-      </Card>
-    </div>
+          )}
+        </Card>
+      </div>
     </ConfigProvider>
   );
 }

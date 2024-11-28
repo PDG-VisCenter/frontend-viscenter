@@ -58,6 +58,7 @@ function ReservaCita() {
             span={24}
             md={12}
             lg={8}
+            style={{ display: 'flex', justifyContent: 'center' }}
           >
             <Card
               hoverable
@@ -81,7 +82,7 @@ function ReservaCita() {
                 Agendar Cita
               </Title>
               <Text style={{ fontSize: '16px' }}>
-                Programa una nueva cita seleccionando el horario y fecha más adecuados para ti.
+                Programa una nueva cita seleccionando el horario y fecha del día.
               </Text>
               <Divider />
               <Button
@@ -141,6 +142,7 @@ function ReservaCita() {
             span={24}
             md={12}
             lg={8}
+            style={{ display: 'flex', justifyContent: 'center' }}
           >
             <Card
               hoverable

@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useRef, useEffect, useState } from 'react';
-import { Modal, Button, Upload, Spin, Typography, Row, Col, Card, ConfigProvider, Pagination, Rate } from 'antd';
+import { Select, Button, Upload, Spin, Typography, Row, Col, Card, ConfigProvider, Rate } from 'antd';
 import { UploadOutlined, CameraOutlined, FileImageOutlined, RedoOutlined } from '@ant-design/icons';
 import { FaceMesh } from '@mediapipe/face_mesh';
 import { FaceLandmarker, DrawingUtils } from '@mediapipe/tasks-vision';
@@ -13,6 +13,7 @@ import marcos from '../../assets/img/citas/marcosLentes.jpg';
 import FaceShapeInfoPage from '../components/FaceShapeInfoPage';
 
 const { Title, Paragraph } = Typography;
+const { Option } = Select;
 
 function FaceLandmarkerComponent() {
   const webcamRef = useRef(null);
@@ -23,11 +24,17 @@ function FaceLandmarkerComponent() {
   const [faceMesh, setFaceMesh] = useState(null);
   const [faceShape, setFaceShape] = useState('');
   const [loading, setLoading] = useState(false);
-  const [isModalVisible, setIsModalVisible] = useState(true);
   const [buttonsDisabled, setButtonsDisabled] = useState(false);
   const [products, setProducts] = useState([]);
-  const [pagination, setPagination] = useState({ page: 1, size: 3, total: 0 });
+  const [pagination, setPagination] = useState({ page: 1, size: 10, total: 0 });
   const [showInfoPage, setShowInfoPage] = useState(true);
+  const [filters, setFilters] = useState({
+    averageRating: null,
+    categoryName: null,
+    brandName: null,
+    material: null,
+    color: null,
+  });
 
   const faceShapeInfo = {
     Oval: {
@@ -120,6 +127,26 @@ function FaceLandmarkerComponent() {
     } catch (error) {
       console.error('Error al obtener productos recomendados:', error.message);
     }
+  };
+
+  const handleFilterChange = (filterName, value) => {
+    setFilters((prev) => ({
+      ...prev,
+      [filterName]: value,
+    }));
+  };
+
+  const applyFilters = (products) => {
+    return products.filter((product) => {
+      const { averageRating, categoryName, brandName, material, color } = filters;
+      return (
+        (averageRating === null || product.averageRating === averageRating) &&
+        (categoryName === null || product.categoryName === categoryName) &&
+        (brandName === null || product.brandName === brandName) &&
+        (material === null || product.material === material) &&
+        (color === null || product.color === color)
+      );
+    });
   };
 
   const handlePaginationChange = (page) => {
@@ -233,8 +260,16 @@ function FaceLandmarkerComponent() {
     window.location.reload();
   };
 
-  const handleOk = () => {
-    setIsModalVisible(false);
+  const handleClearFilters = () => {
+    setFilters({
+      averageRating: null,
+      categoryName: null,
+      brandName: null,
+      material: null,
+      color: null,
+    });
+    setPagination((prev) => ({ ...prev, page: 1 }));
+    fetchRecommendedFrames(faceShape.recommendedFrame, 1, pagination.size);
   };
 
   const handleProceed = () => setShowInfoPage(false);
@@ -251,59 +286,53 @@ function FaceLandmarkerComponent() {
         },
       }}
     >
-      <div style={{ backgroundColor: '#f0f2f5', padding: '20px' }}>
-        <Modal
-          title='Bienvenido'
-          open={isModalVisible}
-          onOk={handleOk}
-          onCancel={handleOk}
-          footer={[
-            <Button
-              key='ok'
-              type='primary'
-              onClick={handleOk}
-            >
-              OK
-            </Button>,
-          ]}
-        >
-          <Title level={4}>Herramienta de Recomendación de Marcos de Lentes</Title>
-          <Paragraph>
-            Utilice esta herramienta para escanear su rostro y recibir recomendaciones sobre los marcos de lentes que
-            mejor se adaptan a su tipo de rostro. Las recomendaciones son meramente estéticas.
-          </Paragraph>
-        </Modal>
-
-        <div
-          className='site-layout-content'
-          style={{ minHeight: 'calc(100vh - 64px)' }}
-        >
-          <Title
-            level={2}
-            style={{ textAlign: 'center', color: '#fe0034' }}
+      <div style={{ backgroundColor: '#f0f2f5', minHeight: '100vh', overflow: 'hidden' }}>
+        {showInfoPage ? (
+          <FaceShapeInfoPage onProceed={handleProceed} />
+        ) : (
+          <div
+            className='site-layout-content'
+            style={{ minHeight: 'calc(100vh - 64px)' }}
           >
-            Recomendación de Marcos de Lentes
-          </Title>
-          <Row gutter={16}>
-            <Col
-              span={24}
-              md={12}
+            <Title
+              level={2}
+              style={{ textAlign: 'center', color: '#fe0034' }}
             >
-              <Card>
-                {cameraActive && (
-                  <div style={{ position: 'relative', width: '100%' }}>
-                    <Webcam
-                      ref={webcamRef}
-                      screenshotFormat='image/jpeg'
-                      style={{
-                        position: 'absolute',
-                        top: 0,
-                        left: 0,
-                        width: '100%',
-                        height: '100%',
-                        borderRadius: '8px',
-                      }}
-                    />
+              Recomendación de Marcos de Lentes
+            </Title>
+            <Row gutter={16}>
+              <Col
+                span={24}
+                md={12}
+              >
+                <Card>
+                  {cameraActive && (
+                    <div style={{ position: 'relative', width: '100%' }}>
+                      <Webcam
+                        ref={webcamRef}
+                        screenshotFormat='image/jpeg'
+                        style={{
+                          position: 'absolute',
+                          top: 0,
+                          left: 0,
+                          width: '100%',
+                          height: '100%',
+                          borderRadius: '8px',
+                          border: '2px solid red',
+                        }}
+                      />
+                      <canvas
+                        ref={canvasRef}
+                        style={{
+                          width: '100%',
+                          height: '100%',
+                          borderRadius: '8px',
+                          border: '2px solid red',
+                        }}
+                      />
+                    </div>
+                  )}
+                  {uploadedImage && (
                     <canvas
                       ref={canvasRef}
                       style={{
@@ -313,142 +342,237 @@ function FaceLandmarkerComponent() {
                         border: '2px solid red',
                       }}
                     />
-                  </div>
-                )}
-                {uploadedImage && (
-                  <canvas
-                    ref={canvasRef}
-                    style={{
-                      width: '100%',
-                      height: '100%',
-                      borderRadius: '8px',
-                      border: '2px solid red',
-                    }}
-                  />
-                )}
-              </Card>
-            </Col>
-            <Col
-              span={24}
-              md={12}
-            >
-              <Card>
-                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                  <Button
-                    type='primary'
-                    icon={<CameraOutlined />}
-                    onClick={handleStartCamera}
-                    style={{ marginBottom: '16px' }}
-                    disabled={buttonsDisabled || cameraActive}
-                  >
-                    Iniciar Cámara
-                  </Button>
-
-                  <Upload
-                    customRequest={(options) => handleUpload(options.file)}
-                    showUploadList={false}
-                    accept='image/*'
-                    disabled={buttonsDisabled}
-                  >
-                    <Button
-                      icon={<UploadOutlined />}
-                      disabled={cameraActive || buttonsDisabled}
-                    >
-                      Subir Imagen
-                    </Button>
-                  </Upload>
-
-                  {cameraActive && (
+                  )}
+                </Card>
+              </Col>
+              <Col
+                span={24}
+                md={12}
+              >
+                <Card>
+                  <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
                     <Button
                       type='primary'
-                      icon={<FileImageOutlined />}
-                      onClick={handleCaptureImage}
-                      style={{ marginTop: '16px' }}
+                      icon={<CameraOutlined />}
+                      onClick={handleStartCamera}
+                      style={{ marginBottom: '16px' }}
+                      disabled={buttonsDisabled || cameraActive}
                     >
-                      Capturar Imagen
+                      Iniciar Cámara
                     </Button>
-                  )}
 
-                  {(uploadedImage || cameraActive) && (
-                    <Button
-                      icon={<RedoOutlined />}
-                      onClick={handleReset}
-                      style={{ marginTop: '16px' }}
+                    <Upload
+                      customRequest={(options) => handleUpload(options.file)}
+                      showUploadList={false}
+                      accept='image/*'
+                      disabled={buttonsDisabled}
                     >
-                      Volver a Intentar
-                    </Button>
-                  )}
-                </div>
-                {loading ? (
-                  <Spin style={{ marginTop: '16px' }} />
-                ) : (
-                  faceShape && (
-                    <>
-                      <Paragraph style={{ marginTop: '16px', fontSize: '18px' }}>
-                        Tipo de rostro detectado: <strong>{faceShape.shape}</strong>
-                      </Paragraph>
-                      <Paragraph style={{ fontSize: '16px' }}>Descripción: {faceShape.description}</Paragraph>
-                      <Paragraph style={{ fontSize: '16px' }}>
-                        Marco recomendado: <strong>{faceShape.recommendedFrame}</strong>
-                      </Paragraph>
-                      <Paragraph style={{ fontSize: '16px' }}>
-                        Fiabilidad: <strong>{faceShape.confidence}</strong>
-                      </Paragraph>
+                      <Button
+                        icon={<UploadOutlined />}
+                        disabled={cameraActive || buttonsDisabled}
+                      >
+                        Subir Imagen
+                      </Button>
+                    </Upload>
 
-                      <Row
-                        gutter={16}
+                    {cameraActive && (
+                      <Button
+                        type='primary'
+                        icon={<FileImageOutlined />}
+                        onClick={handleCaptureImage}
                         style={{ marginTop: '16px' }}
                       >
-                        {products.map((product) => (
-                          <Col
-                            span={8}
-                            key={product.productID}
-                          >
-                            <Card
-                              hoverable
-                              cover={
-                                <Image
-                                  alt={product.name}
-                                  src={product.images.length > 0 ? marcos : marcos}
-                                  height={200}
-                                  style={{ objectFit: 'cover' }}
-                                />
-                              }
-                            >
-                              <Card.Meta
-                                title={product.name}
-                                description={
-                                  <>
-                                    <p>SKU: {product.code}</p>
-                                    <p>Precio: ${product.price}</p>
-                                    <Rate
-                                      value={product.averageRating}
-                                      disabled
-                                    />
-                                  </>
-                                }
-                              />
-                            </Card>
-                          </Col>
-                        ))}
-                      </Row>
+                        Capturar Imagen
+                      </Button>
+                    )}
 
-                      {products.length > 0 && (
-                        <Pagination
-                          current={pagination.page}
-                          pageSize={pagination.size}
-                          total={pagination.total}
-                          onChange={handlePaginationChange}
-                          showSizeChanger={false}
-                        />
-                      )}
-                    </>
-                  )
-                )}
-              </Card>
-            </Col>
-          </Row>
-        </div>
+                    {(uploadedImage || cameraActive) && (
+                      <Button
+                        icon={<RedoOutlined />}
+                        onClick={handleReset}
+                        style={{ marginTop: '16px' }}
+                      >
+                        Volver a Intentar
+                      </Button>
+                    )}
+                  </div>
+                  {loading ? (
+                    <Spin style={{ marginTop: '16px' }} />
+                  ) : (
+                    faceShape && (
+                      <>
+                        <Paragraph style={{ marginTop: '16px', fontSize: '18px' }}>
+                          Tipo de rostro detectado: <strong>{faceShape.shape}</strong>
+                        </Paragraph>
+                        <Paragraph style={{ fontSize: '16px' }}>Descripción: {faceShape.description}</Paragraph>
+                        <Paragraph style={{ fontSize: '16px' }}>
+                          Marco recomendado: <strong>{faceShape.recommendedFrame}</strong>
+                        </Paragraph>
+                        <Paragraph style={{ fontSize: '16px' }}>
+                          Fiabilidad: <strong>{faceShape.confidence}</strong>
+                        </Paragraph>
+                        <div
+                          style={{
+                            display: 'flex',
+                            flexDirection: 'column',
+                            gap: '12px',
+                            backgroundColor: '#ffffff',
+                            borderRadius: '8px',
+                            boxShadow: '0 2px 8px rgba(0, 0, 0, 0.15)',
+                            marginTop: '16px',
+                            padding: '10px',
+                          }}
+                        >
+                          <div style={{ marginBottom: '8px' }}>
+                            <label style={{ fontWeight: 'bold', marginRight: '8px' }}>Rating:</label>
+                            <Select
+                              value={filters.averageRating}
+                              onChange={(value) => handleFilterChange('averageRating', value)}
+                              style={{ width: '100%' }}
+                              placeholder='Seleccionar'
+                            >
+                              {[0, 1, 2, 3, 4, 5].map((rating) => (
+                                <Option
+                                  key={rating}
+                                  value={rating}
+                                >
+                                  {rating}
+                                </Option>
+                              ))}
+                            </Select>
+                          </div>
+
+                          <div style={{ marginBottom: '8px' }}>
+                            <label style={{ fontWeight: 'bold', marginRight: '8px' }}>Categoría:</label>
+                            <Select
+                              value={filters.categoryName}
+                              onChange={(value) => handleFilterChange('categoryName', value)}
+                              style={{ width: '100%' }}
+                              placeholder='Seleccionar'
+                            >
+                              {[...new Set(products.map((product) => product.categoryName))].map((category) => (
+                                <Option
+                                  key={category}
+                                  value={category}
+                                >
+                                  {category}
+                                </Option>
+                              ))}
+                            </Select>
+                          </div>
+
+                          <div style={{ marginBottom: '8px' }}>
+                            <label style={{ fontWeight: 'bold', marginRight: '8px' }}>Marca:</label>
+                            <Select
+                              value={filters.brandName}
+                              onChange={(value) => handleFilterChange('brandName', value)}
+                              style={{ width: '100%' }}
+                              placeholder='Seleccionar'
+                            >
+                              {[...new Set(products.map((product) => product.brandName))].map((brand) => (
+                                <Option
+                                  key={brand}
+                                  value={brand}
+                                >
+                                  {brand}
+                                </Option>
+                              ))}
+                            </Select>
+                          </div>
+
+                          <div style={{ marginBottom: '8px' }}>
+                            <label style={{ fontWeight: 'bold', marginRight: '8px' }}>Material:</label>
+                            <Select
+                              value={filters.material}
+                              onChange={(value) => handleFilterChange('material', value)}
+                              style={{ width: '100%' }}
+                              placeholder='Seleccionar'
+                            >
+                              {[...new Set(products.map((product) => product.material))].map((material) => (
+                                <Option
+                                  key={material}
+                                  value={material}
+                                >
+                                  {material}
+                                </Option>
+                              ))}
+                            </Select>
+                          </div>
+
+                          <div style={{ marginBottom: '8px' }}>
+                            <label style={{ fontWeight: 'bold', marginRight: '8px' }}>Color:</label>
+                            <Select
+                              value={filters.color}
+                              onChange={(value) => handleFilterChange('color', value)}
+                              style={{ width: '100%' }}
+                              placeholder='Seleccionar'
+                            >
+                              {[...new Set(products.map((product) => product.color))].map((color) => (
+                                <Option
+                                  key={color}
+                                  value={color}
+                                >
+                                  {color}
+                                </Option>
+                              ))}
+                            </Select>
+                          </div>
+
+                          <Button
+                            type='default'
+                            onClick={handleClearFilters}
+                            style={{ marginTop: '16px', width: '100%' }}
+                          >
+                            Limpiar Filtros
+                          </Button>
+                        </div>
+
+                        <Row
+                          gutter={16}
+                          style={{ marginTop: '16px' }}
+                        >
+                          {applyFilters(products).map((product) => (
+                            <Col
+                              span={8}
+                              key={product.productID}
+                            >
+                              <Card
+                                hoverable
+                                style={{ marginTop: '16px' }}
+                                cover={
+                                  <Image
+                                    alt={product.name}
+                                    src={product.images.length > 0 ? marcos : marcos}
+                                    height={200}
+                                    style={{ objectFit: 'cover' }}
+                                  />
+                                }
+                              >
+                                <Card.Meta
+                                  title={product.name}
+                                  description={
+                                    <>
+                                      <p>SKU: {product.code}</p>
+                                      <p>Precio: ${product.price}</p>
+                                      <Rate
+                                        value={product.averageRating}
+                                        disabled
+                                      />
+                                    </>
+                                  }
+                                />
+                              </Card>
+                            </Col>
+                          ))}
+                        </Row>
+                      </>
+                    )
+                  )}
+                </Card>
+              </Col>
+            </Row>
+          </div>
+        )}
       </div>
     </ConfigProvider>
   );
