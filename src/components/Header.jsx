@@ -10,12 +10,23 @@ import NavBar from './NavBar';
 import NavBarSticky from './NavBarSticky';
 import { useInView } from 'react-intersection-observer';
 import { useSelector } from 'react-redux';
+import { useRouter } from 'next/navigation';
+import { useEffect } from 'react';
 
 function Header() {
   const { data: session, status } = useSession();
+  const router = useRouter();
   const cartTotalItems = useSelector((state) => state.cart.totalItems);
 
   // const [cartItems] = useContext(CartContext);
+
+  useEffect(() => {
+    if (status === 'authenticated') {
+      if (session.roles.includes('seller_role')) {
+        router.push('/admin/home');
+      }
+    }
+  }, [status, session, router]);
 
   const [ref, inView] = useInView({
     threshold: 0,
