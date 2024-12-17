@@ -8,7 +8,7 @@ const initialState = {
 };
 
 export const fetchCategoriesByParentId = createAsyncThunk('categories/fetchCategories', async (id) => {
-  const response = await axios.get(`https://localhost:7235/api/Category/parent_category_id/${id}`);
+  const response = await axios.get(`http://localhost:5203/api/Category/parent_category_id/${id}`);
   return response.data;
 });
 

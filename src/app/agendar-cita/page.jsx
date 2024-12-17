@@ -7,6 +7,9 @@ import { useRouter } from 'next/navigation';
 import { Button, Form, Input, Select, DatePicker, Alert, Typography, Steps, ConfigProvider, message } from 'antd';
 import moment from 'moment';
 import Map from '../components/Map';
+import { fetchUserAccessToken } from '../services/keycloakServices';
+import Header from '../../components/Header';
+import Footer from '../../components/Footer';
 
 const { Title, Text } = Typography;
 const { Step } = Steps;
@@ -39,33 +42,50 @@ function ScheduleAppointment() {
     if (status === 'loading') {
       return;
     }
-  
+
     if (!session || !session.userId) {
-      return;
+      signIn('keycloak');
     }
-    axios
-      .get('http://localhost:5281/api/Availability')
-      .then((response) => setAvailabilities(response.data))
-      .catch(error => console.error('Error fetching availabilities:', error));
 
-    axios
-      .get('http://localhost:5281/api/AppointmentService')
-      .then((response) => setServices(response.data))
-      .catch(error => console.error('Error fetching services:', error));
-
-    axios
-      .get('http://localhost:5281/api/Doctor')
-      .then((response) => setDoctors(response.data))
-      .catch(error => console.error('Error fetching doctor:', error));
-
-    axios
-      .get('http://localhost:5281/api/LocationCenter')
-      .then((response) => {
-        const location = response.data[0];
-        setLOCATION({ lat: location.latitude, lng: location.longitude });
-      })
-      .catch((error) => console.error(error));
+    fetchData();
   }, [session, status]);
+
+  const fetchData = async () => {
+    try {
+      const token = await fetchUserAccessToken();
+
+      const availabilityResponse = await axios.get('http://localhost:5270/viscenter/api/v1/Availability', {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      setAvailabilities(availabilityResponse.data);
+
+      const servicesResponse = await axios.get('http://localhost:5270/viscenter/api/v1/AppointmentService', {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      setServices(servicesResponse.data);
+
+      const doctorsResponse = await axios.get('http://localhost:5270/viscenter/api/v1/Doctor', {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      setDoctors(doctorsResponse.data);
+
+      const locationResponse = await axios.get('http://localhost:5270/viscenter/api/v1/LocationCenter', {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      const location = locationResponse.data[0];
+      setLOCATION({ lat: location.latitude, lng: location.longitude });
+    } catch (error) {
+      console.error('Error fetching data:', error);
+    }
+  };
 
   const validateDate = (date) => {
     const today = moment().startOf('day');
@@ -83,7 +103,7 @@ function ScheduleAppointment() {
     return now < startDateTime;
   };
 
-  const handleSubmit = (values) => {
+  const handleSubmit = async (values) => {
     if (!session || !session.userId) {
       message.error('No se ha iniciado sesión. Por favor, inicia sesión primero.');
       return;
@@ -102,33 +122,53 @@ function ScheduleAppointment() {
     } else {
       const todayDate = new Date().toISOString().split('T')[0];
 
+      const token = await fetchUserAccessToken();
+
       axios
-        .post('http://localhost:5281/api/Appointment', {
-          ...formData,
-          userID: session.userId,
-          availabilityID: formData.availabilityID,
-          appointmentDate: todayDate,
-          status: formData.status,
-          description: formData.description,
-          patientName: formData.patientName,
-          patientBirthday: formData.patientBirthday,
-          symptoms: formData.symptoms,
-          serviceType: formData.serviceType,
-          doctorName: formData.doctorName,
-        })
+        .post(
+          'http://localhost:5270/viscenter/api/v1/Appointment',
+          {
+            ...formData,
+            userID: session.userId,
+            availabilityID: formData.availabilityID,
+            appointmentDate: todayDate,
+            status: formData.status,
+            description: formData.description,
+            patientName: formData.patientName,
+            patientBirthday: formData.patientBirthday,
+            symptoms: formData.symptoms,
+            serviceType: formData.serviceType,
+            doctorName: formData.doctorName,
+          },
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        )
         .then(() => {
           if (formData.availabilityID) {
             axios
-              .patch(`http://localhost:5281/api/Availability/${formData.availabilityID}`, {
+              .patch(`http://localhost:5270/viscenter/api/v1/Availability/${formData.availabilityID}`, {
                 isAvailable: false,
+              },
+              {
+                headers: {
+                  Authorization: `Bearer ${token}`,
+                },
               })
               .catch((error) => console.error(error));
           }
 
           if (previousAvailability) {
             axios
-              .patch(`http://localhost:5281/api/Availability/${previousAvailability.availabilityID}`, {
+              .patch(`http://localhost:5270/viscenter/api/v1/Availability/${previousAvailability.availabilityID}`, {
                 isAvailable: true,
+              },
+              {
+                headers: {
+                  Authorization: `Bearer ${token}`,
+                },
               })
               .catch((error) => console.error(error));
           }
@@ -166,8 +206,13 @@ function ScheduleAppointment() {
   const handleCancel = () => {
     if (selectedAvailability) {
       axios
-        .patch(`http://localhost:5281/api/Availability/${selectedAvailability.availabilityID}`, {
+        .patch(`http://localhost:5270/viscenter/api/v1/Availability/${selectedAvailability.availabilityID}`, {
           isAvailable: true,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
         })
         .catch((error) => console.error(error));
     }
@@ -196,6 +241,7 @@ function ScheduleAppointment() {
         },
       }}
     >
+      <Header />
       <div style={{ backgroundColor: '#f0f2f5', padding: '20px' }}>
         <div className='bg-white p-8 rounded-lg shadow-lg w-full max-w-md'>
           {error && (
@@ -351,6 +397,7 @@ function ScheduleAppointment() {
           />
         )}
       </div>
+    <Footer/>
     </ConfigProvider>
   );
 }

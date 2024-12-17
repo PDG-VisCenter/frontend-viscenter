@@ -1,17 +1,20 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import { Layout, theme, message, Form, Input, Button, TimePicker, Select, List, Switch, Modal } from 'antd';
+import { Layout, theme, message, DatePicker, Input, Button, TimePicker, Select, List, Switch, Modal } from 'antd';
 import { Content } from 'antd/es/layout/layout';
 import HeaderSeller from '../components/HeaderSeller';
 import SiderMenuSeller from '../components/SiderMenuSeller';
 import axios from 'axios';
 import moment from 'moment';
 import UpdateMap from '@/app/components/UpdateMap';
+import { fetchUserAccessToken } from '@/app/services/keycloakServices';
+import { signIn, useSession } from 'next-auth/react';
 
 const { Option } = Select;
 
 function Appointments() {
+  const { data: session, status } = useSession();
   const {
     token: { colorBgContainer, borderRadiusLG },
   } = theme.useToken();
@@ -39,17 +42,51 @@ function Appointments() {
   const [isServiceModalVisible, setIsServiceModalVisible] = useState(false);
   const [isDoctorModalVisible, setIsDoctorModalVisible] = useState(false);
 
+  const [selectedDate, setSelectedDate] = useState(null);
+  const [selectedSchedule, setSelectedSchedule] = useState(null);
+  const [disabledAvailabilities, setDisabledAvailabilities] = useState([]);
+
   useEffect(() => {
+    if (status === 'loading') {
+      return;
+    }
+
+    if (!session || !session.userId) {
+      signIn('keycloak');
+      return;
+    }
     fetchLocation();
     fetchAvailabilities();
     fetchAppointments();
     fetchServices();
     fetchDoctors();
-  }, []);
+    fetchDisabledAvailabilities();
+  }, [session, status]);
+
+  const fetchDisabledAvailabilities = async () => {
+    const token = await fetchUserAccessToken();
+    console.log(token);
+    try {
+      const { data } = await axios.get('http://localhost:5270/viscenter/api/v1/ExtendedAvailability', {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      setDisabledAvailabilities(data);
+    } catch (error) {
+      console.log(error);
+    }
+  };
 
   const fetchAvailabilities = async () => {
+    const token = await fetchUserAccessToken();
+    console.log(token);
     try {
-      const { data } = await axios.get('http://localhost:5281/api/Availability');
+      const { data } = await axios.get('http://localhost:5270/viscenter/api/v1/Availability', {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
       setAvailabilities(data);
     } catch (error) {
       message.error('Error obteniendo disponibilidades.');
@@ -57,8 +94,14 @@ function Appointments() {
   };
 
   const fetchAppointments = async () => {
+    const token = await fetchUserAccessToken();
+    console.log(token);
     try {
-      const { data } = await axios.get('http://localhost:5281/api/Appointment');
+      const { data } = await axios.get('http://localhost:5270/viscenter/api/v1/Appointment', {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
 
       if (data && data.length > 0) {
         setAppointments(data);
@@ -75,8 +118,14 @@ function Appointments() {
   };
 
   const fetchServices = async () => {
+    const token = await fetchUserAccessToken();
+    console.log(token);
     try {
-      const { data } = await axios.get('http://localhost:5281/api/AppointmentService');
+      const { data } = await axios.get('http://localhost:5270/viscenter/api/v1/AppointmentService', {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
       setServices(data);
     } catch (error) {
       message.error('Error obteniendo los servicios.');
@@ -84,8 +133,14 @@ function Appointments() {
   };
 
   const fetchDoctors = async () => {
+    const token = await fetchUserAccessToken();
+    console.log(token);
     try {
-      const { data } = await axios.get('http://localhost:5281/api/Doctor');
+      const { data } = await axios.get('http://localhost:5270/viscenter/api/v1/Doctor', {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
       setDoctors(data);
     } catch (error) {
       message.error('Error obteniendo los doctores.');
@@ -97,8 +152,14 @@ function Appointments() {
   };
 
   const fetchLocation = async () => {
+    const token = await fetchUserAccessToken();
+    console.log(token);
     try {
-      const { data } = await axios.get('http://localhost:5281/api/LocationCenter');
+      const { data } = await axios.get('http://localhost:5270/viscenter/api/v1/LocationCenter', {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
       const location = data[0];
       setLocation({ lat: location.latitude, lng: location.longitude });
       setMarkerPosition({ lat: location.latitude, lng: location.longitude });
@@ -108,12 +169,22 @@ function Appointments() {
   };
 
   const handleUpdateLocation = async () => {
+    const token = await fetchUserAccessToken();
+    console.log(token);
     try {
-      await axios.put('http://localhost:5281/api/LocationCenter', {
-        locationID: 1,
-        latitude: markerPosition.lat,
-        longitude: markerPosition.lng,
-      });
+      await axios.put(
+        'http://localhost:5270/viscenter/api/v1/LocationCenter',
+        {
+          locationID: 1,
+          latitude: markerPosition.lat,
+          longitude: markerPosition.lng,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
       message.success('Localización actualizada con éxito.');
     } catch (error) {
       message.error('Error al actualizar la localización.');
@@ -126,6 +197,8 @@ function Appointments() {
   };
 
   const handleUpdateAvailability = async () => {
+    const token = await fetchUserAccessToken();
+    console.log(token);
     if (!selectedAvailability || !startTime || !endTime) {
       message.warning('Por favor selecciona una disponibilidad y horarios.');
       return;
@@ -138,13 +211,21 @@ function Appointments() {
     }
 
     try {
-      await axios.put(`http://localhost:5281/api/Availability`, {
-        availabilityID: selectedAvailability.availabilityID,
-        startTime: startTime.format('HH:mm:ss'),
-        endTime: endTime.format('HH:mm:ss'),
-        isAvailable: selectedAvailability.isAvailable,
-        date: new Date().toISOString(),
-      });
+      await axios.put(
+        `http://localhost:5270/viscenter/api/v1/Availability`,
+        {
+          availabilityID: selectedAvailability.availabilityID,
+          startTime: startTime.format('HH:mm:ss'),
+          endTime: endTime.format('HH:mm:ss'),
+          isAvailable: selectedAvailability.isAvailable,
+          date: new Date().toISOString(),
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
       message.success('Disponibilidad actualizada exitosamente.');
       fetchAvailabilities();
     } catch (error) {
@@ -153,6 +234,8 @@ function Appointments() {
   };
 
   const handleToggleAvailability = async (availability) => {
+    const token = await fetchUserAccessToken();
+    console.log(token);
     const now = moment();
     if (moment(availability.startTime, 'HH:mm:ss').isBefore(now)) {
       message.warning('No es posible actualizar horarios para horarios pasados.');
@@ -165,9 +248,17 @@ function Appointments() {
     }
 
     try {
-      await axios.patch(`http://localhost:5281/api/Availability/${availability.availabilityID}`, {
-        isAvailable: !availability.isAvailable,
-      });
+      await axios.patch(
+        `http://localhost:5270/viscenter/api/v1/Availability/${availability.availabilityID}`,
+        {
+          isAvailable: !availability.isAvailable,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
       message.success('Estado de la disponibilidad actualizado exitosamente.');
       fetchAvailabilities();
     } catch (error) {
@@ -175,16 +266,69 @@ function Appointments() {
     }
   };
 
+  const handleDeactivateAvailability = async () => {
+    const token = await fetchUserAccessToken();
+    console.log(token);
+    if (!selectedDate || !selectedSchedule) {
+      message.warning('Por favor selecciona una fecha y un horario.');
+      return;
+    }
+
+    try {
+      await axios.post(
+        'http://localhost:5270/viscenter/api/v1/ExtendedAvailability',
+        {
+          scheduleID: selectedSchedule,
+          appointmentDate: selectedDate.toISOString(),
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      setDisabledAvailabilities((prevDisabled) => [
+        ...prevDisabled,
+        { scheduleID: selectedSchedule, appointmentDate: selectedDate.toISOString() },
+      ]);
+
+      setAvailabilities((prevAvailabilities) =>
+        prevAvailabilities.map((availability) =>
+          availability.availabilityID === selectedSchedule ? { ...availability, isAvailable: false } : availability
+        )
+      );
+
+      message.success('Disponibilidad desactivada exitosamente.');
+    } catch (error) {
+      if (error.response && error.response.status === 500) {
+        message.error('Error: no se puede desactivar, existe una cita asociada.');
+      } else {
+        message.error('Error desactivando la disponibilidad.');
+      }
+    }
+  };
+
   const handleAddService = async () => {
+    const token = await fetchUserAccessToken();
+    console.log(token);
     if (!newServiceType) {
       message.warning('Por favor ingresa un tipo de servicio.');
       return;
     }
 
     try {
-      await axios.post('http://localhost:5281/api/AppointmentService', {
-        serviceType: newServiceType,
-      });
+      await axios.post(
+        'http://localhost:5270/viscenter/api/v1/AppointmentService',
+        {
+          serviceType: newServiceType,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
       message.success('Servicio agregado exitosamente.');
       setNewServiceType('');
       fetchServices();
@@ -194,15 +338,25 @@ function Appointments() {
   };
 
   const handleAddDoctor = async () => {
+    const token = await fetchUserAccessToken();
+    console.log(token);
     if (!newDoctor) {
       message.warning('Por favor selecciona a un doctor o doctora.');
       return;
     }
 
     try {
-      await axios.post('http://localhost:5281/api/Doctor', {
-        doctorName: newDoctor,
-      });
+      await axios.post(
+        'http://localhost:5270/viscenter/api/v1/Doctor',
+        {
+          doctorName: newDoctor,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
       message.success('Doctor Doctora agregado Correctamente.');
       setNewDoctor('');
       fetchDoctors();
@@ -222,13 +376,23 @@ function Appointments() {
   };
 
   const handleUpdateService = async () => {
+    const token = await fetchUserAccessToken();
+    console.log(token);
     if (!editingService) return;
 
     try {
-      await axios.put('http://localhost:5281/api/AppointmentService', {
-        serviceID: editingService.serviceID,
-        serviceType: editingService.serviceType,
-      });
+      await axios.put(
+        'http://localhost:5270/viscenter/api/v1/AppointmentService',
+        {
+          serviceID: editingService.serviceID,
+          serviceType: editingService.serviceType,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
       message.success('Servicio actualizado exitosamente.');
       setIsModalVisible(false);
       fetchServices();
@@ -238,13 +402,23 @@ function Appointments() {
   };
 
   const handleUpdateDoctor = async () => {
+    const token = await fetchUserAccessToken();
+    console.log(token);
     if (!editingDoctor) return;
 
     try {
-      await axios.put('http://localhost:5281/api/Doctor', {
-        doctorID: editingDoctor.doctorID,
-        doctorName: editingDoctor.doctorName,
-      });
+      await axios.put(
+        'http://localhost:5270/viscenter/api/v1/Doctor',
+        {
+          doctorID: editingDoctor.doctorID,
+          doctorName: editingDoctor.doctorName,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
       message.success('Se actualizó correctamente.');
       setIsModalVisible(false);
       fetchDoctors();
@@ -254,8 +428,14 @@ function Appointments() {
   };
 
   const handleDeleteService = async (serviceID) => {
+    const token = await fetchUserAccessToken();
+    console.log(token);
     try {
-      await axios.delete(`http://localhost:5281/api/AppointmentService/${serviceID}`);
+      await axios.delete(`http://localhost:5270/viscenter/api/v1/AppointmentService/${serviceID}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
       message.success('Servicio eliminado correctamente.');
       fetchServices();
     } catch (error) {
@@ -264,12 +444,39 @@ function Appointments() {
   };
 
   const handleDeleteDoctor = async (doctorID) => {
+    const token = await fetchUserAccessToken();
+    console.log(token);
     try {
-      await axios.delete(`http://localhost:5281/api/Doctor/${doctorID}`);
+      await axios.delete(`http://localhost:5270/viscenter/api/v1/Doctor/${doctorID}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
       message.success('Eliminado correctamente.');
       fetchDoctors();
     } catch (error) {
       message.error('Error eliminando.');
+    }
+  };
+
+  const handleReactivateAvailability = async (scheduleID, appointmentDate) => {
+    const token = await fetchUserAccessToken();
+    console.log(token);
+    try {
+      await axios.delete('http://localhost:5270/viscenter/api/v1/ExtendedAvailability', {
+        data: {
+          scheduleID,
+          appointmentDate,
+        },
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      message.success('Disponibilidad reactivada exitosamente.');
+      setDisabledAvailabilities([]);
+      fetchDisabledAvailabilities();
+    } catch (error) {
+      message.error('Error reactivando la disponibilidad.');
     }
   };
 
@@ -342,6 +549,59 @@ function Appointments() {
                   />
                 </List.Item>
               )}
+            />
+
+            <h2 style={{ marginTop: 16, marginBottom: 16, fontWeight: 'bold', fontSize: '24px' }}>
+              Disponibilidad del Calendario
+            </h2>
+            <DatePicker
+              style={{ width: '100%' }}
+              placeholder='Selecciona una fecha'
+              disabledDate={(current) => current && current < moment().endOf('day')}
+              onChange={(date) => setSelectedDate(date)}
+            />
+            <Select
+              style={{ width: '100%', marginTop: 16 }}
+              placeholder='Selecciona un horario'
+              onChange={(availabilityID) => {
+                setSelectedSchedule(availabilityID);
+              }}
+            >
+              {availabilities.map((availability) => (
+                <Option
+                  key={availability.availabilityID}
+                  value={availability.availabilityID}
+                >
+                  {`Horario: ${availability.startTime} - ${availability.endTime}`}
+                </Option>
+              ))}
+            </Select>
+            <Button
+              type='primary'
+              block
+              style={{ marginTop: 16 }}
+              onClick={handleDeactivateAvailability}
+            >
+              Desactivar Disponibilidad
+            </Button>
+
+            <h2 style={{ marginTop: 16, fontWeight: 'bold', fontSize: '24px' }}>Disponibilidades Desactivadas</h2>
+            <List
+              dataSource={disabledAvailabilities}
+              renderItem={(item) => {
+                const availability = availabilities.find((a) => a.availabilityID === item.scheduleID);
+                return (
+                  <List.Item>
+                    <div>{`Fecha: ${item.appointmentDate}, Horario: ${availability?.startTime || 'N/A'} - ${availability?.endTime || 'N/A'}`}</div>
+                    <Button
+                      type='primary'
+                      onClick={() => handleReactivateAvailability(item.scheduleID, item.appointmentDate)}
+                    >
+                      Reactivar
+                    </Button>
+                  </List.Item>
+                );
+              }}
             />
 
             <h2 style={{ marginTop: 16, fontWeight: 'bold', fontSize: '24px' }}>Servicios del Centro</h2>

@@ -5,8 +5,21 @@ import { Content } from 'antd/es/layout/layout';
 import HeaderSeller from '../components/HeaderSeller';
 import { Line } from '@ant-design/plots';
 import SiderMenuSeller from '../components/SiderMenuSeller';
+import { useRouter } from 'next/navigation';
+import { useEffect } from 'react';
+import { useSession } from 'next-auth/react';
 
 function HomeSeller() {
+  const { data: session, status } = useSession();
+  const router = useRouter();
+  useEffect(() => {
+    if (status === 'authenticated') {
+      if (!session.roles.includes('seller_role')) {
+        router.push('/');
+      }
+    }
+  }, [status, session, router]);
+  
   const {
     token: { colorBgContainer, borderRadiusLG },
   } = theme.useToken();

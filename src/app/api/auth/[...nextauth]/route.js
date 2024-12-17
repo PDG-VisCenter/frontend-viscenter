@@ -71,7 +71,7 @@ export const authOptions = {
       // Send properties to the client
       session.access_token = encrypt(token.access_token);
       session.id_token = encrypt(token.id_token);
-      session.roles = token.decoded.realm_access.roles;
+      session.roles = token.decoded.resource_access['paws-claws-client'].roles;
       session.error = token.error;
       session.userId = token.decoded.sub;
       return session;
