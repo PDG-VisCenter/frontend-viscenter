@@ -8,17 +8,17 @@ const initialState = {
 };
 
 export const fetchProductById = createAsyncThunk('products/fetchProductById', async (id) => {
-  const response = await axios.get(`https://localhost:7235/api/Product/${id}`);
+  const response = await axios.get(`http://localhost:5203/api/Product/${id}`);
   return response.data;
 });
 
 export const addProduct = createAsyncThunk('product/addProduct', async (newProduct) => {
-  const response = await axios.post('https://localhost:7235/api/Product', newProduct);
+  const response = await axios.post('http://localhost:5203/api/Product', newProduct);
   return response.data;
 });
 
 export const updateProduct = createAsyncThunk('product/updateProduct', async ({ id, newProduct }) => {
-  const response = await axios.put(`https://localhost:7235/api/Product/${id}`, newProduct);
+  const response = await axios.put(`http://localhost:5203/api/Product/${id}`, newProduct);
   return response.data;
 });
 

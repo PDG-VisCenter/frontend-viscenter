@@ -1,11 +1,14 @@
 'use client';
 
-import { useSession } from 'next-auth/react';
+import { useSession, signIn } from 'next-auth/react';
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import axios from 'axios';
 import moment from 'moment';
 import { Calendar as AntCalendar, Modal, Form, Input, DatePicker, Select, Button, message, ConfigProvider } from 'antd';
+import { fetchUserAccessToken } from '../services/keycloakServices';
+import Header from '@/components/Header';
+import Footer from '@/components/Footer';
 
 const ExtendedAppointment = () => {
   const { data: session, status } = useSession();
@@ -45,30 +48,53 @@ const ExtendedAppointment = () => {
     if (!session || !session.userId) {
       return;
     }
+    fetchData();
     fetchAppointments();
     fetchServiceTypes();
     fetchDoctors();
-    axios
-      .get('http://localhost:5281/api/ExtendedAppointment/schedules')
-      .then((response) => {
-        const schedulesData = response.data.map((schedule) => ({
-          id: schedule.scheduleID,
-          time: `${schedule.startTime} - ${schedule.endTime}`,
-        }));
-        setSchedules(schedulesData);
-      })
-      .catch((error) => console.error('Error fetching schedules:', error));
-    axios
-      .get('http://localhost:5281/api/ExtendedAvailability')
-      .then((response) => {
-        setUnavailableSchedules(response.data);
-      })
-      .catch((error) => console.error('Error fetching unavailable schedules:', error));
   }, [session, status]);
+
+  const fetchData = async (id) => {
+    const token = await fetchUserAccessToken();
+    console.log(token);
+
+    try {
+      axios
+        .get('http://localhost:5270/viscenter/api/v1/ExtendedAppointment/schedules', {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        })
+        .then((response) => {
+          const schedulesData = response.data.map((schedule) => ({
+            id: schedule.scheduleID,
+            time: `${schedule.startTime} - ${schedule.endTime}`,
+          }));
+          setSchedules(schedulesData);
+        })
+        .catch((error) => console.error('Error fetching schedules:', error));
+      axios
+        .get('http://localhost:5270/viscenter/api/v1/ExtendedAvailability', {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        })
+        .then((response) => {
+          setUnavailableSchedules(response.data);
+        })
+        .catch((error) => console.error('Error fetching unavailable schedules:', error));
+    } catch (error) {
+      console.error('Error fetching data:', error);
+    }
+  };
 
   const fetchUnavailableSchedules = async () => {
     try {
-      const response = await axios.get('http://localhost:5281/api/ExtendedAvailability');
+      const response = await axios.get('http://localhost:5270/viscenter/api/v1/ExtendedAvailability', {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
       const unavailableSchedules = response.data.filter((item) => !item.isAvailable);
       setUnavailableSchedules(unavailableSchedules);
     } catch (error) {
@@ -77,8 +103,17 @@ const ExtendedAppointment = () => {
   };
 
   const fetchAppointments = async () => {
+    const token = await fetchUserAccessToken();
+    console.log(token);
+
     try {
-      const response = await axios.get(`http://localhost:5281/api/ExtendedAppointment/user/${session.userId}`);
+      const response = await axios.get(
+        `http://localhost:5270/viscenter/api/v1/ExtendedAppointment/user/${session.userId}`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
       const formattedAppointments = response.data.map((appointment) => ({
         ...appointment,
         appointmentDate: moment(appointment.appointmentDate).format('YYYY-MM-DD'),
@@ -91,8 +126,15 @@ const ExtendedAppointment = () => {
   };
 
   const fetchServiceTypes = async () => {
+    const token = await fetchUserAccessToken();
+    console.log(token);
+
     try {
-      const response = await axios.get('http://localhost:5281/api/AppointmentService');
+      const response = await axios.get('http://localhost:5270/viscenter/api/v1/AppointmentService', {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
       const formattedServices = response.data.map((service) => ({
         value: service.serviceType,
         label: service.serviceType,
@@ -104,8 +146,15 @@ const ExtendedAppointment = () => {
   };
 
   const fetchDoctors = async () => {
+    const token = await fetchUserAccessToken();
+    console.log(token);
+    
     try {
-      const response = await axios.get('http://localhost:5281/api/Doctor');
+      const response = await axios.get('http://localhost:5270/viscenter/api/v1/Doctor', {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
       const formattedDoctors = response.data.map((doctor) => ({
         value: doctor.doctorName,
         label: doctor.doctorName,
@@ -197,14 +246,24 @@ const ExtendedAppointment = () => {
   };
 
   const handleFormSubmit = async (values) => {
+    const token = await fetchUserAccessToken();
+    console.log(token);
     const updatedData = { ...formData, ...values };
 
     try {
       if (updatedData.appointmentID) {
-        await axios.put('http://localhost:5281/api/ExtendedAppointment', updatedData);
+        await axios.put('http://localhost:5270/viscenter/api/v1/ExtendedAppointment', updatedData, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
         message.success('Cita actualizada correctamente');
       } else {
-        await axios.post('http://localhost:5281/api/ExtendedAppointment', updatedData);
+        await axios.post('http://localhost:5270/viscenter/api/v1/ExtendedAppointment', updatedData, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
         message.success('Cita agendada correctamente');
       }
       fetchAppointments();
@@ -219,6 +278,9 @@ const ExtendedAppointment = () => {
   };
 
   const confirmDelete = async () => {
+    const token = await fetchUserAccessToken();
+    console.log(token);
+
     if (!cancelReason) {
       message.warning('El motivo de la cancelación es obligatorio.');
       return;
@@ -227,11 +289,19 @@ const ExtendedAppointment = () => {
     const today = moment().format('YYYY-MM-DD');
 
     try {
-      await axios.delete(`http://localhost:5281/api/ExtendedAppointment/${formData.appointmentID}`);
+      await axios.delete(`http://localhost:5270/viscenter/api/v1/ExtendedAppointment/${formData.appointmentID}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
 
       if (formData.appointmentDate === today) {
-        await axios.patch(`http://localhost:5281/api/Availability/${formData.scheduleID}`, {
+        await axios.patch(`http://localhost:5270/viscenter/api/v1/Availability/${formData.scheduleID}`, {
           isAvailable: true,
+        }, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
         });
       }
 
@@ -242,8 +312,13 @@ const ExtendedAppointment = () => {
       const EmailData = `El usuario ${session.user?.email} a cancelado la cita del ${formData.appointmentDate} a las ${timeSlot} 
         por el siguiente motivo: ${cancelReason}`;
       const emailResponse = await axios.post(
-        `http://localhost:5281/api/Email/send?toEmail=${email}&subject=${subject}&message=${EmailData}`
-      );
+        `http://localhost:5270/viscenter/api/v1/Email/send?toEmail=${email}&subject=${subject}&message=${EmailData}`, 
+        null,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
 
       if (emailResponse.status === 200) {
         message.success('La cita fue cancelada y el correo ha sido enviado.');
@@ -275,6 +350,9 @@ const ExtendedAppointment = () => {
   };
 
   const handleConvertToDailyAppointment = async () => {
+    const token = await fetchUserAccessToken();
+    console.log(token);
+
     const newAppointmentData = {
       appointmentID: 0,
       userID: currentAppointment.userID,
@@ -290,11 +368,13 @@ const ExtendedAppointment = () => {
     };
 
     try {
-      await axios.post('http://localhost:5281/api/appointment', newAppointmentData);
+      await axios.post('http://localhost:5270/viscenter/api/v1/appointment', newAppointmentData);
 
-      await axios.delete(`http://localhost:5281/api/ExtendedAppointment/${currentAppointment.appointmentID}`);
+      await axios.delete(
+        `http://localhost:5270/viscenter/api/v1/ExtendedAppointment/${currentAppointment.appointmentID}`
+      );
 
-      await axios.patch(`http://localhost:5281/api/Availability/${currentAppointment.scheduleID}`, {
+      await axios.patch(`http://localhost:5270/viscenter/api/v1/Availability/${currentAppointment.scheduleID}`, {
         isAvailable: false,
       });
 
@@ -303,7 +383,9 @@ const ExtendedAppointment = () => {
       router.push('/citas-agendadas');
     } catch (error) {
       message.error('Error al convertir la cita, excedió el plazo límite');
-      await axios.delete(`http://localhost:5281/api/ExtendedAppointment/${currentAppointment.appointmentID}`);
+      await axios.delete(
+        `http://localhost:5270/viscenter/api/v1/ExtendedAppointment/${currentAppointment.appointmentID}`
+      );
     }
   };
 
@@ -319,7 +401,9 @@ const ExtendedAppointment = () => {
         },
       }}
     >
-      <div style={{ backgroundColor: '#f0f2f5', padding: '5px' }}>
+    <Header/>
+      <div style={{ backgroundColor: '#f0f2f5', padding: '5px', position: 'relative',
+          zIndex: 0  }}>
         <h1 style={{ fontSize: '24px', marginBottom: '24px', color: '#fe0034' }}>Agendar y Gestionar Citas</h1>
         <AntCalendar
           cellRender={dateCellRender}
@@ -477,6 +561,7 @@ const ExtendedAppointment = () => {
           </Form>
         </Modal>
       </div>
+    <Footer/>
     </ConfigProvider>
   );
 };

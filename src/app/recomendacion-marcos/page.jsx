@@ -11,11 +11,43 @@ import axios from 'axios';
 import Image from 'next/image';
 import marcos from '../../assets/img/citas/marcosLentes.jpg';
 import FaceShapeInfoPage from '../components/FaceShapeInfoPage';
+import Header from '@/components/Header';
+import Footer from '@/components/Footer';
+import { Modal } from 'antd';
+import { createStyles } from 'antd-style';
 
 const { Title, Paragraph } = Typography;
 const { Option } = Select;
 
+const useStyle = createStyles(({ prefixCls, css }) => ({
+  linearGradientButton: css`
+    &.${prefixCls}-btn-primary:not([disabled]):not(.${prefixCls}-btn-dangerous) {
+      border-width: 0;
+
+      > span {
+        position: relative;
+      }
+
+      &::before {
+        content: '';
+        background: linear-gradient(135deg, #fe0034, #6253e1, #04befe);
+        position: absolute;
+        inset: 0;
+        opacity: 1;
+        transition: all 0.3s;
+        border-radius: inherit;
+      }
+
+      &:hover::before {
+        opacity: 0;
+      }
+    }
+  `,
+}));
+
 function FaceLandmarkerComponent() {
+  const { styles } = useStyle();
+  const [isModalVisible, setIsModalVisible] = useState(false);
   const webcamRef = useRef(null);
   const canvasRef = useRef(null);
   const [cameraActive, setCameraActive] = useState(false);
@@ -30,8 +62,8 @@ function FaceLandmarkerComponent() {
   const [showInfoPage, setShowInfoPage] = useState(true);
   const [filters, setFilters] = useState({
     averageRating: null,
-    categoryName: null,
-    brandName: null,
+    category: null,
+    brand: null,
     material: null,
     color: null,
   });
@@ -41,32 +73,38 @@ function FaceLandmarkerComponent() {
       translation: 'Ovalado',
       description:
         'El rostro ovalado tiene proporciones equilibradas, con la frente ligeramente más ancha que la mandíbula.',
-      recommendedFrame: 'rectangulares',
+      recommendedFrame: 'Rectangular',
+      info: 'Los marcos rectangulares ayudan a mantener el equilibrio de las proporciones naturales del rostro ovalado.',
     },
     Round: {
       translation: 'Redondo',
       description: 'El rostro redondo tiene mejillas llenas y una línea de mandíbula suave.',
-      recommendedFrame: 'cuadrados',
+      recommendedFrame: 'Cuadrado',
+      info: 'Los marcos cuadrados o angulares añaden definición y contraste al rostro redondo.',
     },
     Square: {
       translation: 'Cuadrado',
       description: 'El rostro cuadrado tiene una mandíbula prominente y frente ancha.',
-      recommendedFrame: 'redondos',
+      recommendedFrame: 'Redondo',
+      info: 'Los marcos redondos suavizan las líneas angulares y proporcionan equilibrio al rostro cuadrado.',
     },
     Heart: {
       translation: 'Corazón',
       description: 'El rostro en forma de corazón tiene una frente ancha y una mandíbula estrecha.',
-      recommendedFrame: 'ovalados',
+      recommendedFrame: 'Ovalado',
+      info: 'Los marcos ovalados equilibran las proporciones entre la frente y la mandíbula estrecha.',
     },
     Oblong: {
       translation: 'Alargado',
       description: 'El rostro alargado es más largo que ancho, con una barbilla prominente.',
-      recommendedFrame: 'cat-eye',
+      recommendedFrame: 'Cat-Eye',
+      info: 'Los marcos estilo cat-eye añaden amplitud visual y acentúan las mejillas para equilibrar el rostro alargado.',
     },
     Unlabeled: {
       translation: 'No etiquetado',
       description: 'No se ha podido determinar un tipo de rostro claro.',
-      recommendedFrame: 'Marcos universales',
+      recommendedFrame: 'Irregular',
+      info: 'Los marcos irregulares son una opción versátil adecuada para cualquier tipo de rostro.',
     },
   };
 
@@ -113,17 +151,9 @@ function FaceLandmarkerComponent() {
 
   const fetchRecommendedFrames = async (searchTerm, page, size) => {
     try {
-      const response = await axios.get(`http://localhost:5203/api/Product/search-shape`, {
-        params: {
-          searchTerm,
-          page,
-          size,
-        },
-      });
+      const response = await axios.get(`http://localhost:5203/api/Product/shape/${searchTerm}`);
 
-      const { data, totalCount } = response.data;
-      setProducts(data);
-      setPagination((prev) => ({ ...prev, total: totalCount }));
+      setProducts(response.data);
     } catch (error) {
       console.error('Error al obtener productos recomendados:', error.message);
     }
@@ -138,13 +168,12 @@ function FaceLandmarkerComponent() {
 
   const applyFilters = (products) => {
     return products.filter((product) => {
-      const { averageRating, categoryName, brandName, material, color } = filters;
+      const { averageRating, category, brand, material } = filters;
       return (
         (averageRating === null || product.averageRating === averageRating) &&
-        (categoryName === null || product.categoryName === categoryName) &&
-        (brandName === null || product.brandName === brandName) &&
-        (material === null || product.material === material) &&
-        (color === null || product.color === color)
+        (category === null || product.category === category) &&
+        (brand === null || product.brand === brand) &&
+        (material === null || product.material === material)
       );
     });
   };
@@ -245,6 +274,7 @@ function FaceLandmarkerComponent() {
         shape: faceShapeData.translation,
         description: faceShapeData.description,
         recommendedFrame: faceShapeData.recommendedFrame,
+        info: faceShapeData.info,
         confidence: (confidence * 100).toFixed(2) + '%',
       });
 
@@ -263,8 +293,8 @@ function FaceLandmarkerComponent() {
   const handleClearFilters = () => {
     setFilters({
       averageRating: null,
-      categoryName: null,
-      brandName: null,
+      category: null,
+      brand: null,
       material: null,
       color: null,
     });
@@ -276,6 +306,9 @@ function FaceLandmarkerComponent() {
 
   return (
     <ConfigProvider
+      button={{
+        className: styles.linearGradientButton,
+      }}
       theme={{
         token: {
           colorPrimary: '#fe0034',
@@ -287,6 +320,7 @@ function FaceLandmarkerComponent() {
       }}
     >
       <div style={{ backgroundColor: '#f0f2f5', minHeight: '100vh', overflow: 'hidden' }}>
+        <Header />
         {showInfoPage ? (
           <FaceShapeInfoPage onProceed={handleProceed} />
         ) : (
@@ -296,7 +330,7 @@ function FaceLandmarkerComponent() {
           >
             <Title
               level={2}
-              style={{ textAlign: 'center', color: '#fe0034' }}
+              style={{ textAlign: 'center', color: '#fe0034', fontSize: '32px', paddingTop: '4px' }}
             >
               Recomendación de Marcos de Lentes
             </Title>
@@ -401,169 +435,32 @@ function FaceLandmarkerComponent() {
                   ) : (
                     faceShape && (
                       <>
-                        <Paragraph style={{ marginTop: '16px', fontSize: '18px' }}>
+                        <Paragraph style={{ marginTop: '16px', fontSize: '22px' }}>
                           Tipo de rostro detectado: <strong>{faceShape.shape}</strong>
                         </Paragraph>
-                        <Paragraph style={{ fontSize: '16px' }}>Descripción: {faceShape.description}</Paragraph>
-                        <Paragraph style={{ fontSize: '16px' }}>
+                        <Paragraph style={{ fontSize: '22px' }}>Descripción: {faceShape.description}</Paragraph>
+                        <Paragraph style={{ fontSize: '22px' }}>
                           Marco recomendado: <strong>{faceShape.recommendedFrame}</strong>
                         </Paragraph>
-                        <Paragraph style={{ fontSize: '16px' }}>
+                        <Paragraph style={{ fontSize: '22px' }}>
                           Fiabilidad: <strong>{faceShape.confidence}</strong>
                         </Paragraph>
-                        <div
-                          style={{
-                            display: 'flex',
-                            flexDirection: 'column',
-                            gap: '12px',
-                            backgroundColor: '#ffffff',
-                            borderRadius: '8px',
-                            boxShadow: '0 2px 8px rgba(0, 0, 0, 0.15)',
-                            marginTop: '16px',
-                            padding: '10px',
-                          }}
-                        >
-                          <div style={{ marginBottom: '8px' }}>
-                            <label style={{ fontWeight: 'bold', marginRight: '8px' }}>Rating:</label>
-                            <Select
-                              value={filters.averageRating}
-                              onChange={(value) => handleFilterChange('averageRating', value)}
-                              style={{ width: '100%' }}
-                              placeholder='Seleccionar'
-                            >
-                              {[0, 1, 2, 3, 4, 5].map((rating) => (
-                                <Option
-                                  key={rating}
-                                  value={rating}
-                                >
-                                  {rating}
-                                </Option>
-                              ))}
-                            </Select>
-                          </div>
-
-                          <div style={{ marginBottom: '8px' }}>
-                            <label style={{ fontWeight: 'bold', marginRight: '8px' }}>Categoría:</label>
-                            <Select
-                              value={filters.categoryName}
-                              onChange={(value) => handleFilterChange('categoryName', value)}
-                              style={{ width: '100%' }}
-                              placeholder='Seleccionar'
-                            >
-                              {[...new Set(products.map((product) => product.categoryName))].map((category) => (
-                                <Option
-                                  key={category}
-                                  value={category}
-                                >
-                                  {category}
-                                </Option>
-                              ))}
-                            </Select>
-                          </div>
-
-                          <div style={{ marginBottom: '8px' }}>
-                            <label style={{ fontWeight: 'bold', marginRight: '8px' }}>Marca:</label>
-                            <Select
-                              value={filters.brandName}
-                              onChange={(value) => handleFilterChange('brandName', value)}
-                              style={{ width: '100%' }}
-                              placeholder='Seleccionar'
-                            >
-                              {[...new Set(products.map((product) => product.brandName))].map((brand) => (
-                                <Option
-                                  key={brand}
-                                  value={brand}
-                                >
-                                  {brand}
-                                </Option>
-                              ))}
-                            </Select>
-                          </div>
-
-                          <div style={{ marginBottom: '8px' }}>
-                            <label style={{ fontWeight: 'bold', marginRight: '8px' }}>Material:</label>
-                            <Select
-                              value={filters.material}
-                              onChange={(value) => handleFilterChange('material', value)}
-                              style={{ width: '100%' }}
-                              placeholder='Seleccionar'
-                            >
-                              {[...new Set(products.map((product) => product.material))].map((material) => (
-                                <Option
-                                  key={material}
-                                  value={material}
-                                >
-                                  {material}
-                                </Option>
-                              ))}
-                            </Select>
-                          </div>
-
-                          <div style={{ marginBottom: '8px' }}>
-                            <label style={{ fontWeight: 'bold', marginRight: '8px' }}>Color:</label>
-                            <Select
-                              value={filters.color}
-                              onChange={(value) => handleFilterChange('color', value)}
-                              style={{ width: '100%' }}
-                              placeholder='Seleccionar'
-                            >
-                              {[...new Set(products.map((product) => product.color))].map((color) => (
-                                <Option
-                                  key={color}
-                                  value={color}
-                                >
-                                  {color}
-                                </Option>
-                              ))}
-                            </Select>
-                          </div>
-
-                          <Button
-                            type='default'
-                            onClick={handleClearFilters}
-                            style={{ marginTop: '16px', width: '100%' }}
-                          >
-                            Limpiar Filtros
-                          </Button>
-                        </div>
-
+                        <Paragraph style={{ fontSize: '22px' }}>Motivo: {faceShape.info}</Paragraph>
                         <Row
                           gutter={16}
                           style={{ marginTop: '16px' }}
                         >
-                          {applyFilters(products).map((product) => (
-                            <Col
-                              span={8}
-                              key={product.productID}
-                            >
-                              <Card
-                                hoverable
-                                style={{ marginTop: '16px' }}
-                                cover={
-                                  <Image
-                                    alt={product.name}
-                                    src={product.images.length > 0 ? marcos : marcos}
-                                    height={200}
-                                    style={{ objectFit: 'cover' }}
-                                  />
-                                }
-                              >
-                                <Card.Meta
-                                  title={product.name}
-                                  description={
-                                    <>
-                                      <p>SKU: {product.code}</p>
-                                      <p>Precio: ${product.price}</p>
-                                      <Rate
-                                        value={product.averageRating}
-                                        disabled
-                                      />
-                                    </>
-                                  }
-                                />
-                              </Card>
-                            </Col>
-                          ))}
+                          <Button
+                            type='primary'
+                            onClick={() => setIsModalVisible(true)}
+                            style={{
+                              fontSize: '18px',
+                              height: '50px',
+                              padding: '0 24px',
+                            }}
+                          >
+                            Ver Productos Recomendados
+                          </Button>
                         </Row>
                       </>
                     )
@@ -573,6 +470,184 @@ function FaceLandmarkerComponent() {
             </Row>
           </div>
         )}
+        <Modal
+          title={
+            <div style={{ fontSize: '24px', fontWeight: 'bold', textAlign: 'center' }}>
+              Productos Recomendados
+            </div>
+          }
+          open={isModalVisible}
+          onCancel={() => setIsModalVisible(false)}
+          footer={null}
+          width='90%'
+        >
+          <Row
+            gutter={[16, 16]}
+            style={{ height: '100%' }}
+          >
+            {/* Columna de filtros */}
+            <Col
+              xs={24}
+              sm={4}
+              style={{
+                padding: '16px',
+                borderRight: '1px solid #d9d9d9',
+                height: '100%',
+                overflowY: 'auto',
+              }}
+            >
+              <div
+                style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '12px',
+                  backgroundColor: '#ffffff',
+                  borderRadius: '8px',
+                  boxShadow: '0 2px 8px rgba(0, 0, 0, 0.15)',
+                  marginTop: '16px',
+                  padding: '10px',
+                }}
+              >
+                <div style={{ marginBottom: '8px' }}>
+                  <label style={{ fontWeight: 'bold', marginRight: '8px' }}>Rating:</label>
+                  <Select
+                    value={filters.averageRating}
+                    onChange={(value) => handleFilterChange('averageRating', value)}
+                    style={{ width: '100%' }}
+                    placeholder='Seleccionar'
+                  >
+                    {[0, 1, 2, 3, 4, 5].map((rating) => (
+                      <Option
+                        key={rating}
+                        value={rating}
+                      >
+                        {rating}
+                      </Option>
+                    ))}
+                  </Select>
+                </div>
+
+                <div style={{ marginBottom: '8px' }}>
+                  <label style={{ fontWeight: 'bold', marginRight: '8px' }}>Categoría:</label>
+                  <Select
+                    value={filters.category}
+                    onChange={(value) => handleFilterChange('category', value)}
+                    style={{ width: '100%' }}
+                    placeholder='Seleccionar'
+                  >
+                    {[...new Set(products.map((product) => product.category))].map((category) => (
+                      <Option
+                        key={category}
+                        value={category}
+                      >
+                        {category}
+                      </Option>
+                    ))}
+                  </Select>
+                </div>
+
+                <div style={{ marginBottom: '8px' }}>
+                  <label style={{ fontWeight: 'bold', marginRight: '8px' }}>Marca:</label>
+                  <Select
+                    value={filters.brand}
+                    onChange={(value) => handleFilterChange('brand', value)}
+                    style={{ width: '100%' }}
+                    placeholder='Seleccionar'
+                  >
+                    {[...new Set(products.map((product) => product.brand))].map((brand) => (
+                      <Option
+                        key={brand}
+                        value={brand}
+                      >
+                        {brand}
+                      </Option>
+                    ))}
+                  </Select>
+                </div>
+
+                <div style={{ marginBottom: '8px' }}>
+                  <label style={{ fontWeight: 'bold', marginRight: '8px' }}>Material:</label>
+                  <Select
+                    value={filters.material}
+                    onChange={(value) => handleFilterChange('material', value)}
+                    style={{ width: '100%' }}
+                    placeholder='Seleccionar'
+                  >
+                    {[...new Set(products.map((product) => product.material))].map((material) => (
+                      <Option
+                        key={material}
+                        value={material}
+                      >
+                        {material}
+                      </Option>
+                    ))}
+                  </Select>
+                </div>
+
+                <Button
+                  type='default'
+                  onClick={handleClearFilters}
+                  style={{ type: 'primary', marginTop: '16px', width: '100%' }}
+                >
+                  Limpiar Filtros
+                </Button>
+              </div>
+            </Col>
+
+            {/* Columna de productos */}
+            <Col
+              xs={24}
+              sm={20}
+              style={{
+                padding: '16px',
+                height: '100%',
+                overflowY: 'auto',
+              }}
+            >
+              <Row
+                gutter={16}
+                style={{ marginTop: '16px' }}
+              >
+                {applyFilters(products).map((product) => (
+                  <Col
+                    key={product.id}
+                    xs={24}
+                    sm={12}
+                    md={8}
+                    lg={6}
+                  >
+                    <Card
+                      hoverable
+                      style={{ marginTop: '16px' }}
+                      cover={
+                        <Image
+                          alt={product.name}
+                          src={product.image != null ? product.image : marcos}
+                          height={200}
+                          width={200}
+                          style={{ objectFit: 'cover' }}
+                        />
+                      }
+                      onClick={() => window.open(`products/${product.id}`, '_blank')}
+                    >
+                      <Card.Meta
+                        title={product.name}
+                        description={
+                          <Rate
+                            disabled
+                            defaultValue={product.averageRating}
+                          />
+                        }
+                      />
+                    </Card>
+                  </Col>
+                ))}
+              </Row>
+            </Col>
+          </Row>
+        </Modal>
+
+        <Footer />
       </div>
     </ConfigProvider>
   );

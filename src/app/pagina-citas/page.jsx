@@ -1,12 +1,13 @@
 'use client';
 
-import { useSession } from 'next-auth/react';
+import { useSession, signIn } from 'next-auth/react';
 import React from 'react';
 import { Card, Button, Row, Col, Typography, Divider, ConfigProvider, message } from 'antd';
 import { CalendarOutlined, SolutionOutlined, ScheduleOutlined, EyeOutlined, BookOutlined } from '@ant-design/icons';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import Header from '../../components/Header';
+import Footer from '../../components/Footer';
 import schedule from '../../assets/img/citas/agendarCita.jpg';
 import appointments from '../../assets/img/citas/citasAgendadas.jpg';
 import calendar from '../../assets/img/citas/calendarioCitas.jpg';
@@ -18,7 +19,7 @@ function ReservaCita() {
   const router = useRouter();
   const handleNavigation = (url) => {
     if (!session || !session.userId) {
-      message.error('No se ha iniciado sesión. Por favor, inicia sesión primero.');
+      signIn('keycloak');
     } else {
       router.push(url);
     }
@@ -182,6 +183,7 @@ function ReservaCita() {
           </Col>
         </Row>
       </div>
+      <Footer />
     </ConfigProvider>
   );
 }

@@ -8,7 +8,7 @@ const initialState = {
 };
 
 export const fetchCategoryById = createAsyncThunk('category/fetchCategoryById', async (id) => {
-  const response = await axios.get(`https://localhost:7235/api/Category/${id}`);
+  const response = await axios.get(`http://localhost:5203/api/Category/${id}`);
   return response.data;
 });
 

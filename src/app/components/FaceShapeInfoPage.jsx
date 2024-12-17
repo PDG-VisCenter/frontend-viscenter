@@ -8,7 +8,9 @@ import oblong from '../../assets/img/recomendaciones/oblongShape.png';
 import round from '../../assets/img/recomendaciones/roundShape.png';
 import square from '../../assets/img/recomendaciones/squareShape.png';
 import model from '../../assets/img/recomendaciones/trainedModel.png';
+import marcos from '../../assets/img/citas/marcosLentes.jpg';
 import Header from '../../components/Header';
+import Footer from '@/components/Footer';
 import { createStyles } from 'antd-style';
 
 const useStyle = createStyles(({ prefixCls, css }) => ({
@@ -108,10 +110,18 @@ const FaceShapeInfoPage = ({ onProceed }) => {
       }}
     >
       <div style={{ backgroundColor: '#f0f2f5' }}>
-        <Header />
-        <Title level={2} style={{ textAlign: 'center', color: '#fe0034', paddingTop: '20px' }}>
+        <Title level={2} style={{ textAlign: 'center', color: '#fe0034', paddingTop: '20px', fontSize: '32px' }}>
           Tipos de Rostro y Recomendaciones
         </Title>
+        <div style={{ textAlign: 'center', marginTop: '20px', paddingBottom: '50px' }}>
+          <Button type='primary' size='large' onClick={onProceed} style={{
+            fontSize: '20px',
+            height: '60px',
+            padding: '0 24px',
+          }}>
+            Pasar a la herramienta de recomendación
+          </Button>
+        </div>
         <Paragraph style={{ textAlign: 'center', maxWidth: '800px', margin: '0 auto', fontSize: '16px' }}>
           Conozca su tipo de rostro y obtenga recomendaciones personalizadas de marcos de lentes para realzar sus
           características únicas.
@@ -186,7 +196,7 @@ const FaceShapeInfoPage = ({ onProceed }) => {
           </Paragraph>
           <Image
             width={600}
-            height={350}
+            height={340}
             src={model}
             preview={false}
             style={{ marginTop: '20px' }}
@@ -204,12 +214,14 @@ const FaceShapeInfoPage = ({ onProceed }) => {
             Con esta herramienta, recibirá recomendaciones de estilos de gafas que mejor se adapten a su tipo de rostro.
             Esto le ayudará a elegir monturas que realcen sus características y mejoren su apariencia.
           </Paragraph>
-        </div>
-
-        <div style={{ textAlign: 'center', marginTop: '20px', paddingBottom: '50px' }}>
-          <Button type='primary' size='large' onClick={onProceed}>
-            Pasar a la herramienta de recomendación
-          </Button>
+          <Image
+            width={400}
+            height={400}
+            src={marcos}
+            preview={false}
+            style={{ marginTop: '20px' }}
+            alt='Diagrama CNN'
+          />
         </div>
       </div>
     </ConfigProvider>

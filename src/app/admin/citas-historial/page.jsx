@@ -7,10 +7,13 @@ import { Content } from 'antd/es/layout/layout';
 import HeaderSeller from '../components/HeaderSeller';
 import SiderMenuSeller from '../components/SiderMenuSeller';
 import dayjs from 'dayjs';
+import { fetchUserAccessToken } from '@/app/services/keycloakServices';
+import { signIn, useSession } from 'next-auth/react';
 
 const { Title } = Typography;
 
 function Appointments() {
+  const { data: session, status } = useSession();
   const [appointments, setAppointments] = useState([]);
   const [filteredAppointments, setFilteredAppointments] = useState([]);
   const [searchText, setSearchText] = useState('');
@@ -22,18 +25,42 @@ function Appointments() {
   } = theme.useToken();
 
   useEffect(() => {
-    axios
-      .get('http://localhost:5281/api/History')
-      .then((response) => {
-        setAppointments(response.data);
-        setFilteredAppointments(response.data);
-        setLoading(false);
-      })
-      .catch((error) => {
-        console.error('Error fetching appointments:', error);
-        setLoading(false);
-      });
-  }, []);
+    if (status === 'loading') {
+      return;
+    }
+
+    if (!session || !session.userId) {
+      signIn('keycloak');
+      return;
+    }
+
+    fetchData();
+  }, [session, status]);
+
+  const fetchData = async () => {
+    const token = await fetchUserAccessToken();
+    console.log(token);
+
+    try {
+      axios
+        .get('http://localhost:5270/viscenter/api/v1/History', {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        })
+        .then((response) => {
+          setAppointments(response.data);
+          setFilteredAppointments(response.data);
+          setLoading(false);
+        })
+        .catch((error) => {
+          console.error('Error fetching appointments:', error);
+          setLoading(false);
+        });
+    } catch (error) {
+      console.error('Error fetching data:', error);
+    }
+  };
 
   const handleReset = () => {
     setFilteredAppointments(appointments);

@@ -17,7 +17,7 @@ const initialState = {
 };
 
 export const fetchLastAddedProduct = createAsyncThunk('products/fetchLastAddedProduct', async () => {
-  const response = await axios.get('https://localhost:7235/api/Product/last_product');
+  const response = await axios.get('http://localhost:5203/api/Product/last_product');
   return response.data;
 });
 

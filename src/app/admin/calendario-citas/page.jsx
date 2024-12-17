@@ -8,10 +8,13 @@ import HeaderSeller from '../components/HeaderSeller';
 import SiderMenuSeller from '../components/SiderMenuSeller';
 import dayjs from 'dayjs';
 import { fetchUserEmail } from '@/app/services/keycloakServices';
+import { fetchUserAccessToken } from '@/app/services/keycloakServices';
+import { signIn, useSession } from 'next-auth/react';
 
 const { Title } = Typography;
 
 function Appointments() {
+  const { data: session, status } = useSession();
   const [appointments, setAppointments] = useState([]);
   const [schedules, setSchedules] = useState([]);
   const [selectedDate, setSelectedDate] = useState(null);
@@ -25,25 +28,53 @@ function Appointments() {
   } = theme.useToken();
 
   useEffect(() => {
-    axios
-      .get('http://localhost:5281/api/ExtendedAppointment')
-      .then((response) => {
-        const appointmentsData = response.data;
-        setAppointments(appointmentsData);
-      })
-      .catch((error) => console.error('Error fetching appointments:', error));
+    if (status === 'loading') {
+      return;
+    }
 
-    axios
-      .get('http://localhost:5281/api/ExtendedAppointment/schedules')
-      .then((response) => {
-        const schedulesData = response.data.map((schedule) => ({
-          id: schedule.scheduleID,
-          time: `${schedule.startTime} - ${schedule.endTime}`,
-        }));
-        setSchedules(schedulesData);
-      })
-      .catch((error) => console.error('Error fetching schedules:', error));
-  }, []);
+    if (!session || !session.userId) {
+      signIn('keycloak');
+      return;
+    }
+
+    fetchData();
+  }, [session, status]);
+
+  const fetchData = async () => {
+    const token = await fetchUserAccessToken();
+    console.log(token);
+
+    try {
+      axios
+        .get('http://localhost:5270/viscenter/api/v1/ExtendedAppointment', {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        })
+        .then((response) => {
+          const appointmentsData = response.data;
+          setAppointments(appointmentsData);
+        })
+        .catch((error) => console.error('Error fetching appointments:', error));
+
+      axios
+        .get('http://localhost:5270/viscenter/api/v1/ExtendedAppointment/schedules', {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        })
+        .then((response) => {
+          const schedulesData = response.data.map((schedule) => ({
+            id: schedule.scheduleID,
+            time: `${schedule.startTime} - ${schedule.endTime}`,
+          }));
+          setSchedules(schedulesData);
+        })
+        .catch((error) => console.error('Error fetching schedules:', error));
+    } catch (error) {
+      console.error('Error fetching data:', error);
+    }
+  };
 
   const handleDateChange = (date) => {
     setSelectedDate(date ? dayjs(date).format('YYYY-MM-DD') : null);
@@ -55,6 +86,9 @@ function Appointments() {
   };
 
   const confirmCancel = async () => {
+    const token = await fetchUserAccessToken();
+    console.log(token);
+
     if (!cancelReason) {
       setError('Debe ingresar una razón para cancelar la cita.');
       return;
@@ -63,12 +97,27 @@ function Appointments() {
     const today = dayjs().format('YYYY-MM-DD');
 
     try {
-      await axios.delete(`http://localhost:5281/api/ExtendedAppointment/${appointmentToCancel.appointmentID}`);
+      await axios.delete(
+        `http://localhost:5270/viscenter/api/v1/ExtendedAppointment/${appointmentToCancel.appointmentID}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
 
       if (dayjs(appointmentToCancel.appointmentDate).format('YYYY-MM-DD') === today) {
-        await axios.patch(`http://localhost:5281/api/Availability/${appointmentToCancel.scheduleID}`, {
-          isAvailable: true,
-        });
+        await axios.patch(
+          `http://localhost:5270/viscenter/api/v1/Availability/${appointmentToCancel.scheduleID}`,
+          {
+            isAvailable: true,
+          },
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
       }
 
       const userEmail = await fetchUserEmail(appointmentToCancel.userID);
@@ -80,7 +129,13 @@ function Appointments() {
         ${appointmentToCancel.appointmentDate} a las ${timeSlot} se cancela por el siguiente motivo: ${cancelReason}`;
 
       const emailResponse = await axios.post(
-        `http://localhost:5281/api/Email/send?toEmail=${email}&subject=${subject}&message=${emailData}`
+        `http://localhost:5270/viscenter/api/v1/Email/send?toEmail=${email}&subject=${subject}&message=${emailData}`,
+        null,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
       );
 
       if (emailResponse.status === 200) {

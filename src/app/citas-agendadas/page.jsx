@@ -1,11 +1,13 @@
 'use client';
 
-import { useSession } from 'next-auth/react';
+import { useSession, signIn } from 'next-auth/react';
 import { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useRouter } from 'next/navigation';
 import { List, Card, Button, Typography, Spin, ConfigProvider } from 'antd';
 import { fetchUserAccessToken } from '../services/keycloakServices';
+import Header from '../../components/Header';
+import Footer from '../../components/Footer';
 
 const { Title, Paragraph } = Typography;
 
@@ -22,7 +24,7 @@ function ScheduledAppointments() {
       return;
     }
     if (!session || !session.userId) {
-      return;
+      signIn('keycloak');
     }
 
     fetchData();
@@ -30,7 +32,6 @@ function ScheduledAppointments() {
 
   const fetchData = async () => {
     const token = await fetchUserAccessToken();
-    console.log(token);
 
     axios
       .get(`http://localhost:5270/viscenter/api/v1/Appointment/user/${session.userId}`, {
@@ -86,8 +87,12 @@ function ScheduledAppointments() {
         },
       }}
     >
+    <Header/>
       <div
-        style={{ backgroundColor: '#f0f2f5', padding: '20px' }}
+        style={{ backgroundColor: '#f0f2f5', padding: '20px', minHeight: 'calc(100vh - 120px)',
+          display: 'flex',
+          flexDirection: 'column',
+          justifyContent: 'space-between' }}
         className='min-h-screen bg-gray-100 p-6'
       >
         <Card
@@ -159,6 +164,7 @@ function ScheduledAppointments() {
           )}
         </Card>
       </div>
+    <Footer/>
     </ConfigProvider>
   );
 }

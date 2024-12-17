@@ -8,7 +8,7 @@ const initialState = {
 };
 
 export const fetchColorsByProduct = createAsyncThunk('products/fetchColorsByProduct', async (product) => {
-  const response = await axios.get(`https://localhost:7235/api/Color/product_id/${product}`);
+  const response = await axios.get(`http://localhost:5203/api/Color/product_id/${product}`);
   return response.data;
 });
 

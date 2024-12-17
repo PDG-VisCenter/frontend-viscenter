@@ -11,6 +11,8 @@ import axios from 'axios';
 import dayjs from 'dayjs';
 import Footer from '../../components/Footer';
 import HeaderSimple from '../../components/HeaderSimple';
+import { keycloakSessionLogOut } from '@/components/authStatus';
+import { fetchUserAccessToken } from '@/app/services/keycloakServices';
 
 const items = [
   { key: 'account', label: 'Cuenta' },
@@ -39,22 +41,45 @@ function Profile() {
   const { data: session, status } = useSession();
 
   useEffect(() => {
-    if (session?.roles.includes('client_role')) {
-      axios
-        .get(`http://localhost:5281/api/History/user/${session.userId}`)
-        .then((response) => {
-          setAppointments(response.data);
-          setFilteredAppointments(response.data);
-        })
-        .catch((error) => console.error('Error fetching appointments:', error));
+    if (status === 'loading') {
+      return;
     }
-  }, [session]);
+
+    if (!session || !session.userId) {
+      return;
+    }
+
+    fetchAppointmentHistory();
+  }, [session, status]);
+
+  const fetchAppointmentHistory = async () => {
+    const token = await fetchUserAccessToken();
+    console.log(token);
+
+    try {
+      if (session?.roles.includes('client_role')) {
+        axios
+          .get(`http://localhost:5270/viscenter/api/v1/History/user/${session.userId}`, {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          })
+          .then((response) => {
+            setAppointments(response.data);
+            setFilteredAppointments(response.data);
+          })
+          .catch((error) => console.error('Error fetching appointments:', error));
+      }
+    } catch (error) {
+      console.error('Error fetching profile data:', error);
+    }
+  };
 
   const showModal = () => setIsModalOpen(true);
 
   const handleLogout = () => {
     setIsModalOpen(false);
-    signOut({ callbackUrl: '/' });
+    keycloakSessionLogOut().then(() => signOut({ callbackUrl: '/' }));
   };
 
   const handleCancel = () => setIsModalOpen(false);

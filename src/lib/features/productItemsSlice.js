@@ -10,12 +10,12 @@ const initialState = {
 };
 
 export const fetchProductItemsByProduct = createAsyncThunk('products/fetchProductItemsByProduct', async (product) => {
-  const response = await axios.get(`https://localhost:7235/api/ProductItem/product/${product}`);
+  const response = await axios.get(`http://localhost:5203/api/ProductItem/product/${product}`);
   return response.data;
 });
 
 export const addProductItem = createAsyncThunk('productItem/addProductItem', async (newProductItem) => {
-  const response = await axios.post('https://localhost:7235/api/ProductItem', newProductItem);
+  const response = await axios.post('http://localhost:5203/api/ProductItem', newProductItem);
   return response.data;
 });
 
