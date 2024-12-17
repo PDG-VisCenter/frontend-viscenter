@@ -343,6 +343,7 @@ function FaceLandmarkerComponent() {
                   {cameraActive && (
                     <div style={{ position: 'relative', width: '100%' }}>
                       <Webcam
+                        mirrored={true}
                         ref={webcamRef}
                         screenshotFormat='image/jpeg'
                         style={{
