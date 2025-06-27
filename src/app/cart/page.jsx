@@ -11,6 +11,7 @@ import Layout from 'antd/es/layout/layout';
 import Link from 'next/link';
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { createOrder } from '@/lib/features/orderSlice';
 
 function Cart() {
   const dispatch = useDispatch();
@@ -71,6 +72,21 @@ function Cart() {
       description: `Color: ${item.color}`,
       quantity: item.quantity,
     }));
+
+    const userId = localStorage.getItem('userId');
+    const orderData = new FormData();
+    orderData.append('userId', userId);
+    orderData.append(
+      'orderDate',
+      new Date().toLocaleDateString('en-CA', {
+        timeZone: 'America/La_Paz',
+      })
+    );
+    orderData.append('totalPrice', cartTotalPrice);
+    orderData.append('totalItems', cartTotalItems);
+    console.log(cartTotalPrice);
+
+    await dispatch(createOrder(orderData)).unwrap();
 
     const data = {
       products,
@@ -159,7 +175,6 @@ function Cart() {
                   size='large'
                   onClick={onClickCheckout}
                   block
-                  disabled
                 >
                   Checkout
                 </Button>

@@ -22,41 +22,41 @@ function PaymentSuccess() {
     router.push('http://localhost:3000/profile');
   };
 
-  const handleCreateOrder = (userId) => {
-    const orderData = new FormData();
-    orderData.append('userId', userId);
-    orderData.append(
-      'orderDate',
-      new Date().toLocaleDateString('en-CA', {
-        timeZone: 'America/La_Paz',
-      })
-    );
+  // const handleCreateOrder = (userId) => {
+  //   const orderData = new FormData();
+  //   orderData.append('userId', userId);
+  //   orderData.append(
+  //     'orderDate',
+  //     new Date().toLocaleDateString('en-CA', {
+  //       timeZone: 'America/La_Paz',
+  //     })
+  //   );
 
-    dispatch(createOrder(orderData)).then(() =>
-      dispatch(fetchOrdersByUserId(userId)).then((order) => {
-        const orderId = order.payload?.id;
-        cartItems.forEach((item) => {
-          const orderLine = new FormData();
-          orderLine.append('orderId', orderId);
-          orderLine.append('productItemId', item.productItemId);
-          orderLine.append('quantity', item.quantity);
+  //   dispatch(createOrder(orderData)).then(() =>
+  //     dispatch(fetchOrdersByUserId(userId)).then((order) => {
+  //       const orderId = order.payload?.id;
+  //       cartItems.forEach((item) => {
+  //         const orderLine = new FormData();
+  //         orderLine.append('orderId', orderId);
+  //         orderLine.append('productItemId', item.productItemId);
+  //         orderLine.append('quantity', item.quantity);
 
-          dispatch(addOrderLine(orderLine));
-        });
+  //         dispatch(addOrderLine(orderLine));
+  //       });
 
-        cartItems.forEach((item) => {
-          dispatch(deleteCartItem(item.id));
-        });
-        dispatch(removeAllCartRedux());
-      })
-    );
-  };
+  //       cartItems.forEach((item) => {
+  //         dispatch(deleteCartItem(item.id));
+  //       });
+  //       dispatch(removeAllCartRedux());
+  //     })
+  //   );
+  // };
 
-  useEffect(() => {
-    const userId = localStorage.getItem('userId');
-    dispatch(fetchCartItemsByUserId(userId));
-    handleCreateOrder(userId);
-  }, []);
+  // useEffect(() => {
+  //   const userId = localStorage.getItem('userId');
+  //   dispatch(fetchCartItemsByUserId(userId));
+  //   // handleCreateOrder(userId);
+  // }, []);
 
   return (
     <Layout

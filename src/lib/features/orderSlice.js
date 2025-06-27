@@ -27,8 +27,13 @@ export const fetchOrdersByUserId = createAsyncThunk('orders/fetchOrdersByUserId'
   return response.data;
 });
 
-export const updateOrder = createAsyncThunk('orders/updateOrderStatus', async (orderId) => {
-  const response = await axios.put(`https://localhost:7235/api/Order/${orderId}`);
+export const fetchAllOrders = createAsyncThunk('orders/fetchAllOrders', async () => {
+  const response = await axios.get('https://localhost:7235/api/Order');
+  return response.data;
+});
+
+export const updateOrder = createAsyncThunk('orders/updateOrderStatus', async ({ id, newOrder }) => {
+  const response = await axios.put(`https://localhost:7235/api/Order/${id}`, newOrder);
   return response.data;
 });
 
@@ -88,7 +93,7 @@ const orderSlice = createSlice({
     });
     builder.addCase(updateOrder.fulfilled, (state, action) => {
       state.statusUpdate = 'success';
-      state.orderLine = action.payload;
+      state.order = action.payload;
     });
     builder.addCase(updateOrder.rejected, (state, action) => {
       state.statusUpdate = 'failed';
@@ -120,6 +125,18 @@ const orderSlice = createSlice({
       state.orderLines = action.payload;
     });
     builder.addCase(fetchOrderLinesByOrderId.rejected, (state, action) => {
+      state.status = 'failed';
+      state.error = action.error.message;
+    });
+
+    builder.addCase(fetchAllOrders.pending, (state) => {
+      state.status = 'loading';
+    });
+    builder.addCase(fetchAllOrders.fulfilled, (state, action) => {
+      state.status = 'success';
+      state.orders = action.payload;
+    });
+    builder.addCase(fetchAllOrders.rejected, (state, action) => {
       state.status = 'failed';
       state.error = action.error.message;
     });

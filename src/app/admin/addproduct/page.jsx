@@ -43,30 +43,6 @@ function AddProduct() {
   const [currentStep, setCurrentStep] = useState(0);
   const { token } = theme.useToken();
 
-  useEffect(() => {
-    if (productItemsStatus === 'success') {
-      const updateProductItem = async () => {
-        try {
-          const aux = new FormData();
-          aux.append('categoryId', 4);
-          aux.append('brandId', 1);
-          aux.append('name', '');
-          aux.append('shape', '');
-          aux.append('material', '');
-          aux.append('description', '');
-          aux.append('originalPrice', 0);
-          aux.append('image', productSpecifications[0].images[0]);
-          await dispatch(updateProduct({ id: productId, newProduct: aux })).unwrap();
-          message.success('Variantes guardadas correctamente');
-        } catch (error) {
-          throw new Error('Error updating product:', error);
-        }
-      };
-
-      updateProductItem();
-    }
-  }, [productItemsStatus, dispatch]);
-
   const {
     token: { colorBgContainer, borderRadiusLG },
   } = theme.useToken();
@@ -148,12 +124,25 @@ function AddProduct() {
             throw new Error('Error saving product item:', error);
           });
       });
-
-      // Promise.all(addProductItemPromises).then(() => {
-      //   dispatch(fetchProductItemsByProduct(id));
-      // });
     } catch (error) {
       throw new Error('Error saving product item:', error);
+    }
+
+    try {
+      const idLastProductAdded = await dispatch(fetchLastAddedProduct()).unwrap();
+      const aux = new FormData();
+      aux.append('categoryId', productData.category[1]);
+      aux.append('brandId', productData.brand);
+      aux.append('name', productData.name);
+      aux.append('shape', productData.shape);
+      aux.append('material', productData.material);
+      aux.append('description', productData.description);
+      aux.append('originalPrice', productData.price);
+      aux.append('image', 'https://res.cloudinary.com/dyrgwac0i/image/upload/v1/product/' + idLastProductAdded + '/' + productItemsData[0].images[0].name);
+      await dispatch(updateProduct({ id: idLastProductAdded, newProduct: aux })).unwrap();
+      message.success('Imagen guardada');
+    } catch (error) {
+      throw new Error('Error updating product:', error);
     }
 
     message.success('Producto guardado correctamente');

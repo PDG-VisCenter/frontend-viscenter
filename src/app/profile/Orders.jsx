@@ -3,6 +3,7 @@ import { CheckCircleOutlined, ClockCircleOutlined, CloseCircleOutlined, ShopOutl
 import { Content } from 'antd/es/layout/layout';
 import Title from 'antd/es/typography/Title';
 import { useRouter } from 'next/navigation';
+import { useDispatch, useSelector } from 'react-redux';
 
 const contentStyle = {
   display: 'flex',
@@ -15,6 +16,8 @@ const contentStyle = {
 
 function Orders() {
   const router = useRouter();
+  const orders = useSelector((state) => state.order.orders);
+
   const columns = [
     {
       title: 'N° Pedido',
@@ -88,48 +91,18 @@ function Orders() {
     },
   ];
 
-  const data = [
-    {
-      key: '1',
-      order_number: '#9844',
-      date: '17 de Diciembre, 2024',
-      status: 'Pendiente',
-      total: 'Bs. 2860',
-      items: 3,
-    },
-    // {
-    //   key: '2',
-    //   order_number: '#5652',
-    //   date: '11 de Noviembre, 2024',
-    //   status: 'En proceso',
-    //   total: 'Bs. 150',
-    //   items: 1,
-    // },
-    // {
-    //   key: '3',
-    //   order_number: '#4567',
-    //   date: '1 de Octubre, 2024',
-    //   status: 'Listo para recojo',
-    //   total: 'Bs. 380',
-    //   items: 1,
-    // },
-    // {
-    //   key: '4',
-    //   order_number: '#1111',
-    //   date: '15 de Junio, 2024',
-    //   status: 'Entregado',
-    //   total: 'Bs. 530',
-    //   items: 2,
-    // },
-    // {
-    //   key: '5',
-    //   order_number: '#560',
-    //   date: '3 de Abril, 2024',
-    //   status: 'Cancelado',
-    //   total: 'Bs. 200',
-    //   items: 1,
-    // },
-  ];
+  const data = orders.map((order, index) => ({
+    key: String(index + 1),
+    order_number: order.id,
+    date: new Date(order.orderDate).toLocaleDateString('es-BO', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+    }),
+    status: order.orderStatus,
+    total: `Bs. ${order.totalPrice}`,
+    items: order.totalItems,
+  }));
 
   const onClickProducts = () => {
     router.push('http://localhost:3000/products');

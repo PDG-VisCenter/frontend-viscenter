@@ -56,19 +56,19 @@ function Product({ params }) {
     dispatch(fetchColorsByProduct(params.product));
   }, [dispatch, params.product]);
 
-  useEffect(() => {
-    if (cart.length > 0) {
-      if (status === 'authenticated') {
-        const cartItemFormData = new FormData();
-        cartItemFormData.append('cartId', cartUser.id);
-        cartItemFormData.append('productItemId', productSpecifications[activeColorItem]?.id);
-        cartItemFormData.append('quantity', cart[cart.length - 1].quantity);
-        dispatch(addCartItem(cartItemFormData));
-      } else if (status === 'unauthenticated') {
-        localStorage.setItem('cart', JSON.stringify(cart));
-      }
-    }
-  }, [cart, dispatch]);
+  // useEffect(() => {
+  //   if (cart.length > 0) {
+  //     if (status === 'authenticated') {
+  //       const cartItemFormData = new FormData();
+  //       cartItemFormData.append('cartId', cartUser.id);
+  //       cartItemFormData.append('productItemId', productSpecifications[activeColorItem]?.id);
+  //       cartItemFormData.append('quantity', cart[cart.length - 1].quantity);
+  //       dispatch(addCartItem(cartItemFormData));
+  //     } else if (status === 'unauthenticated') {
+  //       localStorage.setItem('cart', JSON.stringify(cart));
+  //     }
+  //   }
+  // }, [cart, dispatch]);
 
   const handleAddToCart = () => {
     dispatch(
