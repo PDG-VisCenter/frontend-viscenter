@@ -1,66 +1,98 @@
 'use client';
 
-import { Input, Layout, Space, Table, theme } from 'antd';
+import { Input, Layout, message, Select, Space, Table, theme } from 'antd';
 import { Content } from 'antd/es/layout/layout';
-import { EditOutlined } from '@ant-design/icons';
 import HeaderSeller from '../components/HeaderSeller';
-import Link from 'next/link';
 import SiderMenuSeller from '../components/SiderMenuSeller';
 import Title from 'antd/es/typography/Title';
-
-const columns = [
-  {
-    title: 'N° Pedido',
-    dataIndex: 'number',
-    width: 90,
-    className: 'center-vertically',
-  },
-  {
-    title: 'Fecha',
-    dataIndex: 'date',
-    width: 90,
-  },
-  {
-    title: 'Email Cliente',
-    dataIndex: 'email',
-    width: 170,
-  },
-  {
-    title: 'Status',
-    dataIndex: 'status',
-    width: 90,
-  },
-  {
-    title: 'Total',
-    dataIndex: 'total',
-    width: 90,
-  },
-  {
-    title: 'Acccion',
-    key: 'action',
-    width: 110,
-    render: (_, record) => (
-      <Space size='middle'>
-        <Link href='/'>
-          <EditOutlined /> Edit
-        </Link>
-      </Space>
-    ),
-  },
-];
-
-const data = [];
-for (let i = 0; i < 50; i++) {
-  data.push({
-    key: i,
-    number: 32,
-    email: `London, Park Lane no. ${i}`,
-    date: `Dec ${i}, 2024`,
-  });
-}
+import { orderStatus } from '@/data/statusOrders';
+import { useDispatch, useSelector } from 'react-redux';
+import { fetchAllOrders, fetchOrdersByUserId, updateOrder } from '@/lib/features/orderSlice';
+import { useEffect } from 'react';
 
 function Orders() {
   const onSearch = (value, _e, info) => console.log(info?.source, value);
+  const dispatch = useDispatch();
+  const orders = useSelector((state) => state.order.orders);
+
+  useEffect(() => {
+    dispatch(fetchAllOrders());
+  }, [dispatch]);
+
+  const data = orders.map((order, index) => ({
+    key: String(index + 1),
+    order_number: order.id,
+    date: new Date(order.orderDate).toLocaleDateString('es-BO', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+    }),
+    name: order.userId,
+    status: order.orderStatus,
+    total: `Bs. ${order.totalPrice}`,
+    items: order.totalItems,
+  }));
+
+  const handleStatusChange = async (newStatus, orderId) => {
+    const formData = new FormData();
+    formData.append('orderStatus', newStatus);
+  
+    try {
+      await dispatch(updateOrder({ id: orderId, newOrder: formData })).unwrap();
+      message.success('Estado actualizado');
+    } catch (error) {
+      console.error(error);
+      message.error('No se pudo actualizar el estado');
+    }
+  };
+
+  const columns = [
+    {
+      title: 'N° Pedido',
+      dataIndex: 'order_number',
+      key: 'order_number',
+      width: 60,
+      className: 'center-vertically',
+    },
+    {
+      title: 'Fecha',
+      dataIndex: 'date',
+      width: 100,
+    },
+    {
+      title: 'ID Cliente',
+      dataIndex: 'name',
+      width: 120,
+    },
+    {
+      title: 'Estado',
+      dataIndex: 'status',
+      width: 80,
+      render: (_, record) => (
+        <Space size='middle'>
+          <Select
+            options={orderStatus}
+            defaultValue={record.status}
+            style={{
+              width: 170,
+            }}
+            onChange={(value) => handleStatusChange(value, record.order_number)}
+          />
+        </Space>
+      ),
+    },
+    {
+      title: 'Total',
+      dataIndex: 'total',
+      width: 60,
+    },
+    {
+      title: 'Items',
+      key: 'items',
+      dataIndex: 'items',
+      width: 40,
+    },
+  ];
 
   const {
     token: { colorBgContainer, borderRadiusLG },
@@ -88,7 +120,7 @@ function Orders() {
             >
               Pedidos
             </Title>
-            <Input.Search
+            {/* <Input.Search
               placeholder='Busca pedidos por número o email del cliente...'
               allowClear
               enterButton='Search'
@@ -97,15 +129,14 @@ function Orders() {
               style={{
                 marginBottom: 20,
               }}
-            />
+            /> */}
             <Table
+              bordered
               columns={columns}
               dataSource={data}
-              pagination={{
-                pageSize: 20,
-              }}
+              pagination={false}
               scroll={{
-                y: 380,
+                y: 500,
               }}
             />
           </div>

@@ -1,22 +1,105 @@
 'use client';
 
 import { Button, Col, Divider, Empty, Row, Space } from 'antd';
+import { removeAllCartRedux, updateCartItem } from '@/lib/features/cartSlice';
+import { useDispatch, useSelector } from 'react-redux';
+import axios from 'axios';
 import CartCard from './CartCard';
 import Footer from '@/components/Footer';
 import HeaderSimple from '@/components/HeaderSimple';
 import Layout from 'antd/es/layout/layout';
 import Link from 'next/link';
-import { useSelector } from 'react-redux';
+import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { createOrder } from '@/lib/features/orderSlice';
 
 function Cart() {
+  const dispatch = useDispatch();
   const cartItems = useSelector((state) => state.cart.items);
+  const cartItemsFetched = useSelector((state) => state.cart.itemsFetched);
   const cartTotalPrice = useSelector((state) => state.cart.totalPrice);
   const cartTotalItems = useSelector((state) => state.cart.totalItems);
   const router = useRouter();
 
-  const onClickCheckout = () => {
-    router.push('https://buy.stripe.com/test_4gw2bw7AL6hI760fYY');
+  const updateCartItems = async () => {
+    if (cartItemsFetched.length > 0) {
+      try {
+        const updatedItems = await Promise.all(
+          cartItemsFetched.map(async (item) => {
+            if (!item.name || !item.img || !item.color) {
+              const productItem = await axios.get(`https://localhost:7235/api/ProductItem/${item.productItemId}`);
+              const product = await axios.get(`https://localhost:7235/api/Product/${productItem.data.productId}`);
+              const color = await axios.get(`https://localhost:7235/api/Color/${productItem.data.colorId}`);
+
+              return {
+                id: item.id,
+                img: productItem.data.images[0],
+                name: product.data.name,
+                price: item.price,
+                quantity: item.quantity,
+                color: color.data.name,
+              };
+            }
+            return item;
+          })
+        );
+
+        return updatedItems;
+      } catch (error) {
+        console.error('Error loading cart items:', error);
+        return [];
+      }
+    }
+    return [];
+  };
+
+  useEffect(() => {
+    const updateAndDispatch = async () => {
+      const updatedItems = await updateCartItems();
+      if (updatedItems.length > 0) {
+        dispatch(removeAllCartRedux());
+        dispatch(updateCartItem(updatedItems));
+      }
+    };
+
+    updateAndDispatch();
+  }, [cartItemsFetched]);
+
+  const onClickCheckout = async () => {
+    const products = cartItems.map((item) => ({
+      price: item.price,
+      name: item.name,
+      description: `Color: ${item.color}`,
+      quantity: item.quantity,
+    }));
+
+    const userId = localStorage.getItem('userId');
+    const orderData = new FormData();
+    orderData.append('userId', userId);
+    orderData.append(
+      'orderDate',
+      new Date().toLocaleDateString('en-CA', {
+        timeZone: 'America/La_Paz',
+      })
+    );
+    orderData.append('totalPrice', cartTotalPrice);
+    orderData.append('totalItems', cartTotalItems);
+    console.log(cartTotalPrice);
+
+    await dispatch(createOrder(orderData)).unwrap();
+
+    const data = {
+      products,
+      successRedirectUrl: 'http://localhost:3000/payment-success',
+      cancelRedirectUrl: 'http://localhost:3000/cart',
+    };
+
+    try {
+      const response = await axios.post('https://localhost:7235/api/Stripe/create-session', data);
+      router.push(response.data.checkoutUrl);
+    } catch (error) {
+      console.error('Error creating Stripe session:', error);
+    }
   };
 
   return (
@@ -44,11 +127,12 @@ function Cart() {
             {cartItems.map((item) => (
               <CartCard
                 key={item.id}
+                id={item.id}
                 img={item.img}
                 name={item.name}
                 price={item.price}
                 color={item.color}
-                sku={item.sku}
+                quantity={item.quantity}
               />
             ))}
             <Divider
@@ -76,7 +160,7 @@ function Cart() {
                     fontSize: '16px',
                   }}
                 >
-                  Continue Shopping
+                  Continuar Comprando
                 </Link>
               </Col>
               <Col
@@ -106,7 +190,7 @@ function Cart() {
                 fontSize: '16px',
               }}
             >
-              Continue Shopping
+              Continuar Comprando
             </Link>
           </div>
         )}

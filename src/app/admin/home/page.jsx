@@ -1,10 +1,11 @@
 'use client';
 
-import { Layout, theme } from 'antd';
+import { Button, Card, Col, Layout, Row, Statistic, theme } from 'antd';
 import { Content } from 'antd/es/layout/layout';
 import HeaderSeller from '../components/HeaderSeller';
-import { Line } from '@ant-design/plots';
+import { Pie } from '@ant-design/charts';
 import SiderMenuSeller from '../components/SiderMenuSeller';
+import Title from 'antd/es/typography/Title';
 
 function HomeSeller() {
   const {
@@ -12,32 +13,35 @@ function HomeSeller() {
   } = theme.useToken();
 
   const data = [
-    { year: '1991', value: 3 },
-    { year: '1992', value: 4 },
-    { year: '1993', value: 3.5 },
-    { year: '1994', value: 5 },
-    { year: '1995', value: 4.9 },
-    { year: '1996', value: 6 },
-    { year: '1997', value: 7 },
-    { year: '1998', value: 9 },
-    { year: '1999', value: 13 },
+    {
+      type: 'Pendiente',
+      value: 1,
+    },
+    {
+      type: 'En proceso',
+      value: 3,
+    },
+    {
+      type: 'Listo para recojo',
+      value: 1,
+    },
+    {
+      type: 'Entregado',
+      value: 2,
+    },
+    {
+      type: 'Cancelado',
+      value: 1,
+    },
   ];
 
   const config = {
     data,
-    xField: 'year',
-    yField: 'value',
-    point: {
-      shapeField: 'square',
-      sizeField: 4,
-    },
-    interaction: {
-      tooltip: {
-        marker: false,
-      },
-    },
-    style: {
-      lineWidth: 2,
+    angleField: 'value',
+    colorField: 'type',
+    label: {
+      text: 'value',
+      position: 'outside',
     },
   };
 
@@ -57,7 +61,36 @@ function HomeSeller() {
               overflow: 'auto',
             }}
           >
-            <Line {...config} />
+            <Row gutter={16}>
+              <Col span={8}>
+                <Card bordered={false}>
+                  <Statistic
+                    title='Productos Totales'
+                    value={67}
+                  />
+                </Card>
+              </Col>
+              <Col span={8}>
+                <Card bordered={false}>
+                  <Statistic
+                    title='Productos Vendidos'
+                    value={5}
+                  />
+                </Card>
+              </Col>
+              <Col span={8}>
+                <Card bordered={false}>
+                  <Statistic
+                    title='Pedidos Completados'
+                    value={2}
+                  />
+                </Card>
+              </Col>
+            </Row>
+            <br />
+            <br />
+            <Title level={3}>Pedidos por estado</Title>
+            <Pie {...config} />;
           </div>
         </Content>
       </Layout>

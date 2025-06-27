@@ -8,7 +8,10 @@ import HeaderSimple from '../../components/HeaderSimple';
 import Sider from 'antd/es/layout/Sider';
 import Title from 'antd/es/typography/Title';
 import { UserOutlined } from '@ant-design/icons';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import Orders from './Orders';
+import { useDispatch, useSelector } from 'react-redux';
+import { fetchOrdersByUserId } from '@/lib/features/orderSlice';
 
 const items = [
   {
@@ -45,6 +48,12 @@ function Profile() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedMenu, setSelectedMenu] = useState('account');
   const { data: session, status } = useSession();
+  const dispatch = useDispatch();
+  const userId = localStorage.getItem('userId');
+
+  useEffect(() => {
+    dispatch(fetchOrdersByUserId(userId));
+  }, [userId, dispatch]);
 
   const showModal = () => {
     setIsModalOpen(true);
@@ -137,12 +146,7 @@ function Profile() {
             </Flex>
           </Content>
         )}
-        {selectedMenu === 'orders' && (
-          <Content style={contentStyle}>
-            <Title>Historial de pedidos</Title>
-            <p>Aún no has realizado ningún pedido</p>
-          </Content>
-        )}
+        {selectedMenu === 'orders' && <Orders />}
       </Layout>
       <Footer />
     </Layout>

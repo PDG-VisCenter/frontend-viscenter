@@ -1,4 +1,5 @@
 import { Button, Card, Col, Row } from 'antd';
+import { deleteCartItem } from '@/lib/features/cartItemSlice';
 import { DeleteOutlined } from '@ant-design/icons';
 import Image from 'next/image';
 import PropTypes from 'prop-types';
@@ -8,9 +9,10 @@ import { useDispatch } from 'react-redux';
 
 function CartCard(props) {
   const dispatch = useDispatch();
-  const { id, img, name, price, color, sku } = props;
+  const { id, img, name, price, color, quantity } = props;
 
   const handleRemoveFromCart = (idItem) => {
+    dispatch(deleteCartItem(idItem));
     dispatch(removeItemFromCart(idItem));
   };
 
@@ -30,17 +32,20 @@ function CartCard(props) {
           <Image
             alt='example'
             src={img}
-            width={100}
-            height={100}
+            width={200}
+            height={150}
+            style={{
+              objectFit: 'contain',
+            }}
           />
         </Col>
         <Col
           span={13}
-          style={{ paddingLeft: 32 }}
+          style={{ paddingLeft: 72 }}
         >
           <Title level={5}>{name}</Title>
           <p>Color: {color}</p>
-          <p>SKU: {sku}</p>
+          <p>Cantidad: {quantity}</p>
           <p>Subtotal: Bs. {price}</p>
         </Col>
         <Col
@@ -53,7 +58,7 @@ function CartCard(props) {
           <Button
             type='primary'
             icon={<DeleteOutlined />}
-            onClick={handleRemoveFromCart(id)}
+            onClick={() => handleRemoveFromCart(id)}
             danger
           >
             Eliminar
@@ -70,7 +75,7 @@ CartCard.propTypes = {
   name: PropTypes.string.isRequired,
   price: PropTypes.number.isRequired,
   color: PropTypes.string.isRequired,
-  sku: PropTypes.number.isRequired,
+  quantity: PropTypes.number.isRequired,
 };
 
 export default CartCard;

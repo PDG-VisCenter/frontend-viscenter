@@ -191,12 +191,13 @@ function Products() {
     },
     {
       title: 'Accciones',
+      dataIndex: 'id',
       key: 'action',
       width: 110,
-      render: (_) => (
+      render: (id) => (
         <Space size='middle'>
-          <Link href='/'>Edit</Link>
-          <Link href='/'>Delete</Link>
+          <Link href={`/admin/products/edit/${id}`}>Editar</Link>
+          <Button color='danger' variant='outlined' disabled>Eliminar</Button>
         </Space>
       ),
     },

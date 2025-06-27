@@ -23,7 +23,7 @@ function ProductCard(props) {
             width={410}
             height={250}
             style={{
-              objectFit: 'cover',
+              objectFit: 'contain',
             }}
           />
         }

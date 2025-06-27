@@ -43,58 +43,6 @@ function AddProduct() {
   const [currentStep, setCurrentStep] = useState(0);
   const { token } = theme.useToken();
 
-  useEffect(() => {
-    if (productId) {
-      const addProductItemPromises = productItemsData.map((item) => {
-        const productItemFormData = new FormData();
-        productItemFormData.append('productId', productId);
-        productItemFormData.append('colorId', item.color);
-        productItemFormData.append('productCode', item.productCode);
-        productItemFormData.append('stock', item.stock);
-
-        item.images.forEach((image) => {
-          productItemFormData.append('fileImages', base64ToFile(image.url, image.name));
-        });
-
-        return dispatch(addProductItem(productItemFormData))
-          .unwrap()
-          .catch((error) => {
-            message.error('Error al guardar el item. Intenta de nuevo');
-            throw new Error('Error saving product item:', error);
-          });
-      });
-
-      Promise.all(addProductItemPromises).then(() => {
-        dispatch(fetchProductItemsByProduct(productId));
-      });
-    }
-  }, [dispatch, productId]);
-
-  useEffect(() => {
-    if (productItemsStatus === 'success') {
-      const updateProductItem = async () => {
-        try {
-          const aux = new FormData();
-          aux.append('stripeId', '');
-          aux.append('categoryId', 4);
-          aux.append('brandId', 1);
-          aux.append('name', '');
-          aux.append('shape', '');
-          aux.append('material', '');
-          aux.append('description', '');
-          aux.append('originalPrice', 0);
-          aux.append('image', productSpecifications[0].images[0]);
-          await dispatch(updateProduct({ id: productId, newProduct: aux })).unwrap();
-          message.success('Variantes guardadas correctamente');
-        } catch (error) {
-          throw new Error('Error updating product:', error);
-        }
-      };
-
-      updateProductItem();
-    }
-  }, [productItemsStatus, dispatch]);
-
   const {
     token: { colorBgContainer, borderRadiusLG },
   } = theme.useToken();
@@ -140,10 +88,10 @@ function AddProduct() {
   }));
 
   const handleSubmit = async () => {
-    product.append('stripeId', productData.stripeId);
     product.append('categoryId', productData.category[1]);
     product.append('brandId', productData.brand);
     product.append('name', productData.name);
+    product.append('hasFilter', false);
     product.append('shape', productData.shape);
     product.append('material', productData.material);
     product.append('description', productData.description);
@@ -158,9 +106,43 @@ function AddProduct() {
 
     try {
       const id = await dispatch(fetchLastAddedProduct()).unwrap();
-      dispatch(setProductId(id));
+      const addProductItemPromises = productItemsData.map((item) => {
+        const productItemFormData = new FormData();
+        productItemFormData.append('productId', id);
+        productItemFormData.append('colorId', item.color);
+        productItemFormData.append('productCode', item.productCode);
+        productItemFormData.append('stock', item.stock);
+
+        item.images.forEach((image) => {
+          productItemFormData.append('fileImages', base64ToFile(image.url, image.name));
+        });
+
+        return dispatch(addProductItem(productItemFormData))
+          .unwrap()
+          .catch((error) => {
+            message.error('Error al guardar el item. Intenta de nuevo');
+            throw new Error('Error saving product item:', error);
+          });
+      });
     } catch (error) {
-      throw new Error('Error fetching product ID:', error);
+      throw new Error('Error saving product item:', error);
+    }
+
+    try {
+      const idLastProductAdded = await dispatch(fetchLastAddedProduct()).unwrap();
+      const aux = new FormData();
+      aux.append('categoryId', productData.category[1]);
+      aux.append('brandId', productData.brand);
+      aux.append('name', productData.name);
+      aux.append('shape', productData.shape);
+      aux.append('material', productData.material);
+      aux.append('description', productData.description);
+      aux.append('originalPrice', productData.price);
+      aux.append('image', 'https://res.cloudinary.com/dyrgwac0i/image/upload/v1/product/' + idLastProductAdded + '/' + productItemsData[0].images[0].name);
+      await dispatch(updateProduct({ id: idLastProductAdded, newProduct: aux })).unwrap();
+      message.success('Imagen guardada');
+    } catch (error) {
+      throw new Error('Error updating product:', error);
     }
 
     message.success('Producto guardado correctamente');

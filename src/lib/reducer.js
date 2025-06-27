@@ -2,10 +2,12 @@ import { combineReducers } from 'redux';
 
 import addProductItemSlice from './features/addProductItemSlice';
 import addProductSlice from './features/addProductSlice';
+import cartItemSlice from './features/cartItemSlice';
 import cartSlice from './features/cartSlice';
 import categoriesSlice from './features/categoriesSlice';
 import categorySlice from './features/categorySlice';
 import colorsSlice from './features/colorsSlice';
+import orderSlice from './features/orderSlice';
 import productItemsSlice from './features/productItemsSlice';
 import productSlice from './features/productSlice';
 import productsSlice from './features/productsSlice';
@@ -20,8 +22,10 @@ const rootReducer = combineReducers({
   productItems: productItemsSlice,
   colors: colorsSlice,
   cart: cartSlice,
+  cartItem: cartItemSlice,
   category: categorySlice,
   categories: categoriesSlice,
+  order: orderSlice,
 });
 
 export default rootReducer;
