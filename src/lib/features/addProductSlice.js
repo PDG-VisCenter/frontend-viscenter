@@ -1,10 +1,10 @@
 import { createSlice } from '@reduxjs/toolkit';
 
 const initialState = {
-  stripeId: null,
   category: null,
   brand: null,
   name: null,
+  hasFilter: false,
   shape: null,
   material: null,
   description: null,

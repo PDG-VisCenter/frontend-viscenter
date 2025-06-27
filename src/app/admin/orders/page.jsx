@@ -139,11 +139,11 @@ const data = [
   {
     key: '10',
     order_number: '#1',
-    date: '15 de Enero, 2024',
-    name: 'Isabel Vargas',
-    status: 'Cancelado',
-    total: 'Bs. 200',
-    items: 2,
+    date: '17 de Diciembre, 2024',
+    name: 'Carlos Fuentes',
+    status: 'Pendiente',
+    total: 'Bs. 2860',
+    items: 3,
   },
 ];
 

@@ -49,7 +49,7 @@ const cartSlice = createSlice({
       });
 
       state.totalItems += 1;
-      state.totalPrice += newItem.price;
+      state.totalPrice += newItem.price * newItem.quantity;
     },
     updateCartItem: (state, action) => {
       state.items = action.payload;

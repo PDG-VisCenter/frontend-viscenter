@@ -195,8 +195,8 @@ function Products() {
       width: 110,
       render: (_) => (
         <Space size='middle'>
-          <Link href='/'>Edit</Link>
-          <Link href='/'>Delete</Link>
+          <Link href='/'>Editar</Link>
+          <Button color='danger' variant='outlined' disabled>Eliminar</Button>
         </Space>
       ),
     },

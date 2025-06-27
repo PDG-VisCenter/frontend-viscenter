@@ -7,12 +7,12 @@ import { fetchLastAddedProduct, setProductId } from '@/lib/features/addProductIt
 import { useDispatch, useSelector } from 'react-redux';
 import { useEffect, useState } from 'react';
 import { Content } from 'antd/es/layout/layout';
-import HeaderSeller from '../components/HeaderSeller';
+import HeaderSeller from '../../components/HeaderSeller';
 import ProductInfo from './ProductInfo';
 import ProductReview from './ProductReview';
 import ProductVariants from './ProductVariants';
 import { setProduct } from '@/lib/features/addProductSlice';
-import SiderMenuSeller from '../components/SiderMenuSeller';
+import SiderMenuSeller from '../../components/SiderMenuSeller';
 import Title from 'antd/es/typography/Title';
 
 function base64ToFile(base64String, fileName) {
@@ -42,6 +42,33 @@ function AddProduct() {
   const productItemsStatus = useSelector((state) => state.productItems.status);
   const [currentStep, setCurrentStep] = useState(0);
   const { token } = theme.useToken();
+
+  useEffect(() => {
+    if (productId) {
+      const addProductItemPromises = productItemsData.map((item) => {
+        const productItemFormData = new FormData();
+        productItemFormData.append('productId', productId);
+        productItemFormData.append('colorId', item.color);
+        productItemFormData.append('productCode', item.productCode);
+        productItemFormData.append('stock', item.stock);
+
+        item.images.forEach((image) => {
+          productItemFormData.append('fileImages', base64ToFile(image.url, image.name));
+        });
+
+        return dispatch(addProductItem(productItemFormData))
+          .unwrap()
+          .catch((error) => {
+            message.error('Error al guardar el item. Intenta de nuevo');
+            throw new Error('Error saving product item:', error);
+          });
+      });
+
+      Promise.all(addProductItemPromises).then(() => {
+        dispatch(fetchProductItemsByProduct(productId));
+      });
+    }
+  }, [dispatch, productId]);
 
   useEffect(() => {
     if (productItemsStatus === 'success') {
@@ -115,7 +142,6 @@ function AddProduct() {
     product.append('categoryId', productData.category[1]);
     product.append('brandId', productData.brand);
     product.append('name', productData.name);
-    product.append('hasFilter', false);
     product.append('shape', productData.shape);
     product.append('material', productData.material);
     product.append('description', productData.description);
@@ -130,30 +156,9 @@ function AddProduct() {
 
     try {
       const id = await dispatch(fetchLastAddedProduct()).unwrap();
-      const addProductItemPromises = productItemsData.map((item) => {
-        const productItemFormData = new FormData();
-        productItemFormData.append('productId', id);
-        productItemFormData.append('colorId', item.color);
-        productItemFormData.append('productCode', item.productCode);
-        productItemFormData.append('stock', item.stock);
-
-        item.images.forEach((image) => {
-          productItemFormData.append('fileImages', base64ToFile(image.url, image.name));
-        });
-
-        return dispatch(addProductItem(productItemFormData))
-          .unwrap()
-          .catch((error) => {
-            message.error('Error al guardar el item. Intenta de nuevo');
-            throw new Error('Error saving product item:', error);
-          });
-      });
-
-      // Promise.all(addProductItemPromises).then(() => {
-      //   dispatch(fetchProductItemsByProduct(id));
-      // });
+      dispatch(setProductId(id));
     } catch (error) {
-      throw new Error('Error saving product item:', error);
+      throw new Error('Error fetching product ID:', error);
     }
 
     message.success('Producto guardado correctamente');

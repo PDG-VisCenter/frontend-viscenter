@@ -159,6 +159,7 @@ function Cart() {
                   size='large'
                   onClick={onClickCheckout}
                   block
+                  disabled
                 >
                   Checkout
                 </Button>

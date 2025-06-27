@@ -12,6 +12,7 @@ import Footer from '@/components/Footer';
 import HeaderSimple from '@/components/HeaderSimple';
 import Image from 'next/image';
 import { useSession } from 'next-auth/react';
+import { useRouter } from 'next/navigation';
 
 function generatePath(category, subCategory = '') {
   const categoryPath = {
@@ -39,6 +40,7 @@ function Product({ params }) {
   const [activeColorItem, setActiveColorItem] = useState(0);
   const [quantity, setQuantity] = useState(1);
   const dispatch = useDispatch();
+  const router = useRouter();
   const productItem = useSelector((state) => state.product.product);
   const productSpecifications = useSelector((state) => state.productItems.productItems);
   const colorItems = useSelector((state) => state.colors.colors);
@@ -80,6 +82,35 @@ function Product({ params }) {
         quantity,
       })
     );
+  };
+
+  const tryOn = (productId) => {
+    let path = 'http://localhost:8888/';
+
+    switch (productId) {
+      case 66:
+        path += '2';
+        break;
+      case 67:
+        path += '1';
+        break;
+      case 45:
+        path += '8';
+        break;
+      case 14:
+        path += '3';
+        break;
+      case 44:
+        path += '4';
+        break;
+      case 5:
+        path += '6';
+        break;
+      default:
+        return;
+    }
+
+    router.push(path);
   };
 
   const incrementQuantity = () => {
@@ -157,6 +188,9 @@ function Product({ params }) {
                       className='pd-pg__img-thumbnail'
                       width={80}
                       height={70}
+                      style={{
+                        objectFit: 'contain',
+                      }}
                     />
                   </button>
                 ))}
@@ -178,10 +212,10 @@ function Product({ params }) {
             <p className='pd-pg__product-code'>Code: {productSpecifications[activeColorItem]?.productCode}</p>
           </div>
           <div className='pd-pg__rating'>
-            <p className='pd-pg__description'>4</p>
+            <p className='pd-pg__description'>{productItem.averageRating}</p>
             <Rate
               disabled
-              defaultValue={3}
+              defaultValue={productItem.averageRating}
               style={{
                 marginLeft: 10,
               }}
@@ -252,6 +286,22 @@ function Product({ params }) {
           >
             Añadir al carrito
           </button>
+          <br />
+          <br />
+          {(productItem.id === 66 ||
+            productItem.id === 67 ||
+            productItem.id === 45 ||
+            productItem.id === 14 ||
+            productItem.id === 44 ||
+            productItem.id === 5) && (
+            <button
+              className='pd-pg__btn-cart pd-pg__btn-try-on'
+              type='submit'
+              onClick={() => tryOn(productItem.id)}
+            >
+              Pruebatelos
+            </button>
+          )}
         </section>
       </main>
       <Collapse
